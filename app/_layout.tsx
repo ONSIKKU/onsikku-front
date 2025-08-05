@@ -1,9 +1,9 @@
-import { Text, View } from "react-native";
+import { Stack } from "expo-router";
 
 export default function RootLayout() {
   return (
-    <View>
-      <Text style={{ color: "black" }}>온식구</Text>
-    </View>
+    <Stack>
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+    </Stack>
   );
 }
