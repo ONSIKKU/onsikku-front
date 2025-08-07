@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from "react-native";
 export default function AboutScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>기록페이지</Text>
+      <Text className="text-white">기록페이지</Text>
     </View>
   );
 }
