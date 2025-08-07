@@ -8,7 +8,11 @@ module.exports = {
     "./screens/**/*.{js,jsx,ts,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        "background-orange": "#FFF5E9",
+      },
+    },
   },
   plugins: [],
 };
