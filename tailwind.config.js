@@ -12,6 +12,11 @@ module.exports = {
       colors: {
         "background-orange": "#FFF5E9",
       },
+      fontFamily: {
+        sans: ["Pretendard", "System"],
+        bold: ["PretendardBold", "System"],
+        light: ["PretendardLight", "System"],
+      },
     },
   },
   plugins: [],
