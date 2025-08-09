@@ -15,7 +15,7 @@ export default function GeneralButton({
       onPress={() => console.log("다음 단계로!!")}
     >
       <View
-        className={`justify-centers items-center py-4 rounded-xl ${
+        className={`justify-center items-center py-4 rounded-xl ${
           isActive ? "bg-dark-orange" : "bg-light-orange"
         }`}
       >
