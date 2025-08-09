@@ -11,6 +11,8 @@ module.exports = {
     extend: {
       colors: {
         "background-orange": "#FFF5E9",
+        "dark-orange": "#FB923C",
+        "light-orange": "#FEC598",
       },
       fontFamily: {
         sans: ["Pretendard", "System"],

@@ -1,5 +1,5 @@
-import LandingScreen from "../screens/LandingScreen";
+import SignUpSelectRoleScreen from "@/screens/SignUpSelectRoleScreen";
 
 export default function Index() {
-  return <LandingScreen />;
+  return <SignUpSelectRoleScreen />;
 }
