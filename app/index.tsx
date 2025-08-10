@@ -1,5 +1,5 @@
-import SignUpSelectRoleScreen from "@/screens/SignUpSelectRoleScreen";
+import SignUpClusterScreen from "@/screens/SignUpClusterScreen";
 
 export default function Index() {
-  return <SignUpSelectRoleScreen />;
+  return <SignUpClusterScreen />;
 }
