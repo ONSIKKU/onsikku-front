@@ -1,18 +1,25 @@
-import { Text, TouchableOpacity, View } from "react-native";
+import {
+  Text,
+  TouchableOpacity,
+  TouchableOpacityProps,
+  View,
+} from "react-native";
 
 export default function GeneralButton({
   text,
   isActive,
+  onPress,
 }: {
   text: string;
   isActive: boolean;
+  onPress?: TouchableOpacityProps["onPress"];
 }) {
   return (
     <TouchableOpacity
-      className="w-full px-8"
+      className="w-full"
       activeOpacity={0.9}
       disabled={!isActive}
-      onPress={() => console.log("다음 단계로!!")}
+      onPress={onPress}
     >
       <View
         className={`justify-center items-center py-4 rounded-xl ${
