@@ -1,5 +1,5 @@
-import SignUpClusterScreen from "@/screens/SignUpClusterScreen";
+import SignUpSelectAgeScreen from "@/screens/SignUpSelectAgeScreen";
 
 export default function Index() {
-  return <SignUpClusterScreen />;
+  return <SignUpSelectAgeScreen />;
 }
