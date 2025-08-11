@@ -13,6 +13,7 @@ module.exports = {
         "background-orange": "#FFF5E9",
         "dark-orange": "#FB923C",
         "light-orange": "#FEC598",
+        "button-selected-light-orange": "#FFEDD0",
       },
       fontFamily: {
         sans: ["Pretendard", "System"],
