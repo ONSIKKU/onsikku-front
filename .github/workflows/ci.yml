@@ -1,0 +1,48 @@
+name: RN CI (checks)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: rn-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install deps
+        run: npm ci
+
+      # Expo/EAS CLI 세팅 (expo doctor 용)
+      - name: Setup Expo/EAS
+        uses: expo/expo-github-action@v8
+        with:
+          expo-version: latest
+          eas-version: latest
+          # A안은 빌드 안 하므로 token 불필요
+
+      - name: Typecheck
+        run: npm run typecheck --if-present
+
+      - name: Lint
+        run: npm run lint --if-present
+
+      - name: Unit tests
+        run: npm test --if-present -- --ci
+
+      - name: Expo Doctor
+        run: npx expo doctor
