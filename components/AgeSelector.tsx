@@ -15,7 +15,7 @@ export default function AgeSelector({
     <Pressable className="flex-1" onPress={onPress}>
       <View
         className={`flex-1 p-4 rounded-xl justify-center items-center ${
-          selected ? "bg-[#FFEDD0]" : "bg-white"
+          selected ? "bg-button-selected-light-orange" : "bg-white"
         }`}
       >
         <Text className="font-sans text-3xl">{icon}</Text>

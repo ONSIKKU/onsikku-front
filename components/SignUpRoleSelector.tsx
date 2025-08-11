@@ -17,7 +17,7 @@ export default function SignUpRoleSelector({
     <Pressable onPress={onPress}>
       <View
         className={`flex-row  rounded-xl p-5 justify-start items-center gap-2 ${
-          selected ? "bg-[#FFEDD0]" : "bg-white"
+          selected ? "bg-button-selected-light-orange" : "bg-white"
         }`}
       >
         <Text className="text-4xl">{icon}</Text>
