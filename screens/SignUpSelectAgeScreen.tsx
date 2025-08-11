@@ -13,7 +13,7 @@ export default function SignUpSelectAgeScreen() {
     { icon: "👨‍🦳", age: 50 },
     { icon: "🧑‍🦳", age: 60 },
   ];
-  const [age, setAge] = useState<number>(0);
+  const [age, setAge] = useState<number | null>(null);
   // age는 최종 선택된 나이 -> 나중에 사용할 때 참고
   return (
     <View className="flex-1 bg-background-orange justify-center gap-10 px-8">
@@ -36,7 +36,7 @@ export default function SignUpSelectAgeScreen() {
         columnWrapperStyle={{ gap: 12 }}
         contentContainerStyle={{ rowGap: 12 }}
       />
-      <GeneralButton text={"다음 단계로 ->"} isActive={age !== 0} />
+      <GeneralButton text={"다음 단계로 ->"} isActive={age !== null} />
     </View>
   );
 }
