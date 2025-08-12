@@ -16,7 +16,7 @@ export default function SignUpSelectAgeScreen() {
   const [age, setAge] = useState<number | null>(null);
   // age는 최종 선택된 나이 -> 나중에 사용할 때 참고
   return (
-    <View className="flex-1 bg-background-orange justify-center gap-10 px-8">
+    <View className="flex-1 justify-center gap-10 px-8">
       <SignUpHeader
         title={`연령대를\n알려주세요`}
         description={`더 적합한 질문을 드리기 위해\n연령대를 선택해주세요`}

@@ -18,7 +18,7 @@ export default function SignUpClusterScreen() {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <KeyboardAvoidingView
-        className="flex-1 bg-background-orange justify-center items-center gap-10"
+        className="flex-1 justify-center items-center gap-10"
         behavior="padding"
         keyboardVerticalOffset={30}
       >
