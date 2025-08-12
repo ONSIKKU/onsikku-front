@@ -1,5 +1,5 @@
-import SignUpSelectAgeScreen from "@/screens/SignUpSelectAgeScreen";
+import SignUpImageSelectScreen from "@/screens/SignUpImageSelectScreen";
 
 export default function Index() {
-  return <SignUpSelectAgeScreen />;
+  return <SignUpImageSelectScreen />;
 }
