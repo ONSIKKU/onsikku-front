@@ -4,7 +4,7 @@ import mainLogo from "../assets/images/onsikku-main-logo.png";
 
 export default function LandingScreen() {
   return (
-    <View className="bg-background-orange flex-1 gap-4 justify-center items-center">
+    <View className="flex-1 gap-4 justify-center items-center">
       <View className="px-2 flex-row gap-1 items-center justify-between ">
         <Image source={mainLogo} className="w-24 h-24" resizeMode="contain" />
         <Text className="font-bold text-6xl">온식구</Text>
