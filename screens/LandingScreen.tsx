@@ -1,31 +1,56 @@
-import * as Linking from "expo-linking";
-import * as WebBrowser from "expo-web-browser";
-import { Image, Text, TouchableOpacity, View } from "react-native";
+import {
+  getProfile,
+  login,
+  loginWithKakaoAccount,
+} from "@react-native-seoul/kakao-login";
+import { router } from "expo-router";
+import { Alert, Image, Text, TouchableOpacity, View } from "react-native";
 import kakaoLogin from "../assets/images/kakao_login_large_wide.png";
 import mainLogo from "../assets/images/onsikku-main-logo.png";
 
 export default function LandingScreen() {
-  const REST_API_KEY = process.env.EXPO_PUBLIC_KAKAO_REST_API_KEY!;
-  const REDIRECT_URI = "onsikku://oauth";
-  const API_BASE = process.env.EXPO_PUBLIC_API_BASE!;
-  const KAKAO_AUTH_URL =
-    "https://kauth.kakao.com/oauth/authorize" +
-    `?response_type=code&client_id=${REST_API_KEY}` +
-    `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
+  const handleKakaoLogin = async () => {
+    try {
+      // 1) 카카오톡 앱 로그인 시도 → 실패 시 계정 로그인으로 폴백
+      let token;
+      try {
+        token = await login();
+      } catch {
+        token = await loginWithKakaoAccount();
+      }
 
-  async function handleKakaoLogin() {
-    const result = await WebBrowser.openAuthSessionAsync(
-      KAKAO_AUTH_URL,
-      REDIRECT_URI
-    );
-    console.log("auth result:", result); // type/url 확인용
+      // 2) (선택) 프로필 확인
+      const profile = await getProfile();
+      console.log("kakao token:", token);
+      console.log("kakao profile:", profile);
 
-    if (result.type !== "success" || !result.url) return;
+      // 3) 서버에 토큰 전달(우리 세션 발급용)
+      const res = await fetch(
+        process.env.EXPO_PUBLIC_API_BASE + "/api/auth/kakao",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            accessToken: token.accessToken,
+            idToken: token.idToken,
+          }),
+        }
+      );
+      const data = await res.json(); // { registered, registrationToken, ... }
+      console.log(data);
 
-    const { queryParams } = Linking.parse(result.url);
-    const code = String(queryParams?.code ?? "");
-    console.log("카카오 code:", code); // ✅ 여기 찍히면 성공
-  }
+      // 4) ✅ 여기서 원하는 화면으로 “리다이렉트” (앱 내부 네비게이션)
+      // 이미 가입된 사용자라면 홈으로:
+      router.replace("/home"); // 또는 "/home"
+
+      // 신규 회원이면 회원가입 플로우로:
+      // router.replace({ pathname: "/signup/role", params: { registrationToken: data.registrationToken } });
+    } catch (e: any) {
+      console.log("Kakao login error:", e);
+      Alert.alert("로그인 실패", e?.message ?? "다시 시도해주세요.");
+    }
+  };
+
   return (
     <View className="flex-1 gap-4 justify-center items-center">
       <View className="px-2 flex-row gap-1 items-center justify-between ">
