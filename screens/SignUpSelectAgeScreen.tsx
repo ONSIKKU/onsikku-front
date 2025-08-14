@@ -1,8 +1,11 @@
 import AgeSelector from "@/components/AgeSelector";
+import BackButton from "@/components/BackButton";
 import GeneralButton from "@/components/GeneralButton";
 import SignUpHeader from "@/components/SignUpHeader";
+import { router } from "expo-router";
 import { useState } from "react";
-import { FlatList, View } from "react-native";
+import { FlatList } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SignUpSelectAgeScreen() {
   const ages = [
@@ -15,8 +18,14 @@ export default function SignUpSelectAgeScreen() {
   ];
   const [age, setAge] = useState<number | null>(null);
   // age는 최종 선택된 나이 -> 나중에 사용할 때 참고
+  const handleNext = () => {
+    if (!age) return;
+    // 다음 스텝으로
+    router.push("/signup/image");
+  };
   return (
-    <View className="flex-1 justify-center gap-10 px-8">
+    <SafeAreaView className="flex-1 justify-start gap-10 px-8">
+      <BackButton />
       <SignUpHeader
         title={`연령대를\n알려주세요`}
         description={`더 적합한 질문을 드리기 위해\n연령대를 선택해주세요`}
@@ -36,7 +45,11 @@ export default function SignUpSelectAgeScreen() {
         columnWrapperStyle={{ gap: 12 }}
         contentContainerStyle={{ rowGap: 12 }}
       />
-      <GeneralButton text={"다음 단계로 ->"} isActive={age !== null} />
-    </View>
+      <GeneralButton
+        text={"다음 단계로 ->"}
+        isActive={age !== null}
+        onPress={handleNext}
+      />
+    </SafeAreaView>
   );
 }

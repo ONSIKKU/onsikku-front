@@ -1,10 +1,11 @@
+import BackButton from "@/components/BackButton";
 import GeneralButton from "@/components/GeneralButton";
 import ImageUploadBox from "@/components/ImageUploadBox";
 import SignUpHeader from "@/components/SignUpHeader";
 import * as ImagePicker from "expo-image-picker";
-import { ArrowLeft, User } from "lucide-react-native";
+import { User } from "lucide-react-native";
 import { useState } from "react";
-import { Image, Pressable, View } from "react-native";
+import { Image, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SignUpImageSelectScreen() {
@@ -39,18 +40,8 @@ export default function SignUpImageSelectScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 justify-start items-center px-8 gap-10">
-      <View className="w-full">
-        <Pressable
-          onPress={() => {
-            /* router.back() 등 */
-          }}
-          className="w-10 h-10 items-center justify-center"
-        >
-          <ArrowLeft size={30} color="#1F2937" />
-        </Pressable>
-      </View>
-
+    <SafeAreaView className="flex-1 justify-start items-center px-8  gap-10">
+      <BackButton />
       <SignUpHeader
         title={`나를 나타낼 \n사진을 선택해주세요`}
         description={`가족들이 쉽게 알아볼 수 있는 \n프로필 사진을 선택해주세요`}
