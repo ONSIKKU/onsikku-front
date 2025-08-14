@@ -84,3 +84,6 @@ android/gradle/wrapper/gradle-wrapper.jar
 *.ipa
 *.apk
 *.aab
+
+android/
+ios/
