@@ -1,16 +1,16 @@
+import { AgeItem } from "@/features/signup/types";
 import { Pressable, PressableProps, Text, View } from "react-native";
+
+type AgeSelector = Pick<AgeItem, "age" | "icon"> & {
+  selected: boolean;
+} & Pick<PressableProps, "onPress">;
 
 export default function AgeSelector({
   icon,
   age,
   selected,
   onPress,
-}: {
-  icon: string;
-  age: number;
-  selected: boolean;
-  onPress?: PressableProps["onPress"];
-}) {
+}: AgeSelector) {
   return (
     <Pressable className="flex-1" onPress={onPress}>
       <View
@@ -20,7 +20,7 @@ export default function AgeSelector({
       >
         <Text className="font-sans text-3xl">{icon}</Text>
         <Text className="font-bold text-xl">
-          {age >= 60 ? age + `대 이상` : age + "대"}
+          {age! >= 60 ? age + `대 이상` : age + "대"}
         </Text>
       </View>
     </Pressable>
