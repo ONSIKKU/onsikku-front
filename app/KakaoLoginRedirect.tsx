@@ -16,7 +16,7 @@ export default function KakaoLoginRedirect() {
         if (!code || typeof code !== "string") {
           throw new Error("인가 코드가 없습니다.");
         }
-
+        // console.log("code :", code);
         // 1) 백엔드로 code 전달
         const res = await fetch(`${API_BASE}/api/auth/kakao`, {
           method: "POST",
@@ -34,6 +34,7 @@ export default function KakaoLoginRedirect() {
         const json = await res.json();
         const result = json?.result ?? json; // 혹시 래핑 안 된 경우 대비
         const { accessToken, registrationToken, registered } = result;
+        // console.log(result);
 
         // 3) 토큰 저장(필요 시)
         // if (accessToken) {
@@ -42,7 +43,7 @@ export default function KakaoLoginRedirect() {
 
         // 4) 라우팅 분기
         if (registered) {
-          router.replace("/home"); // 홈 라우트에 맞춰 변경
+          router.replace("/signup/role"); // 홈 라우트에 맞춰 변경
         } else {
           // 회원가입 플로우로. 필요한 파라미터 같이 전달
           router.replace({
