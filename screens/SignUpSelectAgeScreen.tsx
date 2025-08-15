@@ -2,25 +2,26 @@ import AgeSelector from "@/components/AgeSelector";
 import BackButton from "@/components/BackButton";
 import GeneralButton from "@/components/GeneralButton";
 import SignUpHeader from "@/components/SignUpHeader";
+import { useSignupStore } from "@/features/signup/signupStore";
+import { AgeItem } from "@/features/signup/types";
 import { router } from "expo-router";
-import { useState } from "react";
 import { FlatList } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+const ages: AgeItem[] = [
+  { icon: "🧒", age: 10 },
+  { icon: "👦", age: 20 },
+  { icon: "👨", age: 30 },
+  { icon: "🧑‍🦰", age: 40 },
+  { icon: "👨‍🦳", age: 50 },
+  { icon: "🧑‍🦳", age: 60 },
+];
+
 export default function SignUpSelectAgeScreen() {
-  const ages = [
-    { icon: "🧒", age: 10 },
-    { icon: "👦", age: 20 },
-    { icon: "👨", age: 30 },
-    { icon: "🧑‍🦰", age: 40 },
-    { icon: "👨‍🦳", age: 50 },
-    { icon: "🧑‍🦳", age: 60 },
-  ];
-  const [age, setAge] = useState<number | null>(null);
-  // age는 최종 선택된 나이 -> 나중에 사용할 때 참고
+  const age = useSignupStore((a) => a.age);
+  const setAge = useSignupStore((a) => a.setAge);
   const handleNext = () => {
     if (!age) return;
-    // 다음 스텝으로
     router.push("/signup/image");
   };
   return (

@@ -2,14 +2,20 @@ import BackButton from "@/components/BackButton";
 import GeneralButton from "@/components/GeneralButton";
 import ImageUploadBox from "@/components/ImageUploadBox";
 import SignUpHeader from "@/components/SignUpHeader";
+import { useSignupStore } from "@/features/signup/signupStore";
 import * as ImagePicker from "expo-image-picker";
+import { router } from "expo-router";
 import { User } from "lucide-react-native";
-import { useState } from "react";
 import { Image, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SignUpImageSelectScreen() {
-  const [uri, setUri] = useState<string | null>(null);
+  const uri = useSignupStore((i) => i.uri);
+  const setUri = useSignupStore((i) => i.setUri);
+
+  function handleNext() {
+    router.push("/signup/code");
+  }
 
   async function pickFromLibrary() {
     // 라이브러리 권한
@@ -65,6 +71,7 @@ export default function SignUpImageSelectScreen() {
       <GeneralButton
         text={uri !== null ? "다음 단계로 ->" : "기본 프로필로 진행"}
         isActive={true}
+        onPress={handleNext}
       />
     </SafeAreaView>
   );
