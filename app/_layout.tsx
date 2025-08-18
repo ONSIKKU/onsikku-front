@@ -16,10 +16,19 @@ export default function RootLayout() {
     <View className="flex-1 bg-background-orange">
       <Stack
         screenOptions={{
-          contentStyle: { backgroundColor: "transparent" },
+          contentStyle: { backgroundColor: "#FFF5E9" },
+          headerShown: false,
         }}
       >
         <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="KakaoLoginWebView"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="KakaoLoginRedirect"
+          options={{ headerShown: false }}
+        />
       </Stack>
     </View>
   );

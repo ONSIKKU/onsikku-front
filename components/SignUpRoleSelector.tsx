@@ -1,4 +1,13 @@
+import { RoleItem } from "@/features/signup/types";
+import { Check } from "lucide-react-native";
 import { Pressable, PressableProps, Text, View } from "react-native";
+
+type SignUpRoleSelectorProps = Pick<
+  RoleItem,
+  "icon" | "role" | "description"
+> & {
+  selected: boolean;
+} & Pick<PressableProps, "onPress">;
 
 export default function SignUpRoleSelector({
   icon,
@@ -6,17 +15,11 @@ export default function SignUpRoleSelector({
   description,
   selected,
   onPress,
-}: {
-  icon: string;
-  role: string;
-  description: string;
-  selected: boolean;
-  onPress?: PressableProps["onPress"];
-}) {
+}: SignUpRoleSelectorProps) {
   return (
     <Pressable onPress={onPress}>
       <View
-        className={`flex-row  rounded-xl p-5 justify-start items-center gap-2 ${
+        className={`flex-row rounded-xl p-5 justify-start items-center gap-2 ${
           selected ? "bg-button-selected-light-orange" : "bg-white"
         }`}
       >
@@ -25,7 +28,9 @@ export default function SignUpRoleSelector({
           <Text className="font-bold">{role}</Text>
           <Text className="font-sans">{description}</Text>
         </View>
-        <Text className={`${selected ? "" : "hidden"} `}>✔</Text>
+        <View className={`${selected ? "" : "hidden"} `}>
+          <Check size={25} color={"#FB923C"} />
+        </View>
       </View>
     </Pressable>
   );

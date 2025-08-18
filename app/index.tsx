@@ -1,5 +1,5 @@
-import SignUpImageSelectScreen from "@/screens/SignUpImageSelectScreen";
+import LandingScreen from "@/screens/LandingScreen";
 
 export default function Index() {
-  return <SignUpImageSelectScreen />;
+  return <LandingScreen />;
 }
