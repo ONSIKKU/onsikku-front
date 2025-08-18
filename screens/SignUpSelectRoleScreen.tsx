@@ -74,7 +74,7 @@ export default function SignUpSelectRole() {
           isActive={
             role !== "조부모"
               ? role !== null
-              : role != null && grandParentType != null
+              : role !== null && grandParentType !== null
           }
           onPress={handleNext}
         />

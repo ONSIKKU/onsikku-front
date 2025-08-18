@@ -180,7 +180,7 @@ export default function SignUpSelectBirthAndGenderScreen() {
       </View>
       <GeneralButton
         text={"다음 단계로 ->"}
-        isActive={draftBirth != null && gender != null}
+        isActive={draftBirth !== null && gender !== null}
         onPress={handleNext}
       />
     </SafeAreaView>
