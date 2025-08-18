@@ -63,11 +63,11 @@ const config: ExpoConfig = {
       },
     ],
     // 카카오톡 앱 쿼리 허용
-    queries: [
-      { package: "com.kakao.talk" },
-      { scheme: "kakaokompassauth" },
-      { scheme: "kakaolink" },
-    ],
+    // queries: [
+    //   { package: "com.kakao.talk" },
+    //   { scheme: "kakaokompassauth" },
+    //   { scheme: "kakaolink" },
+    // ],
   },
 
   web: {
