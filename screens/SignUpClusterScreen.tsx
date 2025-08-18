@@ -19,8 +19,13 @@ export default function SignUpClusterScreen() {
   const familyInvitationCode = useSignupStore((c) => c.familyInvitationCode);
   const familyName = useSignupStore((n) => n.familyName);
   const familyMode = useSignupStore((m) => m.familyMode);
+
+  // 회원가입 요청 보낼 데이터들 불러오기
   const role = useSignupStore((r) => r.role);
-  const age = useSignupStore((a) => a.age);
+  const grandParentType = useSignupStore((pt) => pt.grandParentType);
+  const gender = useSignupStore((g) => g.gender);
+  const birthDate = useSignupStore((b) => b.birthDate);
+  const uri = useSignupStore((u) => u.uri);
 
   const setFamilyInvitationCode = useSignupStore(
     (c) => c.setFamilyInvitationCode
@@ -30,8 +35,12 @@ export default function SignUpClusterScreen() {
 
   const handleNext = () => {
     // 완료 api 보내기
+    console.log("--------");
     console.log("role", role);
-    console.log("age", age);
+    console.log("외가 or 친가", grandParentType);
+    console.log("성별", gender);
+    console.log("생일", birthDate);
+    console.log("이미지", uri);
     console.log("가족 코드", familyInvitationCode);
     console.log("가족 이름", familyName);
     console.log("가족 모드", familyMode);
