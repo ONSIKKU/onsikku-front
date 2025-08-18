@@ -1,4 +1,5 @@
 import { RoleItem } from "@/features/signup/types";
+import { Check } from "lucide-react-native";
 import { Pressable, PressableProps, Text, View } from "react-native";
 
 type SignUpRoleSelectorProps = Pick<
@@ -27,7 +28,9 @@ export default function SignUpRoleSelector({
           <Text className="font-bold">{role}</Text>
           <Text className="font-sans">{description}</Text>
         </View>
-        <Text className={`${selected ? "" : "hidden"} `}>✔</Text>
+        <View className={`${selected ? "" : "hidden"} `}>
+          <Check size={25} color={"#FB923C"} />
+        </View>
       </View>
     </Pressable>
   );
