@@ -88,14 +88,7 @@ const config: ExpoConfig = {
       },
     ],
     "expo-font",
-    // ✅ 카카오 로그인 플러그인 (환경변수 주입 가능)
-    [
-      "@react-native-seoul/kakao-login",
-      {
-        kakaoAppKey: process.env.EXPO_PUBLIC_KAKAO_NATIVE_APP_KEY,
-        kotlinVersion: "2.0.21",
-      },
-    ],
+
     // 카카오 저장소 추가 (안드로이드)
     [
       "expo-build-properties",
