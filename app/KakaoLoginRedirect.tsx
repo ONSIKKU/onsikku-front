@@ -1,4 +1,6 @@
 // app/KakaoLoginRedirect.tsx
+
+import { setItem } from "@/utils/\bAsyncStorage";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, Text, View } from "react-native";
@@ -34,7 +36,9 @@ export default function KakaoLoginRedirect() {
         const json = await res.json();
         const result = json?.result ?? json; // 혹시 래핑 안 된 경우 대비
         const { accessToken, registrationToken, registered } = result;
-        // console.log(result);
+        setItem("registrationToken", registrationToken); // AsyncStorage에 저장
+        setItem("accessToken", accessToken); // AsyncStorage에 저장
+        console.log(result);
 
         // 3) 토큰 저장(필요 시)
         // if (accessToken) {

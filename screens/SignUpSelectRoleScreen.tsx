@@ -10,9 +10,24 @@ import { Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const roles: RoleItem[] = [
-  { role: "부모", icon: "👩🏻👨🏻", description: "엄마 또는 아빠예요" },
-  { role: "자녀", icon: "👧🏻👦🏻", description: "아들 또는 딸이예요" },
-  { role: "조부모", icon: "👴🏻👵🏻", description: "할아버지 또는 할머니예요" },
+  {
+    role: "PARENT",
+    icon: "👩🏻👨🏻",
+    description: "엄마 또는 아빠예요",
+    value: "부모",
+  },
+  {
+    role: "CHILD",
+    icon: "👧🏻👦🏻",
+    description: "아들 또는 딸이예요",
+    value: "자녀",
+  },
+  {
+    role: "GRANDPARENT",
+    icon: "👴🏻👵🏻",
+    description: "할아버지 또는 할머니예요",
+    value: "조부모",
+  },
 ];
 
 export default function SignUpSelectRole() {
@@ -21,8 +36,8 @@ export default function SignUpSelectRole() {
   const grandParentType = useSignupStore((pt) => pt.grandParentType);
   const setGrandParentType = useSignupStore((pt) => pt.setGrandParentType);
 
-  const handleButtonPress = (roleName: SignupRole | null) => {
-    setRole(roleName);
+  const handleButtonPress = (roleItem: SignupRole) => {
+    setRole(roleItem);
   };
 
   const handleNext = () => {
@@ -32,7 +47,7 @@ export default function SignUpSelectRole() {
   };
 
   useEffect(() => {
-    if (role !== "조부모") setGrandParentType(null);
+    if (role !== "GRANDPARENT") setGrandParentType(null);
   }, [role]);
 
   return (
@@ -51,7 +66,9 @@ export default function SignUpSelectRole() {
           />
         ))}
         <View
-          className={`flex-col gap-4 ${role === "조부모" ? "" : "invisible"}`}
+          className={`flex-col gap-4 ${
+            role === "GRANDPARENT" ? "" : "invisible"
+          }`}
         >
           <Text className="font-bold text-2xl text-center">
             어느 쪽 조부모님이신가요?
@@ -72,7 +89,7 @@ export default function SignUpSelectRole() {
         <GeneralButton
           text={"다음 단계로 ->"}
           isActive={
-            role !== "조부모"
+            role !== "GRANDPARENT"
               ? role !== null
               : role !== null && grandParentType !== null
           }
