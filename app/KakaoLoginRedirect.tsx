@@ -1,11 +1,8 @@
-// app/KakaoLoginRedirect.tsx
-
 import { setItem } from "@/utils/\bAsyncStorage";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, Text, View } from "react-native";
 
-// .env에 EXPO_PUBLIC_API_BASE 넣어두는 걸 추천 (예: https://api.example.com)
 const API_BASE = process.env.EXPO_PUBLIC_API_BASE!;
 
 export default function KakaoLoginRedirect() {
@@ -31,23 +28,21 @@ export default function KakaoLoginRedirect() {
           throw new Error(`로그인 실패(${res.status}) ${txt}`);
         }
 
-        // 2) 응답 파싱 (스웨거 스샷 기준)
         // { code, message, result: { accessToken, registrationToken, registered } }
         const json = await res.json();
         const result = json?.result ?? json; // 혹시 래핑 안 된 경우 대비
         const { accessToken, registrationToken, registered } = result;
         setItem("registrationToken", registrationToken); // AsyncStorage에 저장
         setItem("accessToken", accessToken); // AsyncStorage에 저장
-        console.log(result);
+        // console.log(result);
 
-        // 3) 토큰 저장(필요 시)
         // if (accessToken) {
         //   await SecureStore.setItemAsync("accessToken", accessToken);
         // }
 
         // 4) 라우팅 분기
         if (registered) {
-          router.replace("/signup/role"); // 홈 라우트에 맞춰 변경
+          router.replace("/home"); // 여기는 회원가이 이미 되어있는 경우 바로 마이 페이지로 넘겨야함
         } else {
           // 회원가입 플로우로. 필요한 파라미터 같이 전달
           router.replace({
