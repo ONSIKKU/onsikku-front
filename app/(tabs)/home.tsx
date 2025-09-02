@@ -1,30 +1,10 @@
-import { Link } from "expo-router";
-import { StyleSheet, Text, View } from "react-native";
+import TodayRespondent from "@/components/TodayRespondent";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function Index() {
+export default function Page() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.text}>홈 페이지</Text>
-      <Link href="/about" style={styles.button}>
-        기록 페이지 이동해보기
-      </Link>
-    </View>
+    <SafeAreaView className="flex-1 w-full px-10 gap-6 bg-onsikku-main-orange justify-start items-center">
+      <TodayRespondent />
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#25292e",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  text: {
-    color: "#fff",
-  },
-  button: {
-    fontSize: 20,
-    textDecorationLine: "underline",
-    color: "#fff",
-  },
-});
