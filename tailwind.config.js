@@ -10,11 +10,13 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        "background-orange": "#FFF5E9",
-        "dark-orange": "#FB923C",
+        "onsikku-dark-orange": "#FB923C",
         "light-orange": "#FEC598",
         "button-selected-light-orange": "#FFEDD0",
+        "onsikku-main-orange": "#FFF5E9",
+        "onsikku-light-gray": "#FAFBFB",
       },
+
       fontFamily: {
         sans: ["Pretendard", "System"],
         bold: ["PretendardBold", "System"],

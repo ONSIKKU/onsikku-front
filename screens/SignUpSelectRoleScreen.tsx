@@ -51,7 +51,7 @@ export default function SignUpSelectRole() {
   }, [role]);
 
   return (
-    <SafeAreaView className="flex-1 bg-background-orange px-8 pt-16 justify-start items-center gap-10">
+    <SafeAreaView className="flex-1 bg-onsikku-main-orange px-8 pt-16 justify-start items-center gap-10">
       <SignUpHeader
         title={`가족 구성원을\n알려주세요`}
         description={`가족 안에서 어떤 역할이신지\n선택해주세요`}

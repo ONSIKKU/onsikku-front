@@ -29,7 +29,7 @@ export default function ImageUploadBox({
       </View>
       <TouchableOpacity
         onPress={onPress}
-        className="bg-dark-orange px-4 py-2 rounded-xl flex justify-center items-center"
+        className="bg-onsikku-dark-orange px-4 py-2 rounded-xl flex justify-center items-center"
       >
         <View>
           <Text className="font-bold text-white">{buttonText}</Text>

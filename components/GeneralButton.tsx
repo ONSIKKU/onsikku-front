@@ -23,7 +23,7 @@ export default function GeneralButton({
     >
       <View
         className={`justify-center items-center py-4 rounded-xl ${
-          isActive ? "bg-dark-orange" : "bg-light-orange"
+          isActive ? "bg-onsikku-dark-orange" : "bg-light-orange"
         }`}
       >
         <Text className="font-bold text-xl text-white">{text}</Text>
