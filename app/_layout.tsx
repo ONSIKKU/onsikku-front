@@ -13,7 +13,7 @@ export default function RootLayout() {
   if (!fontsLoaded) return null;
 
   return (
-    <View className="flex-1 bg-background-orange">
+    <View className="flex-1">
       <Stack
         screenOptions={{
           contentStyle: { backgroundColor: "#FFF5E9" },
@@ -29,6 +29,7 @@ export default function RootLayout() {
           name="KakaoLoginRedirect"
           options={{ headerShown: false }}
         />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       </Stack>
     </View>
   );
