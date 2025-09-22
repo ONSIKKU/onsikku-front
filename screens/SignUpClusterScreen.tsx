@@ -2,7 +2,7 @@ import BackButton from "@/components/BackButton";
 import GeneralButton from "@/components/GeneralButton";
 import SignUpHeader from "@/components/SignUpHeader";
 import { useSignupStore } from "@/features/signup/signupStore";
-import { getItem } from "@/utils/\bAsyncStorage";
+import { getItem } from "@/utils/AsyncStorage";
 import { HashIcon, Users } from "lucide-react-native";
 import { useEffect } from "react";
 import {
