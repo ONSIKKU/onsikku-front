@@ -2,6 +2,7 @@ import BackButton from "@/components/BackButton";
 import GeneralButton from "@/components/GeneralButton";
 import SignUpHeader from "@/components/SignUpHeader";
 import { useSignupStore } from "@/features/signup/signupStore";
+import { getItem } from "@/utils/\bAsyncStorage";
 import { HashIcon, Users } from "lucide-react-native";
 import { useEffect } from "react";
 import {
@@ -33,17 +34,41 @@ export default function SignUpClusterScreen() {
   const setFamilyName = useSignupStore((n) => n.setFamilyName);
   const setFamilyMode = useSignupStore((m) => m.setFamilyMode);
 
-  const handleNext = () => {
+  const handleNext = async () => {
     // 완료 api 보내기
-    console.log("--------");
-    console.log("role", role);
-    console.log("외가 or 친가", grandParentType);
-    console.log("성별", gender);
-    console.log("생일", birthDate);
-    console.log("이미지", uri);
-    console.log("가족 코드", familyInvitationCode);
-    console.log("가족 이름", familyName);
-    console.log("가족 모드", familyMode);
+    const registrationToken = await getItem("registrationToken");
+    if (!registrationToken) {
+      console.log("회원가입 토큰이 존재하지 않습니다. ");
+      return;
+    }
+    try {
+      const res = await fetch(
+        `${process.env.EXPO_PUBLIC_API_BASE}/api/auth/signup`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            registrationToken: registrationToken,
+            grandParentType: grandParentType,
+            familyRole: role,
+            gender: gender,
+            birthDate: birthDate,
+            profileImageUrl: uri,
+            familyName: familyName,
+            familyInvitationCode: familyInvitationCode,
+            familyMode: familyMode,
+          }),
+        }
+      );
+
+      if (!res.ok) throw new Error(`HTTP 에러 - ${res.status}`);
+      const result = await res.json();
+      const resultCode = result.code;
+      if (resultCode === 401)
+        throw new Error(`${resultCode} - ${result.message}`);
+    } catch (err) {
+      console.log("회원가입 에러 : ", err);
+    }
   };
 
   useEffect(() => {

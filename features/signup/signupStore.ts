@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-export type SignupRole = "부모" | "자녀" | "조부모";
+export type SignupRole = "PARENT" | "CHILD" | "GRANDPARENT";
 
 //이건 타입이야
 export type SignupState = {
