@@ -39,7 +39,7 @@ const family = [
 export default function TodayRespondent() {
   const [respondent, setResponsdent] = useState("아빠");
   return (
-    <View className="bg-white w-full p-4 gap-2 rounded-xl">
+    <View className="bg-white w-full p-4 gap-2 rounded-xl flex-1">
       <View className="flex flex-row items-center gap-2">
         <Star fill="#FB923C" color="#FB923C" size={24} />
         <Text className="font-bold text-xl">오늘의 주인공</Text>
