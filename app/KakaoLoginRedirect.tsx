@@ -1,4 +1,4 @@
-import { setItem } from "@/utils/\bAsyncStorage";
+import { setItem } from "@/utils/AsyncStorage";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, Text, View } from "react-native";
