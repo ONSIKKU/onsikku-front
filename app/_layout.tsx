@@ -29,7 +29,26 @@ export default function RootLayout() {
           name="KakaoLoginRedirect"
           options={{ headerShown: false }}
         />
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="reply"
+          options={{
+            title: "🧡 답변 작성",
+            headerShown: true,
+            headerStyle: { backgroundColor: "#FFF5E9" },
+            headerTitleAlign: "center",
+            headerShadowVisible: false,
+          }}
+        />
+        <Stack.Screen
+          name="reply-detail"
+          options={{
+            title: "🧡 답변 상세",
+            headerShown: true,
+            headerStyle: { backgroundColor: "#FFF5E9" },
+            headerTitleAlign: "center",
+            headerShadowVisible: false,
+          }}
+        />
       </Stack>
     </View>
   );
