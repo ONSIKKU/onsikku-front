@@ -10,8 +10,8 @@ export default function TodayQuestion({ question }: { question: string }) {
         <Text className="font-bold text-xl">오늘의 질문</Text>
       </View>
 
-      <View className="flex flex-row items-center bg-onsikku-main-orange flex-1">
-        <Text>{question}</Text>
+      <View className="flex flex-row items-center bg-onsikku-main-orange flex-1 rounded-2xl px-2">
+        <Text className="font-sans text-lg">{question}</Text>
       </View>
       <GeneralButton text="나의 생각 들려주기" isActive={true} />
     </View>
