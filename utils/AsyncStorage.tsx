@@ -18,3 +18,11 @@ export const getItem = async (key: string) => {
     throw e;
   }
 };
+
+export const removeItem = async (key: string) => {
+  try {
+    await AsyncStorage.removeItem(key);
+  } catch (e) {
+    throw e;
+  }
+};

@@ -49,6 +49,16 @@ export default function RootLayout() {
             headerShadowVisible: false,
           }}
         />
+        <Stack.Screen
+          name="mypage-edit"
+          options={{
+            title: "내 정보 수정",
+            headerShown: true,
+            headerStyle: { backgroundColor: "#FFF5E9" },
+            headerTitleAlign: "center",
+            headerShadowVisible: false,
+          }}
+        />
       </Stack>
     </View>
   );

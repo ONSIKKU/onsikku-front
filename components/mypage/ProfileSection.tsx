@@ -9,6 +9,7 @@ interface ProfileSectionProps {
   familyName: string;
   joinDate: string;
   avatarUri: string;
+  onEditPress?: () => void;
 }
 
 export default function ProfileSection({
@@ -17,6 +18,7 @@ export default function ProfileSection({
   familyName,
   joinDate,
   avatarUri,
+  onEditPress,
 }: ProfileSectionProps) {
   return (
     <View className="bg-white w-full p-6 rounded-2xl shadow-sm">
@@ -30,7 +32,7 @@ export default function ProfileSection({
           <Text className="text-sm text-gray-500">{email}</Text>
           <Text className="text-sm text-orange-500 mt-1">{familyName}</Text>
         </View>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={onEditPress}>
           <Ionicons name="create-outline" size={24} color="gray" />
         </TouchableOpacity>
       </View>
