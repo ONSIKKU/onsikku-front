@@ -46,7 +46,8 @@ export default function KakaoLoginRedirect() {
 
         // 4) 라우팅 분기
         if (registered) {
-          router.replace("/home"); // 여기는 회원가이 이미 되어있는 경우 바로 마이 페이지로 넘겨야함
+          // 이미 가입된 사용자는 메인 화면(탭 홈)으로 이동
+          router.replace("/(tabs)/home");
         } else {
           // 회원가입 플로우로. 필요한 파라미터 같이 전달
           router.replace({
