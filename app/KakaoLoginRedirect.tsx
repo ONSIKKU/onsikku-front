@@ -32,8 +32,12 @@ export default function KakaoLoginRedirect() {
         const json = await res.json();
         const result = json?.result ?? json; // 혹시 래핑 안 된 경우 대비
         const { accessToken, registrationToken, registered } = result;
-        setItem("registrationToken", registrationToken); // AsyncStorage에 저장
-        setItem("accessToken", accessToken); // AsyncStorage에 저장
+        if (registrationToken) {
+          setItem("registrationToken", registrationToken); // AsyncStorage에 저장
+        }
+        if (accessToken) {
+          setItem("accessToken", accessToken); // AsyncStorage에 저장
+        }
         // console.log(result);
 
         // if (accessToken) {

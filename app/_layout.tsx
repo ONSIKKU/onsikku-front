@@ -1,6 +1,7 @@
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import { View } from "react-native";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import "../global.css";
 
 export default function RootLayout() {
@@ -13,6 +14,7 @@ export default function RootLayout() {
   if (!fontsLoaded) return null;
 
   return (
+    <SafeAreaProvider>
     <View className="flex-1">
       <Stack
         screenOptions={{
@@ -61,5 +63,6 @@ export default function RootLayout() {
         />
       </Stack>
     </View>
+    </SafeAreaProvider>
   );
 }
