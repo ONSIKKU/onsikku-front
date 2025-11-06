@@ -2,9 +2,12 @@ import BackButton from "@/components/BackButton";
 import GeneralButton from "@/components/GeneralButton";
 import SignUpHeader from "@/components/SignUpHeader";
 import { useSignupStore } from "@/features/signup/signupStore";
-import { getItem } from "@/utils/AsyncStorage";
+import { getItem, setItem } from "@/utils/AsyncStorage";
+import { signup, setAccessToken } from "@/utils/api";
 import { HashIcon, Users } from "lucide-react-native";
-import { useEffect } from "react";
+import { router } from "expo-router";
+import { useEffect, useState } from "react";
+import { Alert } from "react-native";
 import {
   Keyboard,
   KeyboardAvoidingView,
@@ -17,6 +20,8 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SignUpClusterScreen() {
+  const [submitting, setSubmitting] = useState(false);
+  
   const familyInvitationCode = useSignupStore((c) => c.familyInvitationCode);
   const familyName = useSignupStore((n) => n.familyName);
   const familyMode = useSignupStore((m) => m.familyMode);
@@ -38,36 +43,46 @@ export default function SignUpClusterScreen() {
     // 완료 api 보내기
     const registrationToken = await getItem("registrationToken");
     if (!registrationToken) {
-      console.log("회원가입 토큰이 존재하지 않습니다. ");
+      console.log("회원가입 토큰이 존재하지 않습니다.");
+      Alert.alert("오류", "회원가입 토큰이 없습니다. 다시 로그인해주세요.");
       return;
     }
-    try {
-      const res = await fetch(
-        `${process.env.EXPO_PUBLIC_API_BASE}/api/auth/signup`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            registrationToken: registrationToken,
-            grandParentType: grandParentType,
-            familyRole: role,
-            gender: gender,
-            birthDate: birthDate,
-            profileImageUrl: uri,
-            familyName: familyName,
-            familyInvitationCode: familyInvitationCode,
-            familyMode: familyMode,
-          }),
-        }
-      );
 
-      if (!res.ok) throw new Error(`HTTP 에러 - ${res.status}`);
-      const result = await res.json();
-      const resultCode = result.code;
-      if (resultCode === 401)
-        throw new Error(`${resultCode} - ${result.message}`);
-    } catch (err) {
-      console.log("회원가입 에러 : ", err);
+    if (!role || !gender || !birthDate || !familyName) {
+      Alert.alert("확인", "필수 정보가 입력되지 않았습니다.");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      const result = await signup({
+        registrationToken,
+        grandParentType: grandParentType || null,
+        familyRole: role,
+        gender,
+        birthDate,
+        profileImageUrl: uri || null,
+        familyName,
+        familyInvitationCode: familyMode === "JOIN" ? familyInvitationCode : undefined,
+        familyMode,
+      });
+
+      // 토큰 저장
+      if (result.accessToken) {
+        await setItem("accessToken", result.accessToken);
+        setAccessToken(result.accessToken);
+      }
+      if (result.refreshToken) {
+        await setItem("refreshToken", result.refreshToken);
+      }
+
+      // 회원가입 성공 후 메인 화면으로 이동
+      router.replace("/(tabs)/home");
+    } catch (err: any) {
+      console.error("[회원가입 에러]", err);
+      Alert.alert("회원가입 실패", err?.message || "회원가입에 실패했습니다.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -118,8 +133,8 @@ export default function SignUpClusterScreen() {
                 </View>
 
                 <GeneralButton
-                  text="가족 생성하기"
-                  isActive={familyName !== ""}
+                  text={submitting ? "처리 중..." : "가족 생성하기"}
+                  isActive={familyName !== "" && !submitting}
                   onPress={handleNext}
                 />
                 <TouchableOpacity
@@ -149,8 +164,8 @@ export default function SignUpClusterScreen() {
                 placeholderTextColor={"#9CA3AF"}
               />
               <GeneralButton
-                text="가족 참여하기"
-                isActive={familyInvitationCode.length === 8}
+                text={submitting ? "처리 중..." : "가족 참여하기"}
+                isActive={familyInvitationCode.length === 8 && !submitting}
                 onPress={handleNext}
               />
               <View className="flex-row w-full items-center">

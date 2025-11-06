@@ -83,3 +83,59 @@ export function deleteMember() {
   // POST /api/members/delete with empty body
   return apiFetch<void>("/api/members/delete", { method: "POST" });
 }
+
+// Auth types
+export type AuthResponse = {
+  accessToken: string;
+  refreshToken: string;
+  registrationToken?: string;
+  registered: boolean;
+};
+
+export type SignupRequest = {
+  registrationToken: string;
+  grandParentType?: "PATERNAL" | "MATERNAL" | null;
+  familyRole: "PARENT" | "CHILD" | "GRANDPARENT";
+  gender: "MALE" | "FEMALE";
+  birthDate: string; // yyyy-MM-dd
+  profileImageUrl?: string | null;
+  familyName: string;
+  familyInvitationCode?: string;
+  familyMode: "CREATE" | "JOIN";
+};
+
+// 회원가입 (JWT 불필요)
+export async function signup(payload: SignupRequest) {
+  console.log("[회원가입 요청]", payload);
+  const url = baseUrl + "/api/auth/signup";
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const text = await res.text();
+  const json = text ? JSON.parse(text) : null;
+
+  if (!res.ok) {
+    const message = (json && (json.message || json.error)) || `HTTP ${res.status}`;
+    console.error("[회원가입 에러]", message);
+    throw new Error(message);
+  }
+
+  const result = (json && (json.result ?? json)) as AuthResponse;
+  console.log("[회원가입 응답]", result);
+  return result;
+}
+
+// 로그아웃
+export async function logout() {
+  console.log("[로그아웃 요청]");
+  const response = await apiFetch<string>("/api/members/logout", {
+    method: "POST",
+  });
+  console.log("[로그아웃 응답]", response);
+  return response;
+}

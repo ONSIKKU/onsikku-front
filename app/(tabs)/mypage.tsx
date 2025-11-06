@@ -2,9 +2,10 @@ import ActivitySection from "@/components/mypage/ActivitySection";
 import LogoutButton from "@/components/mypage/LogoutButton";
 import ProfileSection from "@/components/mypage/ProfileSection";
 import SettingsSection from "@/components/mypage/SettingsSection";
-import { deleteMember, getMyPage, MypageResponse, patchMyPage, setAccessToken } from "@/utils/api";
+import { deleteMember, getMyPage, logout, MypageResponse, patchMyPage, setAccessToken } from "@/utils/api";
 import { getItem, removeItem } from "@/utils/AsyncStorage";
 import { familyRoleToKo, genderToKo, roleToKo } from "@/utils/labels";
+import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
@@ -80,6 +81,30 @@ export default function Page() {
     router.push("/mypage-edit");
   };
 
+  const onLogout = async () => {
+    Alert.alert("로그아웃", "로그아웃 하시겠어요?", [
+      { text: "취소", style: "cancel" },
+      {
+        text: "로그아웃",
+        onPress: async () => {
+          try {
+            setUpdating(true);
+            await logout();
+            await removeItem("accessToken");
+            await removeItem("registrationToken");
+            setAccessToken(null);
+            router.replace("/");
+          } catch (e: any) {
+            console.error("[로그아웃 에러]", e);
+            Alert.alert("오류", e?.message || "로그아웃에 실패했습니다");
+          } finally {
+            setUpdating(false);
+          }
+        },
+      },
+    ]);
+  };
+
   const onDeleteAccount = () => {
     Alert.alert(
       "회원 탈퇴",
@@ -149,7 +174,7 @@ export default function Page() {
     email: "",
     familyName: data?.familyName || "",
     joinDate: "",
-    avatarUri: data?.profileImageUrl || "https://via.placeholder.com/150",
+    avatarUri: data?.profileImageUrl || "",
     onEditPress: onEditProfile,
   };
 
@@ -161,57 +186,105 @@ export default function Page() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-orange-50">
-      <ScrollView contentContainerStyle={{ paddingBottom: 30 }}>
-        <View className="px-5">
-          <View className="gap-5">
+    <SafeAreaView className="flex-1 bg-onsikku-main-orange">
+      <ScrollView 
+        contentContainerStyle={{ paddingBottom: 30, paddingTop: 20 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <View className="px-4">
+          <View className="gap-4">
             <ProfileSection {...profileProps} />
 
-            <View className="bg-white w-full p-6 rounded-2xl shadow-sm gap-2">
-              <Text className="text-lg font-bold text-gray-800 mb-1">내 정보</Text>
-              <Text className="text-sm text-gray-700">역할: {roleToKo(data?.role)}</Text>
-              <Text className="text-sm text-gray-700">가족 내 역할: {familyRoleToKo(data?.familyRole)}</Text>
-              <Text className="text-sm text-gray-700">생년월일: {data?.birthDate ?? "-"}</Text>
-              <Text className="text-sm text-gray-700">성별: {genderToKo(data?.gender)}</Text>
-              <Text className="text-sm text-gray-700">알림: {data?.alarmEnabled ? "켜짐" : "꺼짐"}</Text>
+            {/* 내 정보 카드 */}
+            <View className="bg-white w-full p-5 rounded-3xl shadow-sm">
+              <Text className="text-lg font-bold text-gray-800 mb-4">내 정보</Text>
+              <View className="gap-3">
+                <View className="flex-row items-center justify-between py-2 border-b border-gray-100">
+                  <View className="flex-row items-center">
+                    <Ionicons name="person-circle-outline" size={20} color="#FB923C" />
+                    <Text className="text-sm text-gray-600 ml-2">역할</Text>
+                  </View>
+                  <Text className="text-sm font-medium text-gray-800">{roleToKo(data?.role)}</Text>
+                </View>
+                <View className="flex-row items-center justify-between py-2 border-b border-gray-100">
+                  <View className="flex-row items-center">
+                    <Ionicons name="people-outline" size={20} color="#FB923C" />
+                    <Text className="text-sm text-gray-600 ml-2">가족 내 역할</Text>
+                  </View>
+                  <Text className="text-sm font-medium text-gray-800">{familyRoleToKo(data?.familyRole)}</Text>
+                </View>
+                <View className="flex-row items-center justify-between py-2 border-b border-gray-100">
+                  <View className="flex-row items-center">
+                    <Ionicons name="calendar-outline" size={20} color="#FB923C" />
+                    <Text className="text-sm text-gray-600 ml-2">생년월일</Text>
+                  </View>
+                  <Text className="text-sm font-medium text-gray-800">{data?.birthDate ?? "-"}</Text>
+                </View>
+                <View className="flex-row items-center justify-between py-2">
+                  <View className="flex-row items-center">
+                    <Ionicons name="person-outline" size={20} color="#FB923C" />
+                    <Text className="text-sm text-gray-600 ml-2">성별</Text>
+                  </View>
+                  <Text className="text-sm font-medium text-gray-800">{genderToKo(data?.gender)}</Text>
+                </View>
+              </View>
             </View>
 
             <ActivitySection stats={stats} />
 
-            <View className="bg-white w-full p-4 rounded-2xl shadow-sm gap-3">
-              <View className="flex-row items-center justify-between">
-                <Text className="text-base text-gray-800">알림</Text>
-                <TouchableOpacity
-                  onPress={toggleAlarm}
-                  disabled={updating}
-                  className={`px-3 py-2 rounded-lg ${
-                    data?.alarmEnabled ? "bg-orange-100" : "bg-gray-100"
-                  }`}
-                >
-                  <Text className={`text-sm ${data?.alarmEnabled ? "text-orange-600" : "text-gray-600"}`}>
-                    {updating ? "처리 중..." : data?.alarmEnabled ? "켜짐" : "꺼짐"}
-                  </Text>
-                </TouchableOpacity>
+            {/* 설정 카드 */}
+            <View className="bg-white w-full p-5 rounded-3xl shadow-sm">
+              <Text className="text-lg font-bold text-gray-800 mb-4">설정</Text>
+              <View className="gap-3">
+                <View className="flex-row items-center justify-between py-2">
+                  <View className="flex-row items-center flex-1">
+                    <Ionicons name="notifications-outline" size={20} color="#FB923C" />
+                    <Text className="text-sm text-gray-800 ml-2">알림</Text>
+                  </View>
+                  <TouchableOpacity
+                    onPress={toggleAlarm}
+                    disabled={updating}
+                    className={`px-4 py-2 rounded-full ${
+                      data?.alarmEnabled ? "bg-orange-100" : "bg-gray-100"
+                    }`}
+                  >
+                    <Text className={`text-xs font-medium ${data?.alarmEnabled ? "text-orange-600" : "text-gray-600"}`}>
+                      {updating ? "처리 중..." : data?.alarmEnabled ? "켜짐" : "꺼짐"}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+                <View className="flex-row items-center justify-between py-2 border-t border-gray-100 pt-3">
+                  <View className="flex-row items-center flex-1">
+                    <Ionicons name="key-outline" size={20} color="#FB923C" />
+                    <View className="ml-2">
+                      <Text className="text-sm text-gray-800">가족 초대코드</Text>
+                      <Text className="text-xs text-gray-500 mt-0.5 font-mono">{data?.familyInvitationCode || "-"}</Text>
+                    </View>
+                  </View>
+                  <TouchableOpacity
+                    onPress={regenerateInvitation}
+                    disabled={updating}
+                    className="px-3 py-2 rounded-lg bg-orange-50"
+                  >
+                    <Ionicons name="refresh" size={16} color="#FB923C" />
+                  </TouchableOpacity>
+                </View>
               </View>
-              <View className="flex-row items-center justify-between">
-                <Text className="text-base text-gray-800">가족 초대코드</Text>
-                <Text className="text-gray-700">{data?.familyInvitationCode || "-"}</Text>
-              </View>
-              <TouchableOpacity
-                onPress={regenerateInvitation}
-                disabled={updating}
-                className="self-end px-3 py-2 rounded-lg bg-orange-100"
-              >
-                <Text className="text-orange-600">초대코드 재발급</Text>
-              </TouchableOpacity>
             </View>
+
             <SettingsSection />
-            <LogoutButton />
-            <View className="bg-white w-full p-4 rounded-2xl shadow-sm">
-              <TouchableOpacity onPress={onDeleteAccount} className="items-center">
-                <Text className="text-red-500">{deleting ? "탈퇴 처리 중..." : "회원 탈퇴"}</Text>
-              </TouchableOpacity>
-            </View>
+            
+            <LogoutButton onPress={onLogout} />
+            
+            <TouchableOpacity 
+              onPress={onDeleteAccount} 
+              className="bg-white w-full p-4 rounded-3xl shadow-sm items-center"
+            >
+              <Text className="text-red-500 font-medium">
+                {deleting ? "탈퇴 처리 중..." : "회원 탈퇴"}
+              </Text>
+            </TouchableOpacity>
+            
             {error ? (
               <Text className="text-red-500 text-sm text-center">{error}</Text>
             ) : null}
