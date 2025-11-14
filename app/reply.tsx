@@ -1,8 +1,9 @@
 
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
+  Alert,
   Keyboard,
   Text,
   TextInput,
@@ -11,18 +12,56 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-const QUESTION = "오늘 하루 어떠셨나요?\n위로받고 싶은 일이 있었나요?";
+import { createAnswer, setAccessToken } from "@/utils/api";
+import { getItem } from "@/utils/AsyncStorage";
 
 export default function ReplyScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ 
+    questionAssignmentId?: string;
+    question?: string;
+  }>();
+  
   const [reply, setReply] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const characterLimit = 500;
+  
+  const question = params.question || "오늘 하루 어떠셨나요?\n위로받고 싶은 일이 있었나요?";
+  const questionAssignmentId = params.questionAssignmentId;
 
-  const handleSubmit = () => {
-    console.log("Submitted reply:", reply);
-    // Logic to submit the reply
-    router.back();
+  const handleSubmit = async () => {
+    if (!questionAssignmentId) {
+      Alert.alert("오류", "질문 정보가 없습니다.");
+      return;
+    }
+
+    if (!reply.trim()) {
+      Alert.alert("확인", "답변을 입력해주세요.");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      const token = await getItem("accessToken");
+      if (token) {
+        setAccessToken(token);
+      }
+      
+      await createAnswer({
+        questionAssignmentId,
+        answerType: "TEXT",
+        content: reply.trim(),
+      });
+      
+      Alert.alert("완료", "답변이 등록되었습니다.", [
+        { text: "확인", onPress: () => router.back() },
+      ]);
+    } catch (e: any) {
+      console.error("[답변 생성 에러]", e);
+      Alert.alert("오류", e?.message || "답변 등록에 실패했습니다.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -39,7 +78,7 @@ export default function ReplyScreen() {
             </View>
             <View className="bg-orange-50 p-4 rounded-lg">
               <Text className="text-base text-gray-700 leading-6">
-                {QUESTION}
+                {question}
               </Text>
             </View>
           </View>
@@ -66,11 +105,14 @@ export default function ReplyScreen() {
           {/* Submit Button */}
           <TouchableOpacity
             onPress={handleSubmit}
-            className="bg-orange-400 p-4 rounded-2xl flex-row justify-center items-center shadow-sm"
+            disabled={submitting || !reply.trim()}
+            className={`p-4 rounded-2xl flex-row justify-center items-center shadow-sm ${
+              submitting || !reply.trim() ? "bg-gray-300" : "bg-orange-400"
+            }`}
           >
             <Ionicons name="send-outline" size={20} color="white" />
             <Text className="text-white text-base font-bold ml-2">
-              답변 등록하기 💝
+              {submitting ? "등록 중..." : "답변 등록하기 💝"}
             </Text>
           </TouchableOpacity>
         </View>

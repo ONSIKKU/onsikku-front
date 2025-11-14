@@ -86,6 +86,11 @@ export default function Page() {
   // 질문 대상 (subject)
   const questionSubject = currentQuestion?.questionInstance?.subject;
 
+  // 디버깅: 질문 정보 확인
+  console.log("[홈 화면] 질문 개수:", questions.length);
+  console.log("[홈 화면] 현재 질문 ID:", currentQuestion?.id);
+  console.log("[홈 화면] 현재 질문:", currentQuestion);
+
   if (loading) {
     return (
       <SafeAreaView className="flex-1 w-full px-4 gap-6 bg-onsikku-main-orange justify-center items-center">
@@ -109,7 +114,10 @@ export default function Page() {
         subject={questionSubject}
         pendingCount={pendingCount}
       />
-      <TodayQuestion question={questionContent} />
+      <TodayQuestion 
+        question={questionContent}
+        questionAssignmentId={currentQuestion?.id}
+      />
       <View className="bg-white w-full p-4 gap-2 rounded-xl flex-1/2">
         <View className="flex flex-col items-center gap-2 w-full">
           <View className="flex flex-row justify-between w-full">
