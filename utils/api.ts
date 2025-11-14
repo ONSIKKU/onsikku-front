@@ -139,3 +139,40 @@ export async function logout() {
   console.log("[로그아웃 응답]", response);
   return response;
 }
+
+// Question types
+export type QuestionState = "PENDING" | "SENT" | "ANSWERED" | "EXPIRED" | "FAILED";
+
+export type QuestionMember = {
+  id: string;
+  familyRole: FamilyRole;
+  profileImageUrl: string | null;
+  gender: "MALE" | "FEMALE";
+};
+
+export type QuestionInstance = {
+  id: string;
+  content: string;
+  subject: QuestionMember | null;
+};
+
+export type QuestionAssignment = {
+  id: string;
+  questionInstance: QuestionInstance;
+  member: QuestionMember;
+  state: QuestionState;
+  dueAt: string; // date-time
+  sentAt: string | null; // date-time
+  answeredAt: string | null; // date-time
+  expiredAt: string | null; // date-time
+};
+
+// 오늘의 질문 조회
+export async function getTodayQuestions() {
+  console.log("[오늘의 질문 조회 요청]");
+  const response = await apiFetch<QuestionAssignment[]>("/api/questions", {
+    method: "GET",
+  });
+  console.log("[오늘의 질문 조회 응답]", response);
+  return response;
+}
