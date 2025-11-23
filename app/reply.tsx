@@ -43,9 +43,17 @@ export default function ReplyScreen() {
     try {
       setSubmitting(true);
       const token = await getItem("accessToken");
-      if (token) {
-        setAccessToken(token);
+      console.log("[답변 등록] 토큰 확인:", token ? "있음" : "없음");
+      if (!token) {
+        Alert.alert("오류", "로그인이 필요합니다. 다시 로그인해주세요.");
+        return;
       }
+      setAccessToken(token);
+      console.log("[답변 등록] 요청 데이터:", {
+        questionAssignmentId,
+        answerType: "TEXT",
+        content: reply.trim(),
+      });
       
       await createAnswer({
         questionAssignmentId,
@@ -58,7 +66,20 @@ export default function ReplyScreen() {
       ]);
     } catch (e: any) {
       console.error("[답변 생성 에러]", e);
-      Alert.alert("오류", e?.message || "답변 등록에 실패했습니다.");
+      const errorMessage = e?.message || "답변 등록에 실패했습니다.";
+      
+      // 403 또는 401 에러인 경우 권한 문제로 처리
+      if (errorMessage.includes("403") || errorMessage.includes("401") || errorMessage.includes("Forbidden") || errorMessage.includes("Unauthorized")) {
+        Alert.alert(
+          "권한 오류",
+          "답변을 등록할 권한이 없습니다. 로그인 상태를 확인해주세요.",
+          [
+            { text: "확인", onPress: () => router.replace("/(tabs)/mypage") },
+          ]
+        );
+      } else {
+        Alert.alert("오류", errorMessage);
+      }
     } finally {
       setSubmitting(false);
     }

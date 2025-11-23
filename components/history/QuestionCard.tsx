@@ -10,6 +10,8 @@ export interface Question {
   authorAvatar: string;
   question: string;
   status: "answered" | "pending";
+  questionAssignmentId?: string;
+  questionInstanceId?: string;
   reactions?: {
     heart: number;
     like: number;
@@ -24,11 +26,19 @@ const Reaction = ({ icon, count }: { icon: any; count: number }) => (
   </View>
 );
 
-export default function QuestionCard({ item }: { item: Question }) {
+export default function QuestionCard({
+  item,
+  onPress,
+}: {
+  item: Question;
+  onPress?: () => void;
+}) {
   const isPending = item.status === "pending";
 
   return (
     <TouchableOpacity
+      onPress={onPress}
+      disabled={isPending || !onPress}
       className={`w-full p-5 rounded-2xl shadow-sm ${
         isPending ? "bg-gray-100" : "bg-white"
       }`}

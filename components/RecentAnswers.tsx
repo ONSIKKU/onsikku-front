@@ -13,15 +13,22 @@ export default function RecentAnswers({
   content,
 }: RecentAnswersProps) {
   return (
-    <View className="bg-onsikku-main-orange p-4 gap-2 rounded-xl border border-onsikku-dark-orange">
-      <View className="flex flex-row items-center justify-between gap-2">
-        <Text>{roleName}</Text>
-        <Text className="text-onsikku-dark-orange">{date}</Text>
+    <View className="bg-white p-5 rounded-2xl shadow-sm border border-orange-100">
+      <View className="flex flex-row items-center justify-between mb-3">
+        <View className="flex-row items-center gap-2">
+          <View className="w-8 h-8 rounded-full bg-orange-100 items-center justify-center">
+            <Text className="text-xs font-bold text-onsikku-dark-orange">{roleName}</Text>
+          </View>
+          <Text className="font-medium text-gray-800">{roleName}</Text>
+        </View>
+        <Text className="text-xs text-gray-500">{date}</Text>
       </View>
-      <Text className="font-sans line-clamp-2">{content}</Text>
-      <View className="flex flex-row gap-1">
-        <Heart fill={"#EB523F"} />
-        <Text> 👍</Text>
+      <Text className="font-sans text-sm text-gray-700 leading-5 mb-3" numberOfLines={2}>
+        {content}
+      </Text>
+      <View className="flex flex-row gap-2 items-center">
+        <Heart size={16} fill={"#EB523F"} color={"#EB523F"} />
+        <Text className="text-xs text-gray-500">👍</Text>
       </View>
     </View>
   );

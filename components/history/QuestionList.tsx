@@ -1,54 +1,105 @@
-
 import React from "react";
-import { FlatList, Text, View } from "react-native";
+import { ActivityIndicator, FlatList, Text, View } from "react-native";
 import QuestionCard, { Question } from "./QuestionCard";
+import { QuestionDetails } from "@/utils/api";
+import { familyRoleToKo } from "@/utils/labels";
 
-const mockQuestions: Question[] = [
-  {
-    id: "1",
-    date: "07/31",
-    author: "아빠",
-    authorAvatar: "👴",
-    question: "오늘의 추억이 될 만한 일이 있었나요?",
-    status: "answered",
-    reactions: { heart: 2, like: 3, smile: 1 },
-  },
-  {
-    id: "2",
-    date: "07/30",
-    author: "엄마",
-    authorAvatar: "👵",
-    question: "가족에게 고마운 마음을 전해보세요",
-    status: "answered",
-    reactions: { heart: 4, like: 2, smile: 0 },
-  },
-  {
-    id: "3",
-    date: "07/29",
-    author: "아들",
-    authorAvatar: "👦",
-    question: "어린 시절 가장 기억에 남는 순간은?",
-    status: "answered",
-    reactions: { heart: 1, like: 2, smile: 1 },
-  },
-  {
-    id: "4",
-    date: "07/28",
-    author: "딸",
-    authorAvatar: "👧",
-    question: "오늘 하루 가장 행복했던 순간은?",
-    status: "pending",
-  },
-];
+interface QuestionListProps {
+  questions: QuestionDetails[];
+  loading: boolean;
+  error: string | null;
+  onQuestionPress?: (questionAssignmentId: string, question: string, questionInstanceId?: string) => void;
+}
 
-export default function QuestionList() {
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  const month = (date.getMonth() + 1).toString().padStart(2, "0");
+  const day = date.getDate().toString().padStart(2, "0");
+  return `${month}/${day}`;
+};
+
+const getRoleEmoji = (role: string) => {
+  switch (role) {
+    case "PARENT":
+      return "👨";
+    case "CHILD":
+      return "👦";
+    case "GRANDPARENT":
+      return "👴";
+    default:
+      return "👤";
+  }
+};
+
+export default function QuestionList({
+  questions,
+  loading,
+  error,
+  onQuestionPress,
+}: QuestionListProps) {
+  const convertedQuestions: Question[] = questions.map((q) => ({
+    id: q.questionAssignmentId || "",
+    date: formatDate(q.dueAt || q.sentAt || ""),
+    author: familyRoleToKo(q.familyRole || "PARENT"),
+    authorAvatar: getRoleEmoji(q.familyRole || "PARENT"),
+    question: q.questionContent,
+    status: q.state === "ANSWERED" ? "answered" : "pending",
+    questionAssignmentId: q.questionAssignmentId,
+    questionInstanceId: q.questionInstanceId,
+  }));
+
+  if (loading) {
+    return (
+      <View className="w-full">
+        <Text className="text-lg font-bold text-gray-800 mb-4">지난 질문들</Text>
+        <View className="bg-white p-6 rounded-2xl shadow-sm items-center justify-center">
+          <ActivityIndicator size="large" color="#F97315" />
+          <Text className="text-gray-500 mt-4">질문을 불러오는 중...</Text>
+        </View>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View className="w-full">
+        <Text className="text-lg font-bold text-gray-800 mb-4">지난 질문들</Text>
+        <View className="bg-white p-6 rounded-2xl shadow-sm">
+          <Text className="text-red-500 text-center">{error}</Text>
+        </View>
+      </View>
+    );
+  }
+
+  if (convertedQuestions.length === 0) {
+    return (
+      <View className="w-full">
+        <Text className="text-lg font-bold text-gray-800 mb-4">지난 질문들</Text>
+        <View className="bg-white p-6 rounded-2xl shadow-sm">
+          <Text className="text-gray-500 text-center">
+            이 기간에 질문이 없습니다.
+          </Text>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View className="w-full">
       <Text className="text-lg font-bold text-gray-800 mb-4">지난 질문들</Text>
       <FlatList
-        data={mockQuestions}
+        data={convertedQuestions}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <QuestionCard item={item} />}
+        renderItem={({ item }) => (
+          <QuestionCard
+            item={item}
+            onPress={
+              item.questionAssignmentId && onQuestionPress
+                ? () => onQuestionPress(item.questionAssignmentId!, item.question, item.questionInstanceId)
+                : undefined
+            }
+          />
+        )}
         contentContainerStyle={{ gap: 12 }}
         scrollEnabled={false} // Parent ScrollView handles scrolling
       />

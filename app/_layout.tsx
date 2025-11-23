@@ -1,7 +1,8 @@
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
-import { View } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
 import "../global.css";
 
 export default function RootLayout() {
@@ -24,6 +25,12 @@ export default function RootLayout() {
       >
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen
+          name="(tabs)"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
           name="KakaoLoginWebView"
           options={{ headerShown: false }}
         />
@@ -33,33 +40,60 @@ export default function RootLayout() {
         />
         <Stack.Screen
           name="reply"
-          options={{
+          options={({ navigation }) => ({
             title: "🧡 답변 작성",
             headerShown: true,
             headerStyle: { backgroundColor: "#FFF5E9" },
             headerTitleAlign: "center",
             headerShadowVisible: false,
-          }}
+            headerBackVisible: false,
+            headerLeft: () => (
+              <TouchableOpacity
+                onPress={() => navigation.goBack()}
+                style={{ marginLeft: 16 }}
+              >
+                <Ionicons name="arrow-back" size={24} color="#1F2937" />
+              </TouchableOpacity>
+            ),
+          })}
         />
         <Stack.Screen
           name="reply-detail"
-          options={{
+          options={({ navigation }) => ({
             title: "🧡 답변 상세",
             headerShown: true,
             headerStyle: { backgroundColor: "#FFF5E9" },
             headerTitleAlign: "center",
             headerShadowVisible: false,
-          }}
+            headerBackVisible: false,
+            headerLeft: () => (
+              <TouchableOpacity
+                onPress={() => navigation.goBack()}
+                style={{ marginLeft: 16 }}
+              >
+                <Ionicons name="arrow-back" size={24} color="#1F2937" />
+              </TouchableOpacity>
+            ),
+          })}
         />
         <Stack.Screen
           name="mypage-edit"
-          options={{
+          options={({ navigation }) => ({
             title: "내 정보 수정",
             headerShown: true,
             headerStyle: { backgroundColor: "#FFF5E9" },
             headerTitleAlign: "center",
             headerShadowVisible: false,
-          }}
+            headerBackVisible: false,
+            headerLeft: () => (
+              <TouchableOpacity
+                onPress={() => navigation.goBack()}
+                style={{ marginLeft: 16 }}
+              >
+                <Ionicons name="arrow-back" size={24} color="#1F2937" />
+              </TouchableOpacity>
+            ),
+          })}
         />
       </Stack>
     </View>

@@ -27,13 +27,13 @@ export default function TodayRespondent({ subject, pendingCount = 0 }: TodayResp
   const icon = subject ? getRoleIcon(subject.familyRole) : "👤";
   
   return (
-    <View className="bg-white w-full p-4 gap-2 rounded-xl flex-1/2">
-      <View className="flex flex-row items-center gap-2">
+    <View className="bg-white w-full p-6 rounded-3xl shadow-sm">
+      <View className="flex flex-row items-center gap-2 mb-4">
         <Star fill="#FB923C" color="#FB923C" size={24} />
-        <Text className="font-bold text-xl">오늘의 주인공</Text>
+        <Text className="font-bold text-xl text-gray-800">오늘의 주인공</Text>
       </View>
 
-      <View className="flex flex-row items-center justify-center">
+      <View className="flex flex-row items-center justify-center mb-4">
         <RoleCard 
           icon={icon} 
           roleName={roleName} 
@@ -42,9 +42,9 @@ export default function TodayRespondent({ subject, pendingCount = 0 }: TodayResp
       </View>
       
       {pendingCount > 0 && (
-        <View className="flex flex-row gap-2 justify-center items-center">
-          <Clock4 size={20} color={"#FB923C"} />
-          <Text className="text-onsikku-dark-orange font-bold">
+        <View className="flex flex-row gap-2 justify-center items-center bg-orange-50 py-3 px-4 rounded-xl">
+          <Clock4 size={18} color={"#FB923C"} />
+          <Text className="text-onsikku-dark-orange font-medium text-sm">
             {pendingCount}명이 답변 대기중이에요
           </Text>
         </View>

@@ -24,6 +24,7 @@ export default function Page() {
       setLoading(true);
       setError("");
       const token = await getItem("accessToken");
+      console.log("[액세스 토큰]", token || "토큰 없음");
       if (token) {
         setAccessToken(token);
         setHasToken(true);
@@ -197,7 +198,16 @@ export default function Page() {
 
             {/* 내 정보 카드 */}
             <View className="bg-white w-full p-5 rounded-3xl shadow-sm">
-              <Text className="text-lg font-bold text-gray-800 mb-4">내 정보</Text>
+              <View className="flex-row items-center justify-between mb-4">
+                <Text className="text-lg font-bold text-gray-800">내 정보</Text>
+                <TouchableOpacity
+                  onPress={onEditProfile}
+                  className="flex-row items-center px-3 py-1.5 bg-orange-50 rounded-lg"
+                >
+                  <Ionicons name="create-outline" size={16} color="#FB923C" />
+                  <Text className="text-sm font-medium text-orange-600 ml-1">수정</Text>
+                </TouchableOpacity>
+              </View>
               <View className="gap-3">
                 <View className="flex-row items-center justify-between py-2 border-b border-gray-100">
                   <View className="flex-row items-center">

@@ -6,7 +6,7 @@ import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import { User } from "lucide-react-native";
 import { useEffect, useState } from "react";
-import { Alert, Image, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, Image, Pressable, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function MyPageEdit() {
@@ -98,7 +98,10 @@ export default function MyPageEdit() {
 
   return (
     <SafeAreaView className="flex-1 bg-orange-50">
-      <View className="p-5 gap-6">
+      <ScrollView
+        contentContainerStyle={{ padding: 20, paddingBottom: 40, gap: 24 }}
+        showsVerticalScrollIndicator={false}
+      >
         <Text className="text-lg font-bold">내 정보 수정</Text>
 
         <View className="bg-white rounded-full justify-center items-center w-40 h-40 self-center">
@@ -121,15 +124,33 @@ export default function MyPageEdit() {
         <View className="bg-white p-4 rounded-xl gap-3">
           <Text className="text-sm text-gray-700">성별</Text>
           <View className="flex-row gap-2">
-            {["MALE", "FEMALE"].map((g) => (
-              <TouchableOpacity
-                key={g}
-                className={`px-3 py-2 rounded-lg ${gender === g ? "bg-orange-100" : "bg-gray-100"}`}
-                onPress={() => setGender(g as any)}
-              >
-                <Text className={`${gender === g ? "text-orange-600" : "text-gray-600"}`}>{genderToKo(g)}</Text>
-              </TouchableOpacity>
-            ))}
+            {(["MALE", "FEMALE"] as const).map((g) => {
+              const isSelected = gender === g;
+              return (
+                <Pressable
+                  key={g}
+                  onPress={() => setGender(g)}
+                >
+                  <View
+                    className={`px-3 py-2 rounded-lg ${
+                      isSelected 
+                        ? "bg-button-selected-light-orange" 
+                        : "bg-white border border-gray-200"
+                    }`}
+                  >
+                    <Text 
+                      className={`${
+                        isSelected 
+                          ? "text-onsikku-dark-orange font-bold" 
+                          : "text-gray-600"
+                      }`}
+                    >
+                      {genderToKo(g)}
+                    </Text>
+                  </View>
+                </Pressable>
+              );
+            })}
           </View>
           {/^file:|^assets:/.test(avatarUri) ? (
             <Text className="text-xs text-gray-500 mt-2">선택한 사진은 로컬 경로입니다. 서버 업로드 기능 연결 후 URL로 저장됩니다.</Text>
@@ -150,15 +171,33 @@ export default function MyPageEdit() {
         <View className="bg-white p-4 rounded-xl gap-3">
           <Text className="text-sm text-gray-700">가족 내 역할</Text>
           <View className="flex-row gap-2 flex-wrap">
-            {["PARENT", "CHILD", "GRANDPARENT"].map((r) => (
-              <TouchableOpacity
-                key={r}
-                className={`px-3 py-2 rounded-lg ${familyRole === r ? "bg-orange-100" : "bg-gray-100"}`}
-                onPress={() => setFamilyRole(r as any)}
-              >
-                <Text className={`${familyRole === r ? "text-orange-600" : "text-gray-600"}`}>{familyRoleToKo(r)}</Text>
-              </TouchableOpacity>
-            ))}
+            {(["PARENT", "CHILD", "GRANDPARENT"] as const).map((r) => {
+              const isSelected = familyRole === r;
+              return (
+                <Pressable
+                  key={r}
+                  onPress={() => setFamilyRole(r)}
+                >
+                  <View
+                    className={`px-3 py-2 rounded-lg ${
+                      isSelected 
+                        ? "bg-button-selected-light-orange" 
+                        : "bg-white border border-gray-200"
+                    }`}
+                  >
+                    <Text 
+                      className={`${
+                        isSelected 
+                          ? "text-onsikku-dark-orange font-bold" 
+                          : "text-gray-600"
+                      }`}
+                    >
+                      {familyRoleToKo(r)}
+                    </Text>
+                  </View>
+                </Pressable>
+              );
+            })}
           </View>
         </View>
 
@@ -171,7 +210,8 @@ export default function MyPageEdit() {
         >
           <Text className="text-white">{saving ? "저장 중..." : "저장"}</Text>
         </TouchableOpacity>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
+
