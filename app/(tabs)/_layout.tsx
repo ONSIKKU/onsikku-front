@@ -61,19 +61,6 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="test"
-        options={{
-          title: "Test",
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? "beaker-sharp" : "beaker-outline"}
-              color={color}
-              size={24}
-            />
-          ),
-        }}
-      />
     </Tabs>
   );
 }

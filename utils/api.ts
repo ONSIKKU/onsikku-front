@@ -229,8 +229,19 @@ export async function getTodayQuestions() {
     method: "GET",
   });
   console.log("[오늘의 질문 조회 응답]", response);
+  console.log("[오늘의 질문 조회] todayQuestionInstanceId:", response.todayQuestionInstanceId);
   // 호환성을 위해 QuestionAssignment[] 반환
   return response.todayQuestionAssignments || [];
+}
+
+// 오늘의 질문 인스턴스 ID 조회 (답변 상세 페이지용)
+export async function getTodayQuestionInstanceId(): Promise<string | null> {
+  console.log("[오늘의 질문 인스턴스 ID 조회 요청]");
+  const response = await apiFetch<QuestionResponse>("/api/questions", {
+    method: "GET",
+  });
+  console.log("[오늘의 질문 인스턴스 ID 조회 응답]", response.todayQuestionInstanceId);
+  return response.todayQuestionInstanceId || null;
 }
 
 // Answer types
@@ -265,10 +276,16 @@ export async function createAnswer(payload: AnswerRequest) {
   console.log("[답변 생성 요청]", payload);
   console.log("[답변 생성] 현재 토큰:", inMemoryToken ? "설정됨" : "없음");
   
+  // content가 문자열인 경우 TEXT 타입에 맞게 JsonNode 형식으로 변환
+  let content = payload.content;
+  if (payload.answerType === "TEXT" && typeof payload.content === "string") {
+    content = { text: payload.content };
+  }
+  
   const requestPayload = {
     questionAssignmentId: payload.questionAssignmentId,
     answerType: payload.answerType || "TEXT",
-    content: payload.content,
+    content: content,
   };
   
   const response = await apiFetch<{

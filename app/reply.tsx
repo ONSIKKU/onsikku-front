@@ -58,7 +58,7 @@ export default function ReplyScreen() {
       await createAnswer({
         questionAssignmentId,
         answerType: "TEXT",
-        content: reply.trim(),
+        content: reply.trim(), // TEXT 타입일 때는 문자열 또는 { text: "..." } 객체 모두 가능
       });
       
       Alert.alert("완료", "답변이 등록되었습니다.", [

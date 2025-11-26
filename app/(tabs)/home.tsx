@@ -5,13 +5,14 @@ import {
   Answer,
   getMyPage,
   getRecentAnswers,
+  getTodayQuestionInstanceId,
   getTodayQuestions,
   QuestionAssignment,
   setAccessToken,
 } from "@/utils/api";
 import { getItem } from "@/utils/AsyncStorage";
 import { familyRoleToKo } from "@/utils/labels";
-import { useFocusEffect } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Dimensions, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -21,10 +22,12 @@ const { width } = Dimensions.get("window");
 const ITEM_WIDTH = width - 64;
 
 export default function Page() {
+  const router = useRouter();
   const [activeIndex, setActiveIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [questions, setQuestions] = useState<QuestionAssignment[]>([]);
   const [error, setError] = useState<string>("");
+  const [todayQuestionInstanceId, setTodayQuestionInstanceId] = useState<string | null>(null);
   const [recentAnswers, setRecentAnswers] = useState<Answer[]>([]);
   const [loadingAnswers, setLoadingAnswers] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -39,6 +42,13 @@ export default function Page() {
         setAccessToken(token);
         const data = await getTodayQuestions();
         setQuestions(data || []);
+        // 오늘의 질문 인스턴스 ID도 함께 가져오기
+        try {
+          const instanceId = await getTodayQuestionInstanceId();
+          setTodayQuestionInstanceId(instanceId);
+        } catch (e) {
+          console.error("[오늘의 질문 인스턴스 ID 조회 에러]", e);
+        }
       } else {
         setError("로그인이 필요합니다");
       }
@@ -124,12 +134,14 @@ export default function Page() {
     const familyRole = answer.member?.familyRole || answer.familyRole || "PARENT";
     const questionContent = answer.questionAssignment?.questionInstance?.content || "";
     const questionAssignmentId = answer.questionAssignment?.id || "";
+    const questionInstanceId = answer.questionAssignment?.questionInstance?.id || "";
     
     return {
       roleName: familyRoleToKo(familyRole),
       date: formatDate(answer.createdAt),
       content: getContentText(answer.content),
       questionAssignmentId,
+      questionInstanceId,
       question: questionContent,
     };
   });
@@ -141,7 +153,7 @@ export default function Page() {
   
   // 현재 사용자에게 할당된 질문이 없으면 첫 번째 질문 사용 (호환성)
   const currentQuestion = currentUserQuestion || questions[0];
-  const questionContent = currentQuestion?.questionInstance?.content || "오늘 하루 어떠셨나요?\n위로받고 싶은 일이 있었나요?";
+  const questionContent = currentQuestion?.questionInstance?.content || "질문이 존재하지 않습니다.";
   
   // 답변 대기 중인 사람 수 (SENT 상태이고 아직 답변 안 한 경우)
   const pendingCount = questions.filter(
@@ -153,11 +165,23 @@ export default function Page() {
   
   // 현재 사용자에게 할당된 질문이 있는지 확인
   const hasUserAssignment = !!currentUserQuestion;
+  
+  // 현재 사용자가 오늘의 질문에 답변했는지 확인
+  // currentQuestion 기준으로 확인 (할당된 질문이 없을 경우를 대비)
+  const hasAnsweredToday = currentQuestion?.answeredAt !== null || currentUserQuestion?.answeredAt !== null;
+
+  // questionInstanceId 우선순위: API 응답의 todayQuestionInstanceId > currentQuestion.questionInstance.id
+  const questionInstanceId = todayQuestionInstanceId || currentQuestion?.questionInstance?.id;
 
   // 디버깅: 질문 정보 확인
   console.log("[홈 화면] 질문 개수:", questions.length);
   console.log("[홈 화면] 현재 질문 ID:", currentQuestion?.id);
+  console.log("[홈 화면] questionInstanceId (API):", todayQuestionInstanceId);
+  console.log("[홈 화면] questionInstanceId (QuestionAssignment):", currentQuestion?.questionInstance?.id);
+  console.log("[홈 화면] 최종 questionInstanceId:", questionInstanceId);
   console.log("[홈 화면] 현재 질문:", currentQuestion);
+  console.log("[홈 화면] 답변 완료 여부:", hasAnsweredToday);
+  console.log("[홈 화면] answeredAt:", currentQuestion?.answeredAt);
 
   if (loading) {
     return (
@@ -189,7 +213,9 @@ export default function Page() {
         <TodayQuestion 
           question={questionContent}
           questionAssignmentId={currentQuestion?.id}
+          questionInstanceId={questionInstanceId}
           isUserAssignment={hasUserAssignment}
+          isAnswered={hasAnsweredToday}
         />
         <View className="bg-white w-full p-5 rounded-3xl shadow-sm">
           <View className="flex flex-row justify-between items-center mb-4">
