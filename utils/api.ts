@@ -372,7 +372,7 @@ export async function updateAnswer(payload: AnswerRequest) {
     sadReactionCount: number;
     funnyReactionCount: number;
   }>("/api/questions/answers", {
-    method: "PUT",
+    method: "PATCH",
     body: JSON.stringify(requestPayload),
   });
   console.log("[답변 수정 응답]", response);

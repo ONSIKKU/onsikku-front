@@ -1,18 +1,21 @@
+import { Answer, deleteAnswer, getMyPage, getQuestionInstanceDetails, setAccessToken, updateAnswer } from "@/utils/api";
+import { getItem } from "@/utils/AsyncStorage";
+import { familyRoleToKo } from "@/utils/labels";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Image,
+  Modal,
   ScrollView,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Answer, getQuestionInstanceDetails, setAccessToken } from "@/utils/api";
-import { getItem } from "@/utils/AsyncStorage";
-import { familyRoleToKo } from "@/utils/labels";
 
 // Instagram 스타일 시간 포맷
 const formatTimeAgo = (dateString: string) => {
@@ -60,10 +63,16 @@ type Comment = {
 // Instagram 스타일 피드 카드
 const FeedCard = ({ 
   answer, 
-  commentCount 
+  commentCount,
+  isMyAnswer,
+  onEdit,
+  onDelete,
 }: { 
   answer: Answer;
   commentCount: number;
+  isMyAnswer: boolean;
+  onEdit: () => void;
+  onDelete: () => void;
 }) => {
   const familyRole = answer.member?.familyRole || answer.familyRole || "PARENT";
   const roleName = familyRoleToKo(familyRole);
@@ -85,7 +94,7 @@ const FeedCard = ({
 
   return (
     <View>
-      {/* 헤더: 프로필 이미지 + 이름 + 시간 + 하트 */}
+      {/* 헤더: 프로필 이미지 + 이름 + 시간 + 하트/수정삭제 */}
       <View className="flex-row items-center justify-between p-4 pb-3">
         <View className="flex-row items-center gap-3">
           {profileImageUrl ? (
@@ -103,9 +112,20 @@ const FeedCard = ({
             <Text className="text-xs text-gray-500">{timeAgo}</Text>
           </View>
         </View>
-        <TouchableOpacity>
-          <Ionicons name="heart-outline" size={24} color="#000" />
-        </TouchableOpacity>
+        {isMyAnswer ? (
+          <View className="flex-row items-center gap-3">
+            <TouchableOpacity onPress={onEdit}>
+              <Ionicons name="create-outline" size={22} color="#666" />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={onDelete}>
+              <Ionicons name="trash-outline" size={22} color="#ef4444" />
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <TouchableOpacity>
+            <Ionicons name="heart-outline" size={24} color="#000" />
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* 답변 내용 */}
@@ -186,6 +206,11 @@ export default function ReplyDetailScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [questionContent, setQuestionContent] = useState<string>("");
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [questionAssignments, setQuestionAssignments] = useState<any[]>([]);
+  const [editingAnswer, setEditingAnswer] = useState<Answer | null>(null);
+  const [editText, setEditText] = useState("");
+  const [showEditModal, setShowEditModal] = useState(false);
 
   const questionInstanceId = params.questionInstanceId;
   const question = params.question || "질문 정보가 없습니다.";
@@ -206,12 +231,24 @@ export default function ReplyDetailScreen() {
           setAccessToken(token);
         }
 
+        // 현재 사용자 정보 가져오기
+        try {
+          const myPage = await getMyPage();
+          setCurrentUserId(myPage.memberId || null);
+        } catch (e) {
+          console.error("[사용자 정보 조회 에러]", e);
+        }
+
         // 질문 인스턴스 상세 조회 (답변 + 댓글 포함)
         const questionData = await getQuestionInstanceDetails(questionInstanceId);
         
         // 질문 내용
         const content = questionData.questionDetails?.questionContent || question;
         setQuestionContent(content);
+
+        // 질문 할당 정보 저장 (questionAssignmentId 찾기 위해)
+        const assignments = questionData.questionDetails?.questionAssignments || [];
+        setQuestionAssignments(assignments);
 
         // 답변 목록
         const answerList = questionData.questionDetails?.answers || [];
@@ -241,6 +278,119 @@ export default function ReplyDetailScreen() {
     // 현재 API 구조상 댓글이 답변 ID로 연결되어 있지 않을 수 있으므로
     // 일단 전체 댓글 개수를 반환
     return comments.length;
+  };
+
+  // 답변 작성자의 questionAssignmentId 찾기
+  const getQuestionAssignmentIdForAnswer = (answer: Answer): string | null => {
+    // 답변 작성자의 memberId로 questionAssignment 찾기
+    const assignment = questionAssignments.find(
+      (qa) => qa.member?.id === answer.memberId
+    );
+    return assignment?.id || null;
+  };
+
+  // 답변 수정 핸들러
+  const handleEditAnswer = (answer: Answer) => {
+    const contentText =
+      typeof answer.content === "string"
+        ? answer.content
+        : answer.content?.text || "";
+    setEditingAnswer(answer);
+    setEditText(contentText);
+    setShowEditModal(true);
+  };
+
+  // 답변 수정 저장
+  const handleSaveEdit = async () => {
+    if (!editingAnswer || !editText.trim()) {
+      Alert.alert("확인", "답변 내용을 입력해주세요.");
+      return;
+    }
+
+    try {
+      const questionAssignmentId = getQuestionAssignmentIdForAnswer(editingAnswer);
+      if (!questionAssignmentId) {
+        Alert.alert("오류", "질문 할당 정보를 찾을 수 없습니다.");
+        return;
+      }
+
+      const token = await getItem("accessToken");
+      if (token) {
+        setAccessToken(token);
+      }
+
+      await updateAnswer({
+        answerId: editingAnswer.answerId,
+        questionAssignmentId,
+        answerType: "TEXT",
+        content: editText.trim(),
+      });
+
+      // 답변 목록 새로고침
+      const questionData = await getQuestionInstanceDetails(questionInstanceId!);
+      const answerList = questionData.questionDetails?.answers || [];
+      const convertedAnswers: Answer[] = answerList.map((ans: any) => ({
+        ...ans,
+        id: ans.answerId,
+      }));
+      setAnswers(convertedAnswers);
+
+      setShowEditModal(false);
+      setEditingAnswer(null);
+      setEditText("");
+      Alert.alert("완료", "답변이 수정되었습니다.");
+    } catch (e: any) {
+      console.error("[답변 수정 에러]", e);
+      Alert.alert("오류", e?.message || "답변 수정에 실패했습니다.");
+    }
+  };
+
+  // 답변 삭제 핸들러
+  const handleDeleteAnswer = (answer: Answer) => {
+    Alert.alert(
+      "답변 삭제",
+      "정말 이 답변을 삭제하시겠어요?",
+      [
+        { text: "취소", style: "cancel" },
+        {
+          text: "삭제",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const questionAssignmentId = getQuestionAssignmentIdForAnswer(answer);
+              if (!questionAssignmentId) {
+                Alert.alert("오류", "질문 할당 정보를 찾을 수 없습니다.");
+                return;
+              }
+
+              const token = await getItem("accessToken");
+              if (token) {
+                setAccessToken(token);
+              }
+
+              await deleteAnswer({
+                answerId: answer.answerId,
+                questionAssignmentId,
+              });
+
+              // 답변 목록 새로고침
+              const questionData = await getQuestionInstanceDetails(questionInstanceId!);
+              const answerList = questionData.questionDetails?.answers || [];
+              const convertedAnswers: Answer[] = answerList.map((ans: any) => ({
+                ...ans,
+                id: ans.answerId,
+              }));
+              setAnswers(convertedAnswers);
+
+              Alert.alert("완료", "답변이 삭제되었습니다.");
+            } catch (e: any) {
+              console.error("[답변 삭제 에러]", e);
+              Alert.alert("오류", e?.message || "답변 삭제에 실패했습니다.");
+            }
+          },
+        },
+      ]
+    );
   };
 
   return (
@@ -281,14 +431,20 @@ export default function ReplyDetailScreen() {
               </View>
 
               {/* 답변 피드 */}
-              {answers.map((answer) => (
-                <View key={answer.id || answer.answerId} className="bg-white rounded-2xl shadow-sm overflow-hidden">
-                  <FeedCard
-                    answer={answer}
-                    commentCount={getCommentCountForAnswer(answer.answerId || answer.id || "")}
-                  />
-                </View>
-              ))}
+              {answers.map((answer) => {
+                const isMyAnswer = currentUserId === answer.memberId;
+                return (
+                  <View key={answer.id || answer.answerId} className="bg-white rounded-2xl shadow-sm overflow-hidden">
+                    <FeedCard
+                      answer={answer}
+                      commentCount={getCommentCountForAnswer(answer.answerId || answer.id || "")}
+                      isMyAnswer={isMyAnswer}
+                      onEdit={() => handleEditAnswer(answer)}
+                      onDelete={() => handleDeleteAnswer(answer)}
+                    />
+                  </View>
+                );
+              })}
 
               {/* 댓글 섹션 */}
               {comments.length > 0 && (
@@ -307,6 +463,55 @@ export default function ReplyDetailScreen() {
           )}
         </View>
       </ScrollView>
+
+      {/* 답변 수정 모달 */}
+      <Modal
+        visible={showEditModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => {
+          setShowEditModal(false);
+          setEditingAnswer(null);
+          setEditText("");
+        }}
+      >
+        <View className="flex-1 bg-black/50 items-center justify-center p-5">
+          <View className="bg-white rounded-2xl w-full max-w-md p-6">
+            <Text className="text-lg font-bold text-gray-900 mb-4">답변 수정</Text>
+            <TextInput
+              className="border border-gray-300 rounded-lg p-4 text-base text-gray-900 min-h-[120px]"
+              multiline
+              numberOfLines={6}
+              value={editText}
+              onChangeText={setEditText}
+              placeholder="답변을 입력해주세요"
+              textAlignVertical="top"
+              maxLength={500}
+            />
+            <Text className="text-xs text-gray-500 mt-2 text-right">
+              {editText.length}/500
+            </Text>
+            <View className="flex-row gap-3 mt-6">
+              <TouchableOpacity
+                className="flex-1 bg-gray-200 rounded-lg py-3 items-center"
+                onPress={() => {
+                  setShowEditModal(false);
+                  setEditingAnswer(null);
+                  setEditText("");
+                }}
+              >
+                <Text className="text-base font-semibold text-gray-700">취소</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className="flex-1 bg-orange-500 rounded-lg py-3 items-center"
+                onPress={handleSaveEdit}
+              >
+                <Text className="text-base font-semibold text-white">저장</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
