@@ -3,12 +3,12 @@ import TodayQuestion from "@/components/TodayQuestion";
 import TodayRespondent from "@/components/TodayRespondent";
 import {
   Answer,
+  apiFetch,
   getMyPage,
   getRecentAnswers,
-  getTodayQuestionInstanceId,
-  getTodayQuestions,
   QuestionAssignment,
-  setAccessToken,
+  QuestionResponse,
+  setAccessToken
 } from "@/utils/api";
 import { getItem } from "@/utils/AsyncStorage";
 import { familyRoleToKo } from "@/utils/labels";
@@ -27,7 +27,8 @@ export default function Page() {
   const [loading, setLoading] = useState(true);
   const [questions, setQuestions] = useState<QuestionAssignment[]>([]);
   const [error, setError] = useState<string>("");
-  const [todayQuestionInstanceId, setTodayQuestionInstanceId] = useState<string | null>(null);
+  const [questionContent, setQuestionContent] = useState<string>("");
+  const [questionInstanceId, setQuestionInstanceId] = useState<string | null>(null);
   const [recentAnswers, setRecentAnswers] = useState<Answer[]>([]);
   const [loadingAnswers, setLoadingAnswers] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -40,14 +41,24 @@ export default function Page() {
       console.log("[액세스 토큰]", token || "토큰 없음");
       if (token) {
         setAccessToken(token);
-        const data = await getTodayQuestions();
+        // 새로운 API 스펙에 맞게 오늘의 질문 조회
+        const response = await apiFetch<QuestionResponse>("/api/questions", {
+          method: "GET",
+        });
+        console.log("[홈 화면] API 응답 전체:", response);
+        
+        const data = response.todayQuestionAssignments || [];
         setQuestions(data || []);
-        // 오늘의 질문 인스턴스 ID도 함께 가져오기
-        try {
-          const instanceId = await getTodayQuestionInstanceId();
-          setTodayQuestionInstanceId(instanceId);
-        } catch (e) {
-          console.error("[오늘의 질문 인스턴스 ID 조회 에러]", e);
+        console.log("[홈 화면] todayQuestionAssignments:", data);
+        
+        // 질문 내용과 인스턴스 ID는 questionDetails에서 가져오기
+        if (response.questionDetails) {
+          const content = response.questionDetails.questionContent || "";
+          const instanceId = response.questionDetails.questionInstanceId || null;
+          setQuestionContent(content);
+          setQuestionInstanceId(instanceId);
+          console.log("[홈 화면] 질문 내용 (questionDetails):", content);
+          console.log("[홈 화면] questionInstanceId (questionDetails):", instanceId);
         }
       } else {
         setError("로그인이 필요합니다");
@@ -153,15 +164,16 @@ export default function Page() {
   
   // 현재 사용자에게 할당된 질문이 없으면 첫 번째 질문 사용 (호환성)
   const currentQuestion = currentUserQuestion || questions[0];
-  const questionContent = currentQuestion?.questionInstance?.content || "질문이 존재하지 않습니다.";
+  // questionContent는 state에서 가져오기 (questionDetails에서 가져온 값)
+  const displayQuestionContent = questionContent || "질문이 존재하지 않습니다.";
   
   // 답변 대기 중인 사람 수 (SENT 상태이고 아직 답변 안 한 경우)
   const pendingCount = questions.filter(
     (q) => q.state === "SENT" && !q.answeredAt
   ).length;
 
-  // 질문 대상 (subject)
-  const questionSubject = currentQuestion?.questionInstance?.subject;
+  // 질문 대상 (subject) - QuestionAssignment에 questionInstance가 없으므로 null
+  const questionSubject = null;
   
   // 현재 사용자에게 할당된 질문이 있는지 확인
   const hasUserAssignment = !!currentUserQuestion;
@@ -170,16 +182,16 @@ export default function Page() {
   // currentQuestion 기준으로 확인 (할당된 질문이 없을 경우를 대비)
   const hasAnsweredToday = currentQuestion?.answeredAt !== null || currentUserQuestion?.answeredAt !== null;
 
-  // questionInstanceId 우선순위: API 응답의 todayQuestionInstanceId > currentQuestion.questionInstance.id
-  const questionInstanceId = todayQuestionInstanceId || currentQuestion?.questionInstance?.id;
+  // questionInstanceId: state에서 가져오기 (questionDetails.questionInstanceId)
+  // 새로운 API 스펙에서는 questionDetails.questionInstanceId를 사용
+  const displayQuestionInstanceId = questionInstanceId;
 
   // 디버깅: 질문 정보 확인
   console.log("[홈 화면] 질문 개수:", questions.length);
   console.log("[홈 화면] 현재 질문 ID:", currentQuestion?.id);
-  console.log("[홈 화면] questionInstanceId (API):", todayQuestionInstanceId);
-  console.log("[홈 화면] questionInstanceId (QuestionAssignment):", currentQuestion?.questionInstance?.id);
-  console.log("[홈 화면] 최종 questionInstanceId:", questionInstanceId);
-  console.log("[홈 화면] 현재 질문:", currentQuestion);
+  console.log("[홈 화면] questionInstanceId:", displayQuestionInstanceId);
+  console.log("[홈 화면] questionContent:", displayQuestionContent);
+  console.log("[홈 화면] currentQuestion 전체:", JSON.stringify(currentQuestion, null, 2));
   console.log("[홈 화면] 답변 완료 여부:", hasAnsweredToday);
   console.log("[홈 화면] answeredAt:", currentQuestion?.answeredAt);
 
@@ -211,9 +223,9 @@ export default function Page() {
           pendingCount={pendingCount}
         />
         <TodayQuestion 
-          question={questionContent}
+          question={displayQuestionContent}
           questionAssignmentId={currentQuestion?.id}
-          questionInstanceId={questionInstanceId}
+          questionInstanceId={displayQuestionInstanceId || undefined}
           isUserAssignment={hasUserAssignment}
           isAnswered={hasAnsweredToday}
         />

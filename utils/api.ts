@@ -219,7 +219,7 @@ export type QuestionResponse = {
   answeredQuestions?: number;
   totalReactions?: number;
   todayQuestionAssignments?: QuestionAssignment[]; // 오늘의 질문 조회 시
-  todayQuestionInstanceId?: string;
+  // todayQuestionInstanceId는 더 이상 제공되지 않음 (API 문서 업데이트)
 };
 
 // 오늘의 질문 조회
@@ -229,19 +229,26 @@ export async function getTodayQuestions() {
     method: "GET",
   });
   console.log("[오늘의 질문 조회 응답]", response);
-  console.log("[오늘의 질문 조회] todayQuestionInstanceId:", response.todayQuestionInstanceId);
+  // 새로운 API 스펙에서는 todayQuestionInstanceId가 제공되지 않음
   // 호환성을 위해 QuestionAssignment[] 반환
   return response.todayQuestionAssignments || [];
 }
 
 // 오늘의 질문 인스턴스 ID 조회 (답변 상세 페이지용)
+// 새로운 API 스펙에서는 todayQuestionInstanceId가 제공되지 않으므로
+// QuestionAssignment.questionInstance.id를 사용해야 함
+// 이 함수는 더 이상 사용되지 않음 (호환성을 위해 유지)
 export async function getTodayQuestionInstanceId(): Promise<string | null> {
   console.log("[오늘의 질문 인스턴스 ID 조회 요청]");
   const response = await apiFetch<QuestionResponse>("/api/questions", {
     method: "GET",
   });
-  console.log("[오늘의 질문 인스턴스 ID 조회 응답]", response.todayQuestionInstanceId);
-  return response.todayQuestionInstanceId || null;
+  // 새로운 API 스펙에서는 todayQuestionInstanceId가 없으므로
+  // 첫 번째 QuestionAssignment의 questionInstance.id를 반환
+  const firstAssignment = response.todayQuestionAssignments?.[0];
+  const instanceId = firstAssignment?.questionInstance?.id || null;
+  console.log("[오늘의 질문 인스턴스 ID 조회 응답]", instanceId);
+  return instanceId;
 }
 
 // Answer types
