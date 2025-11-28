@@ -105,8 +105,8 @@ export default function MyPageEdit() {
 
         <View className="bg-white rounded-full justify-center items-center w-40 h-40 self-center overflow-visible">
           <View className="rounded-full bg-orange-100 w-full h-full justify-center items-center border-4 border-white shadow-md shadow-gray-200 overflow-visible">
-            <View className="items-center justify-center" style={{ paddingTop: 6 }}>
-              <Text className="text-6xl">{getRoleIconAndText(familyRole || undefined, gender || undefined).icon}</Text>
+            <View className="items-center justify-center" style={{ paddingTop: 15 }}>
+              <Text className="text-6xl" style={{ lineHeight: 80 }}>{getRoleIconAndText(familyRole || undefined, gender || undefined).icon}</Text>
             </View>
           </View>
         </View>

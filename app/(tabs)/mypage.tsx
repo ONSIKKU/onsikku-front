@@ -1,7 +1,5 @@
-import ActivitySection from "@/components/mypage/ActivitySection";
 import LogoutButton from "@/components/mypage/LogoutButton";
 import ProfileSection from "@/components/mypage/ProfileSection";
-import SettingsSection from "@/components/mypage/SettingsSection";
 import { deleteMember, getMyPage, logout, MypageResponse, patchMyPage, setAccessToken } from "@/utils/api";
 import { getItem, removeItem } from "@/utils/AsyncStorage";
 import { genderToKo, getRoleIconAndText } from "@/utils/labels";
@@ -171,26 +169,16 @@ export default function Page() {
   }
 
   const profileProps = {
-    name: data?.familyName || "온식구",
-    email: "",
-    familyName: data?.familyName || "",
-    joinDate: "",
     avatarUri: data?.profileImageUrl || "",
     familyRole: data?.familyRole,
     gender: data?.gender,
-    onEditPress: onEditProfile,
   };
 
-  const stats = {
-    totalAnswers: 0,
-    reactionsReceived: 0,
-    consecutiveDays: 0,
-    familyRank: 0,
-  };
+
 
   return (
     <SafeAreaView className="flex-1 bg-onsikku-main-orange">
-      <ScrollView 
+      <ScrollView
         contentContainerStyle={{ paddingBottom: 30, paddingTop: 20 }}
         showsVerticalScrollIndicator={false}
       >
@@ -211,6 +199,13 @@ export default function Page() {
                 </TouchableOpacity>
               </View>
               <View className="gap-3">
+                <View className="flex-row items-center justify-between py-2 border-b border-gray-100">
+                  <View className="flex-row items-center">
+                    <Ionicons name="people-outline" size={20} color="#FB923C" />
+                    <Text className="text-sm text-gray-600 ml-2">가족명</Text>
+                  </View>
+                  <Text className="text-sm font-medium text-gray-800">{data?.familyName}</Text>
+                </View>
                 <View className="flex-row items-center justify-between py-2 border-b border-gray-100">
                   <View className="flex-row items-center">
                     <Ionicons name="people-outline" size={20} color="#FB923C" />
@@ -235,7 +230,7 @@ export default function Page() {
               </View>
             </View>
 
-            <ActivitySection stats={stats} />
+
 
             {/* 설정 카드 */}
             <View className="bg-white w-full p-5 rounded-3xl shadow-sm">
@@ -246,7 +241,7 @@ export default function Page() {
                     <Ionicons name="notifications-outline" size={20} color="#FB923C" />
                     <Text className="text-sm text-gray-800 ml-2">알림</Text>
                   </View>
-                  <TouchableOpacity
+                  <Pressable
                     onPress={toggleAlarm}
                     disabled={updating}
                     className={`px-4 py-2 rounded-full ${
@@ -256,7 +251,7 @@ export default function Page() {
                     <Text className={`text-xs font-medium ${data?.alarmEnabled ? "text-orange-600" : "text-gray-600"}`}>
                       {updating ? "처리 중..." : data?.alarmEnabled ? "켜짐" : "꺼짐"}
                     </Text>
-                  </TouchableOpacity>
+                  </Pressable>
                 </View>
                 <View className="flex-row items-center justify-between py-2 border-t border-gray-100 pt-3">
                   <View className="flex-row items-center flex-1">
@@ -277,19 +272,19 @@ export default function Page() {
               </View>
             </View>
 
-            <SettingsSection />
-            
+
+
             <LogoutButton onPress={onLogout} />
-            
-            <TouchableOpacity 
-              onPress={onDeleteAccount} 
+
+            <TouchableOpacity
+              onPress={onDeleteAccount}
               className="bg-white w-full p-4 rounded-3xl shadow-sm items-center"
             >
               <Text className="text-red-500 font-medium">
                 {deleting ? "탈퇴 처리 중..." : "회원 탈퇴"}
               </Text>
             </TouchableOpacity>
-            
+
             {error ? (
               <Text className="text-red-500 text-sm text-center">{error}</Text>
             ) : null}

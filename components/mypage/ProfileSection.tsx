@@ -1,29 +1,17 @@
-
-import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Text, View } from "react-native";
 import { getRoleIconAndText } from "@/utils/labels";
 
 interface ProfileSectionProps {
-  name: string;
-  email: string;
-  familyName: string;
-  joinDate: string;
   avatarUri: string;
   familyRole?: string | null;
   gender?: string | null;
-  onEditPress?: () => void;
 }
 
 export default function ProfileSection({
-  name,
-  email,
-  familyName,
-  joinDate,
   avatarUri,
   familyRole,
   gender,
-  onEditPress,
 }: ProfileSectionProps) {
   const { icon } = getRoleIconAndText(familyRole, gender);
   
@@ -40,22 +28,6 @@ export default function ProfileSection({
             </View>
           </View>
         </View>
-      </View>
-      
-      {/* 프로필 정보 */}
-      <View className="pt-14 px-6 pb-6 items-center">
-        <Text className="text-2xl font-bold text-gray-800">{name}</Text>
-        {familyName ? (
-          <View className="flex-row items-center mt-2 px-3 py-1 bg-orange-50 rounded-full">
-            <Ionicons name="people" size={14} color="#FB923C" />
-            <Text className="text-sm text-orange-600 ml-1 font-medium">{familyName}</Text>
-          </View>
-        ) : null}
-        {joinDate ? (
-          <Text className="text-xs text-gray-400 mt-3">
-            {joinDate}부터 함께하고 있어요 💕
-          </Text>
-        ) : null}
       </View>
     </View>
   );

@@ -1,3 +1,5 @@
+import { getItem, setItem, removeItem } from "./AsyncStorage";
+
 export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
 const DEFAULT_BASE_URL = "https://api.onsikku.xyz";
@@ -26,7 +28,7 @@ const getHeaders = (extra?: Record<string, string>) => {
   return headers;
 };
 
-export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
+export async function apiFetch<T>(path: string, init?: RequestInit & { _retry?: boolean }): Promise<T> {
   const url = baseUrl + path;
   const headers = getHeaders(init?.headers as Record<string, string> | undefined);
   
@@ -40,6 +42,44 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
     ...init,
     headers,
   });
+
+  // Handle 401 (Unauthorized) - Token Refresh Logic
+  if (res.status === 401 && !init?._retry) {
+    console.log("[401 Unauthorized] 토큰 만료, 재발급 시도...");
+    try {
+      const storedRefreshToken = await getItem("refreshToken");
+      if (!storedRefreshToken) {
+        throw new Error("No refresh token available");
+      }
+
+      // Call refreshToken logic
+      // Note: We use the exported function below, ensuring it doesn't use apiFetch to avoid recursion
+      const newTokens = await refreshToken(storedRefreshToken);
+
+      console.log("[토큰 재발급 성공]", "Access Token updated");
+
+      // Update memory and storage
+      setAccessToken(newTokens.accessToken);
+      await setItem("accessToken", newTokens.accessToken);
+      
+      if (newTokens.refreshToken) {
+        await setItem("refreshToken", newTokens.refreshToken);
+      }
+
+      // Retry the original request with the new token
+      // The new token will be picked up by getHeaders() since we updated inMemoryToken
+      return apiFetch<T>(path, { ...init, _retry: true });
+
+    } catch (refreshError) {
+      console.error("[토큰 재발급 실패]", refreshError);
+      // Clean up tokens
+      setAccessToken(null);
+      await removeItem("accessToken");
+      await removeItem("refreshToken");
+      // Propagate the error
+      throw new Error("Session expired. Please login again.");
+    }
+  }
 
   const text = await res.text();
   const json = text ? JSON.parse(text) : null;
