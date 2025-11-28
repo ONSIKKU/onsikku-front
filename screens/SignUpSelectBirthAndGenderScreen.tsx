@@ -45,7 +45,8 @@ export default function SignUpSelectBirthAndGenderScreen() {
   const handleNext = () => {
     setBirthDate(draftBirth!); // draftBirth가 null이면 애초에 다음단계로 버튼이 활성화 되지 않음
     // 따라서 !를 붙여서 null값이 안들어온다고 보장해줘도 문제 없음
-    router.push("/signup/image");
+    // router.push("/signup/image"); // 이미지 선택 화면 비활성화
+    router.push("/signup/code");
   };
   return (
     <SafeAreaView className="flex-1 bg-orange-50">

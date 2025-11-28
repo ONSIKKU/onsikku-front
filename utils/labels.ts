@@ -43,3 +43,35 @@ export const roleToKo = (v?: string | null) => {
       return "-";
     }
 };
+
+// 역할과 성별에 따른 아이콘과 텍스트 반환
+export const getRoleIconAndText = (
+  familyRole?: string | null,
+  gender?: string | null
+): { icon: string; text: string } => {
+  if (!familyRole || !gender) {
+    return { icon: "👤", text: "-" };
+  }
+
+  if (familyRole === "PARENT") {
+    if (gender === "MALE") {
+      return { icon: "👨🏻", text: "아빠" };
+    } else if (gender === "FEMALE") {
+      return { icon: "👩🏻", text: "엄마" };
+    }
+  } else if (familyRole === "CHILD") {
+    if (gender === "MALE") {
+      return { icon: "👦🏻", text: "아들" };
+    } else if (gender === "FEMALE") {
+      return { icon: "👧🏻", text: "딸" };
+    }
+  } else if (familyRole === "GRANDPARENT") {
+    if (gender === "MALE") {
+      return { icon: "👴🏻", text: "할아버지" };
+    } else if (gender === "FEMALE") {
+      return { icon: "👵🏻", text: "할머니" };
+    }
+  }
+
+  return { icon: "👤", text: "-" };
+};

@@ -2,29 +2,17 @@ import { Clock4, Star } from "lucide-react-native";
 import { Text, View } from "react-native";
 import RoleCard from "./RoleCard";
 import { QuestionMember } from "@/utils/api";
-import { familyRoleToKo } from "@/utils/labels";
+import { getRoleIconAndText } from "@/utils/labels";
 
 interface TodayRespondentProps {
   subject?: QuestionMember | null;
+  gender?: string | null;
   pendingCount?: number;
 }
 
-const getRoleIcon = (role: string) => {
-  switch (role) {
-    case "PARENT":
-      return "👨🏻👩🏻";
-    case "CHILD":
-      return "👦🏻👧🏻";
-    case "GRANDPARENT":
-      return "👴🏻👵🏻";
-    default:
-      return "👤";
-  }
-};
-
-export default function TodayRespondent({ subject, pendingCount = 0 }: TodayRespondentProps) {
-  const roleName = subject ? familyRoleToKo(subject.familyRole) : "가족";
-  const icon = subject ? getRoleIcon(subject.familyRole) : "👤";
+export default function TodayRespondent({ subject, gender, pendingCount = 0 }: TodayRespondentProps) {
+  const { icon, text } = getRoleIconAndText(subject?.familyRole, gender || subject?.gender);
+  const roleName = text || "가족";
   
   return (
     <View className="bg-white w-full p-6 rounded-3xl shadow-sm">

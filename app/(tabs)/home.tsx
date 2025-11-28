@@ -2,13 +2,13 @@ import RecentAnswers from "@/components/RecentAnswers";
 import TodayQuestion from "@/components/TodayQuestion";
 import TodayRespondent from "@/components/TodayRespondent";
 import {
-  Answer,
-  apiFetch,
-  getMyPage,
-  getRecentAnswers,
-  QuestionAssignment,
-  QuestionResponse,
-  setAccessToken
+    Answer,
+    apiFetch,
+    getMyPage,
+    getRecentAnswers,
+    QuestionAssignment,
+    QuestionResponse,
+    setAccessToken
 } from "@/utils/api";
 import { getItem } from "@/utils/AsyncStorage";
 import { familyRoleToKo } from "@/utils/labels";
@@ -33,6 +33,8 @@ export default function Page() {
   const [recentAnswers, setRecentAnswers] = useState<Answer[]>([]);
   const [loadingAnswers, setLoadingAnswers] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [currentUserRole, setCurrentUserRole] = useState<string | null>(null);
+  const [currentUserGender, setCurrentUserGender] = useState<string | null>(null);
 
   const fetchTodayQuestions = useCallback(async () => {
     try {
@@ -100,6 +102,8 @@ export default function Page() {
         setAccessToken(token);
         const myPageData = await getMyPage();
         setCurrentUserId(myPageData.memberId || null);
+        setCurrentUserRole(myPageData.familyRole || null);
+        setCurrentUserGender(myPageData.gender || null);
       }
     } catch (e: any) {
       console.error("[현재 사용자 조회 에러]", e);
@@ -177,8 +181,8 @@ export default function Page() {
     (q) => q.state === "SENT" && !q.answeredAt
   ).length;
 
-  // 질문 대상 (subject) - QuestionAssignment에 questionInstance가 없으므로 null
-  const questionSubject = null;
+  // 질문 대상 (subject) - 현재 사용자 정보 사용
+  const questionSubject = currentUserQuestion?.member || null;
   
   // 현재 사용자에게 할당된 질문이 있는지 확인
   const hasUserAssignment = !!currentUserQuestion;
@@ -226,6 +230,7 @@ export default function Page() {
       >
         <TodayRespondent 
           subject={questionSubject}
+          gender={currentUserGender}
           pendingCount={pendingCount}
         />
         <TodayQuestion 

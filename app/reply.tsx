@@ -1,4 +1,6 @@
 
+import { createAnswer, setAccessToken } from "@/utils/api";
+import { getItem } from "@/utils/AsyncStorage";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -12,8 +14,6 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { createAnswer, setAccessToken } from "@/utils/api";
-import { getItem } from "@/utils/AsyncStorage";
 
 export default function ReplyScreen() {
   const router = useRouter();
@@ -133,7 +133,7 @@ export default function ReplyScreen() {
           >
             <Ionicons name="send-outline" size={20} color="white" />
             <Text className="text-white text-base font-bold ml-2">
-              {submitting ? "등록 중..." : "답변 등록하기 💝"}
+              {submitting ? "등록 중..." : "답변 등록하기"}
             </Text>
           </TouchableOpacity>
         </View>

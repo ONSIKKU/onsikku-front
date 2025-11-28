@@ -1,7 +1,7 @@
-import { MessageCircle, ChevronRight } from "lucide-react-native";
+import { router } from "expo-router";
+import { ChevronRight, MessageCircle } from "lucide-react-native";
 import { Text, TouchableOpacity, View } from "react-native";
 import GeneralButton from "./GeneralButton";
-import { router } from "expo-router";
 
 interface TodayQuestionProps {
   question: string;

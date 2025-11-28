@@ -3,15 +3,19 @@ import GeneralButton from "@/components/GeneralButton";
 import ImageUploadBox from "@/components/ImageUploadBox";
 import SignUpHeader from "@/components/SignUpHeader";
 import { useSignupStore } from "@/features/signup/signupStore";
+import { getRoleIconAndText } from "@/utils/labels";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
-import { User } from "lucide-react-native";
-import { Image, View } from "react-native";
+import { View, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SignUpImageSelectScreen() {
   const uri = useSignupStore((i) => i.uri);
   const setUri = useSignupStore((i) => i.setUri);
+  const role = useSignupStore((i) => i.role);
+  const gender = useSignupStore((i) => i.gender);
+  
+  const { icon, text } = getRoleIconAndText(role, gender);
 
   function handleNext() {
     router.push("/signup/code");
@@ -53,15 +57,9 @@ export default function SignUpImageSelectScreen() {
         description={`가족들이 쉽게 알아볼 수 있는 \n프로필 사진을 선택해주세요`}
       />
       <View className="bg-white rounded-full justify-center items-center w-48 h-48">
-        {uri ? (
-          <View className="w-full h-full rounded-full border-4 border-white shadow-md">
-            <Image source={{ uri }} className="w-full h-full rounded-full" />
-          </View>
-        ) : (
-          <View className="rounded-full bg-orange-100 w-full h-full justify-center items-center border-4 border-white shadow-md shadow-gray-200">
-            <User size={80} color="#FB923C" />
-          </View>
-        )}
+        <View className="rounded-full bg-orange-100 w-full h-full justify-center items-center border-4 border-white shadow-md shadow-gray-200">
+          <Text className="text-7xl">{icon}</Text>
+        </View>
       </View>
       <View className="gap-4">
         <ImageUploadBox type="camera" onPress={takePhoto} />

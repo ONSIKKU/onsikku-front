@@ -1,12 +1,11 @@
 import ImageUploadBox from "@/components/ImageUploadBox";
 import { getItem } from "@/utils/AsyncStorage";
 import { getMyPage, MypageResponse, patchMyPage, setAccessToken } from "@/utils/api";
-import { familyRoleToKo, genderToKo } from "@/utils/labels";
+import { familyRoleToKo, genderToKo, getRoleIconAndText } from "@/utils/labels";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
-import { User } from "lucide-react-native";
 import { useEffect, useState } from "react";
-import { Alert, Image, Pressable, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, Pressable, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function MyPageEdit() {
@@ -104,22 +103,19 @@ export default function MyPageEdit() {
       >
         <Text className="text-lg font-bold">내 정보 수정</Text>
 
-        <View className="bg-white rounded-full justify-center items-center w-40 h-40 self-center">
-          {avatarUri ? (
-            <View className="w-full h-full rounded-full border-4 border-white shadow-md">
-              <Image source={{ uri: avatarUri }} className="w-full h-full rounded-full" />
+        <View className="bg-white rounded-full justify-center items-center w-40 h-40 self-center overflow-visible">
+          <View className="rounded-full bg-orange-100 w-full h-full justify-center items-center border-4 border-white shadow-md shadow-gray-200 overflow-visible">
+            <View className="items-center justify-center" style={{ paddingTop: 6 }}>
+              <Text className="text-6xl">{getRoleIconAndText(familyRole || undefined, gender || undefined).icon}</Text>
             </View>
-          ) : (
-            <View className="rounded-full bg-orange-100 w-full h-full justify-center items-center border-4 border-white shadow-md shadow-gray-200">
-              <User size={60} color="#FB923C" />
-            </View>
-          )}
+          </View>
         </View>
 
-        <View className="gap-4">
+        {/* 이미지 업로드 기능 비활성화 */}
+        {/* <View className="gap-4">
           <ImageUploadBox type="camera" onPress={takePhoto} />
           <ImageUploadBox type="album" onPress={pickFromLibrary} />
-        </View>
+        </View> */}
 
         <View className="bg-white p-4 rounded-xl gap-3">
           <Text className="text-sm text-gray-700">성별</Text>

@@ -4,11 +4,11 @@ import ProfileSection from "@/components/mypage/ProfileSection";
 import SettingsSection from "@/components/mypage/SettingsSection";
 import { deleteMember, getMyPage, logout, MypageResponse, patchMyPage, setAccessToken } from "@/utils/api";
 import { getItem, removeItem } from "@/utils/AsyncStorage";
-import { familyRoleToKo, genderToKo, roleToKo } from "@/utils/labels";
+import { genderToKo, getRoleIconAndText } from "@/utils/labels";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Pressable, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Page() {
@@ -176,6 +176,8 @@ export default function Page() {
     familyName: data?.familyName || "",
     joinDate: "",
     avatarUri: data?.profileImageUrl || "",
+    familyRole: data?.familyRole,
+    gender: data?.gender,
     onEditPress: onEditProfile,
   };
 
@@ -211,17 +213,10 @@ export default function Page() {
               <View className="gap-3">
                 <View className="flex-row items-center justify-between py-2 border-b border-gray-100">
                   <View className="flex-row items-center">
-                    <Ionicons name="person-circle-outline" size={20} color="#FB923C" />
-                    <Text className="text-sm text-gray-600 ml-2">역할</Text>
-                  </View>
-                  <Text className="text-sm font-medium text-gray-800">{roleToKo(data?.role)}</Text>
-                </View>
-                <View className="flex-row items-center justify-between py-2 border-b border-gray-100">
-                  <View className="flex-row items-center">
                     <Ionicons name="people-outline" size={20} color="#FB923C" />
                     <Text className="text-sm text-gray-600 ml-2">가족 내 역할</Text>
                   </View>
-                  <Text className="text-sm font-medium text-gray-800">{familyRoleToKo(data?.familyRole)}</Text>
+                  <Text className="text-sm font-medium text-gray-800">{getRoleIconAndText(data?.familyRole, data?.gender).text}</Text>
                 </View>
                 <View className="flex-row items-center justify-between py-2 border-b border-gray-100">
                   <View className="flex-row items-center">
@@ -271,13 +266,13 @@ export default function Page() {
                       <Text className="text-xs text-gray-500 mt-0.5 font-mono">{data?.familyInvitationCode || "-"}</Text>
                     </View>
                   </View>
-                  <TouchableOpacity
+                  <Pressable
                     onPress={regenerateInvitation}
                     disabled={updating}
                     className="px-3 py-2 rounded-lg bg-orange-50"
                   >
                     <Ionicons name="refresh" size={16} color="#FB923C" />
-                  </TouchableOpacity>
+                  </Pressable>
                 </View>
               </View>
             </View>
