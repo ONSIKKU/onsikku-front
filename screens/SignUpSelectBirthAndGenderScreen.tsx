@@ -4,10 +4,10 @@ import GeneralButton from "@/components/GeneralButton";
 import SignUpHeader from "@/components/SignUpHeader";
 import { useSignupStore } from "@/features/signup/signupStore";
 import { Item, MONTH_ITEMS, YEAR_ITEMS } from "@/utils/dates";
+import { Picker } from "@react-native-picker/picker";
 import { router } from "expo-router";
 import { useMemo, useState } from "react";
-import { Platform, StyleSheet, Text, View, ScrollView } from "react-native";
-import { Picker } from "@react-native-picker/picker";
+import { Platform, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SignUpSelectBirthAndGenderScreen() {
@@ -48,22 +48,26 @@ export default function SignUpSelectBirthAndGenderScreen() {
     router.push("/signup/image");
   };
   return (
-    <SafeAreaView className="flex-1">
+    <SafeAreaView className="flex-1 bg-orange-50">
       <ScrollView 
         className="flex-1 px-8" 
-        contentContainerStyle={{ paddingTop: 16, paddingBottom: 32, gap: 40 }}
+        contentContainerStyle={{ paddingTop: 16, paddingBottom: 32 }}
         showsVerticalScrollIndicator={false}
       >
-        <BackButton />
-        <SignUpHeader
-          title={`생일과 성별을\n알려주세요`}
-          description={`더 정확한 맞춤형 콘텐츠 제공을 위해\n생일과 성별을 입력해주세요`}
-        />
-        <View className="w-full flex-col gap-3">
+        <View style={{ marginBottom: 40 }}>
+          <BackButton />
+        </View>
+        <View style={{ marginBottom: 40 }}>
+          <SignUpHeader
+            title={`생일과 성별을\n알려주세요`}
+            description={`더 정확한 맞춤형 콘텐츠 제공을 위해\n생일과 성별을 입력해주세요`}
+          />
+        </View>
+        <View className="w-full flex-col" style={{ marginBottom: 40 }}>
           <Text className="font-bold text-2xl text-center">생년월일</Text>
           {/* 연 */}
-          <View className="gap-2 w-full">
-            <Text className="font-sans">출생 연도</Text>
+          <View style={{ marginBottom: 12 }}>
+            <Text className="font-sans" style={{ marginBottom: 8 }}>출생 연도</Text>
             <View style={styles.pickerContainer}>
               <Picker
                 selectedValue={selectedYear}
@@ -79,9 +83,9 @@ export default function SignUpSelectBirthAndGenderScreen() {
             </View>
           </View>
 
-          <View className="flex-row gap-4">
-            <View className="flex-1 gap-2">
-              <Text className="font-sans">월</Text>
+          <View className="flex-row" style={{ gap: 16 }}>
+            <View className="flex-1">
+              <Text className="font-sans" style={{ marginBottom: 8 }}>월</Text>
               {/* 월 */}
               <View style={styles.pickerContainer}>
                 <Picker
@@ -99,8 +103,8 @@ export default function SignUpSelectBirthAndGenderScreen() {
             </View>
 
             {/* 일 */}
-            <View className="flex-1 gap-2">
-              <Text className="font-sans">일</Text>
+            <View className="flex-1">
+              <Text className="font-sans" style={{ marginBottom: 8 }}>일</Text>
               <View style={styles.pickerContainer}>
                 <Picker
                   selectedValue={selectedDate}
@@ -118,9 +122,9 @@ export default function SignUpSelectBirthAndGenderScreen() {
             </View>
           </View>
         </View>
-        <View className="flex-col gap-4">
-          <Text className="font-bold text-2xl text-center">성별</Text>
-          <View className="flex-row gap-4">
+        <View className="flex-col" style={{ marginBottom: 40 }}>
+          <Text className="font-bold text-2xl text-center" style={{ marginBottom: 16 }}>성별</Text>
+          <View className="flex-row" style={{ gap: 16 }}>
             <GenderSelector
               gender="MALE"
               selected={gender === "MALE"}
@@ -146,18 +150,26 @@ export default function SignUpSelectBirthAndGenderScreen() {
 const styles = StyleSheet.create({
   pickerContainer: {
     borderWidth: 1,
-    borderColor: "#fff",
+    borderColor: "#E5E7EB", // 연한 회색 테두리
     borderRadius: 10,
-    backgroundColor: "#fff",
+    backgroundColor: "#FFFFFF", // 흰색 배경
     overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
     ...(Platform.OS === "android" && {
       elevation: 3,
     }),
   },
   picker: {
     height: Platform.OS === "ios" ? 180 : 50,
+    backgroundColor: "#FFFFFF",
   },
   pickerItem: {
     height: 180,
+    color: "#1F2937", // 진한 회색 텍스트 (잘 보이도록)
+    fontSize: 18,
+    fontWeight: "500",
   },
 });

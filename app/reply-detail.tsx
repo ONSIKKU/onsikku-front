@@ -1,4 +1,4 @@
-import { Answer, deleteAnswer, getMyPage, getQuestionInstanceDetails, setAccessToken, updateAnswer } from "@/utils/api";
+import { Answer, Comment, createComment, deleteAnswer, deleteComment, getMyPage, getQuestionInstanceDetails, setAccessToken, updateAnswer, updateComment } from "@/utils/api";
 import { getItem } from "@/utils/AsyncStorage";
 import { familyRoleToKo } from "@/utils/labels";
 import { Ionicons } from "@expo/vector-icons";
@@ -46,19 +46,6 @@ const formatTimeAgo = (dateString: string) => {
 };
 
 interface ReplyDetailScreenProps {}
-
-// 댓글 타입 정의
-type Comment = {
-  id: string;
-  content: string;
-  createdAt: string;
-  member?: {
-    id: string;
-    familyRole: string;
-    profileImageUrl: string | null;
-  };
-  parent?: Comment;
-};
 
 // Instagram 스타일 피드 카드
 const FeedCard = ({ 
@@ -154,7 +141,19 @@ const FeedCard = ({
 };
 
 // 댓글 카드
-const CommentCard = ({ comment }: { comment: Comment }) => {
+const CommentCard = ({ 
+  comment, 
+  isMyComment,
+  onEdit,
+  onDelete,
+  onReply,
+}: { 
+  comment: Comment;
+  isMyComment: boolean;
+  onEdit: () => void;
+  onDelete: () => void;
+  onReply: () => void;
+}) => {
   const familyRole = comment.member?.familyRole || "PARENT";
   const roleName = familyRoleToKo(familyRole);
   const timeAgo = comment.createdAt ? formatTimeAgo(comment.createdAt) : "";
@@ -174,9 +173,21 @@ const CommentCard = ({ comment }: { comment: Comment }) => {
           </View>
         )}
         <View className="flex-1">
-          <View className="flex-row items-center gap-2 mb-1">
-            <Text className="text-sm font-semibold text-gray-900">{roleName}</Text>
-            <Text className="text-xs text-gray-500">{timeAgo}</Text>
+          <View className="flex-row items-center justify-between mb-1">
+            <View className="flex-row items-center gap-2">
+              <Text className="text-sm font-semibold text-gray-900">{roleName}</Text>
+              <Text className="text-xs text-gray-500">{timeAgo}</Text>
+            </View>
+            {isMyComment && (
+              <View className="flex-row items-center gap-2">
+                <TouchableOpacity onPress={onEdit}>
+                  <Ionicons name="create-outline" size={16} color="#666" />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={onDelete}>
+                  <Ionicons name="trash-outline" size={16} color="#ef4444" />
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
           <Text className="text-sm text-gray-800 leading-5 mb-2">{comment.content}</Text>
           <View className="flex-row items-center gap-4">
@@ -184,7 +195,7 @@ const CommentCard = ({ comment }: { comment: Comment }) => {
               <Ionicons name="heart-outline" size={16} color="#000" />
               <Text className="text-xs text-gray-500">0</Text>
             </TouchableOpacity>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={onReply}>
               <Text className="text-xs text-gray-500">답글</Text>
             </TouchableOpacity>
           </View>
@@ -211,6 +222,12 @@ export default function ReplyDetailScreen() {
   const [editingAnswer, setEditingAnswer] = useState<Answer | null>(null);
   const [editText, setEditText] = useState("");
   const [showEditModal, setShowEditModal] = useState(false);
+  const [editingComment, setEditingComment] = useState<Comment | null>(null);
+  const [editCommentText, setEditCommentText] = useState("");
+  const [showEditCommentModal, setShowEditCommentModal] = useState(false);
+  const [newCommentText, setNewCommentText] = useState("");
+  const [showCommentInput, setShowCommentInput] = useState(false);
+  const [replyingToComment, setReplyingToComment] = useState<Comment | null>(null);
 
   const questionInstanceId = params.questionInstanceId;
   const question = params.question || "질문 정보가 없습니다.";
@@ -335,6 +352,10 @@ export default function ReplyDetailScreen() {
       }));
       setAnswers(convertedAnswers);
 
+      // 댓글 목록도 새로고침
+      const commentList = questionData.questionDetails?.comments || [];
+      setComments(commentList as Comment[]);
+
       setShowEditModal(false);
       setEditingAnswer(null);
       setEditText("");
@@ -382,6 +403,10 @@ export default function ReplyDetailScreen() {
               }));
               setAnswers(convertedAnswers);
 
+              // 댓글 목록도 새로고침
+              const commentList = questionData.questionDetails?.comments || [];
+              setComments(commentList as Comment[]);
+
               Alert.alert("완료", "답변이 삭제되었습니다.");
             } catch (e: any) {
               console.error("[답변 삭제 에러]", e);
@@ -391,6 +416,121 @@ export default function ReplyDetailScreen() {
         },
       ]
     );
+  };
+
+  // 댓글 생성 핸들러
+  const handleCreateComment = async () => {
+    if (!questionInstanceId || !newCommentText.trim()) {
+      Alert.alert("확인", "댓글 내용을 입력해주세요.");
+      return;
+    }
+
+    try {
+      const token = await getItem("accessToken");
+      if (token) {
+        setAccessToken(token);
+      }
+
+      await createComment({
+        questionInstanceId,
+        content: newCommentText.trim(),
+        parentCommentId: replyingToComment?.id,
+      });
+
+      // 댓글 목록 새로고침
+      const questionData = await getQuestionInstanceDetails(questionInstanceId);
+      const commentList = questionData.questionDetails?.comments || [];
+      setComments(commentList as Comment[]);
+
+      setNewCommentText("");
+      setShowCommentInput(false);
+      setReplyingToComment(null);
+    } catch (e: any) {
+      console.error("[댓글 생성 에러]", e);
+      Alert.alert("오류", e?.message || "댓글 작성에 실패했습니다.");
+    }
+  };
+
+  // 댓글 수정 핸들러
+  const handleEditComment = (comment: Comment) => {
+    setEditingComment(comment);
+    setEditCommentText(comment.content);
+    setShowEditCommentModal(true);
+  };
+
+  // 댓글 수정 저장
+  const handleSaveCommentEdit = async () => {
+    if (!editingComment || !editCommentText.trim() || !questionInstanceId) {
+      Alert.alert("확인", "댓글 내용을 입력해주세요.");
+      return;
+    }
+
+    try {
+      const token = await getItem("accessToken");
+      if (token) {
+        setAccessToken(token);
+      }
+
+      await updateComment({
+        questionInstanceId,
+        commentId: editingComment.id,
+        content: editCommentText.trim(),
+      });
+
+      // 댓글 목록 새로고침
+      const questionData = await getQuestionInstanceDetails(questionInstanceId);
+      const commentList = questionData.questionDetails?.comments || [];
+      setComments(commentList as Comment[]);
+
+      setShowEditCommentModal(false);
+      setEditingComment(null);
+      setEditCommentText("");
+      Alert.alert("완료", "댓글이 수정되었습니다.");
+    } catch (e: any) {
+      console.error("[댓글 수정 에러]", e);
+      Alert.alert("오류", e?.message || "댓글 수정에 실패했습니다.");
+    }
+  };
+
+  // 댓글 삭제 핸들러
+  const handleDeleteComment = (comment: Comment) => {
+    Alert.alert(
+      "댓글 삭제",
+      "정말 이 댓글을 삭제하시겠어요?",
+      [
+        { text: "취소", style: "cancel" },
+        {
+          text: "삭제",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const token = await getItem("accessToken");
+              if (token) {
+                setAccessToken(token);
+              }
+
+              await deleteComment(comment.id);
+
+              // 댓글 목록 새로고침
+              const questionData = await getQuestionInstanceDetails(questionInstanceId!);
+              const commentList = questionData.questionDetails?.comments || [];
+              setComments(commentList as Comment[]);
+
+              Alert.alert("완료", "댓글이 삭제되었습니다.");
+            } catch (e: any) {
+              console.error("[댓글 삭제 에러]", e);
+              Alert.alert("오류", e?.message || "댓글 삭제에 실패했습니다.");
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  // 댓글 답글 작성 핸들러
+  const handleReplyComment = (comment: Comment) => {
+    setReplyingToComment(comment);
+    setShowCommentInput(true);
   };
 
   return (
@@ -447,17 +587,75 @@ export default function ReplyDetailScreen() {
               })}
 
               {/* 댓글 섹션 */}
+              <View className="px-2">
+                <Text className="text-sm font-semibold text-gray-900">
+                  대댓글 {comments.length}개
+                </Text>
+              </View>
+              
+              {/* 댓글 입력 */}
+              <View className="bg-white rounded-2xl shadow-sm p-4">
+                {replyingToComment && (
+                  <View className="bg-orange-50 p-2 rounded-lg mb-3">
+                    <Text className="text-xs text-gray-600">
+                      {familyRoleToKo(replyingToComment.member?.familyRole || "PARENT")}님에게 답글
+                    </Text>
+                  </View>
+                )}
+                <TextInput
+                  className="border border-gray-300 rounded-lg p-3 text-base text-gray-900 min-h-[80px]"
+                  multiline
+                  numberOfLines={4}
+                  value={newCommentText}
+                  onChangeText={setNewCommentText}
+                  placeholder="댓글을 입력해주세요"
+                  textAlignVertical="top"
+                  maxLength={500}
+                />
+                <View className="flex-row items-center justify-between mt-2">
+                  <Text className="text-xs text-gray-500">
+                    {newCommentText.length}/500
+                  </Text>
+                  <View className="flex-row gap-2">
+                    {(showCommentInput || replyingToComment) && (
+                      <TouchableOpacity
+                        className="px-4 py-2 bg-gray-200 rounded-lg"
+                        onPress={() => {
+                          setShowCommentInput(false);
+                          setReplyingToComment(null);
+                          setNewCommentText("");
+                        }}
+                      >
+                        <Text className="text-sm font-semibold text-gray-700">취소</Text>
+                      </TouchableOpacity>
+                    )}
+                    <TouchableOpacity
+                      className="px-4 py-2 bg-orange-500 rounded-lg"
+                      onPress={handleCreateComment}
+                    >
+                      <Text className="text-sm font-semibold text-white">작성</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+
+              {/* 댓글 목록 */}
               {comments.length > 0 && (
-                <>
-                  <View className="px-2">
-                    <Text className="text-sm font-semibold text-gray-900">대댓글</Text>
-                  </View>
-                  <View className="bg-white rounded-2xl shadow-sm overflow-hidden">
-                    {comments.map((comment) => (
-                      <CommentCard key={comment.id} comment={comment} />
-                    ))}
-                  </View>
-                </>
+                <View className="bg-white rounded-2xl shadow-sm overflow-hidden">
+                  {comments.map((comment) => {
+                    const isMyComment = currentUserId === comment.member?.id;
+                    return (
+                      <CommentCard
+                        key={comment.id}
+                        comment={comment}
+                        isMyComment={isMyComment}
+                        onEdit={() => handleEditComment(comment)}
+                        onDelete={() => handleDeleteComment(comment)}
+                        onReply={() => handleReplyComment(comment)}
+                      />
+                    );
+                  })}
+                </View>
               )}
             </>
           )}
@@ -505,6 +703,55 @@ export default function ReplyDetailScreen() {
               <TouchableOpacity
                 className="flex-1 bg-orange-500 rounded-lg py-3 items-center"
                 onPress={handleSaveEdit}
+              >
+                <Text className="text-base font-semibold text-white">저장</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* 댓글 수정 모달 */}
+      <Modal
+        visible={showEditCommentModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => {
+          setShowEditCommentModal(false);
+          setEditingComment(null);
+          setEditCommentText("");
+        }}
+      >
+        <View className="flex-1 bg-black/50 items-center justify-center p-5">
+          <View className="bg-white rounded-2xl w-full max-w-md p-6">
+            <Text className="text-lg font-bold text-gray-900 mb-4">댓글 수정</Text>
+            <TextInput
+              className="border border-gray-300 rounded-lg p-4 text-base text-gray-900 min-h-[100px]"
+              multiline
+              numberOfLines={5}
+              value={editCommentText}
+              onChangeText={setEditCommentText}
+              placeholder="댓글을 입력해주세요"
+              textAlignVertical="top"
+              maxLength={500}
+            />
+            <Text className="text-xs text-gray-500 mt-2 text-right">
+              {editCommentText.length}/500
+            </Text>
+            <View className="flex-row gap-3 mt-6">
+              <TouchableOpacity
+                className="flex-1 bg-gray-200 rounded-lg py-3 items-center"
+                onPress={() => {
+                  setShowEditCommentModal(false);
+                  setEditingComment(null);
+                  setEditCommentText("");
+                }}
+              >
+                <Text className="text-base font-semibold text-gray-700">취소</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className="flex-1 bg-orange-500 rounded-lg py-3 items-center"
+                onPress={handleSaveCommentEdit}
               >
                 <Text className="text-base font-semibold text-white">저장</Text>
               </TouchableOpacity>

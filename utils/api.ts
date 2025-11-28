@@ -62,11 +62,12 @@ export type FamilyRole = "PARENT" | "CHILD" | "GRANDPARENT";
 export type Role = "MEMBER" | "ADMIN";
 
 export type MypageResponse = {
-  memberId?: string;
+  memberId: string;
+  familyId: string;
   familyName: string;
   familyInvitationCode: string;
   role: Role;
-  profileImageUrl: string | null;
+  profileImageUrl: string;
   familyRole: FamilyRole;
   birthDate: string; // yyyy-MM-dd
   gender: "MALE" | "FEMALE";
@@ -185,8 +186,22 @@ export async function refreshToken(refreshToken: string) {
 }
 
 // Question types
-export type QuestionState = "PENDING" | "SENT" | "ANSWERED" | "EXPIRED" | "FAILED";
+export type QuestionState = "PENDING" | "SENT" | "READ" | "ANSWERED" | "EXPIRED" | "FAILED";
 
+// Member 타입 (API 문서의 Member 스키마와 일치)
+export type Member = {
+  createdAt: string; // date-time
+  updatedAt: string; // date-time
+  id: string;
+  role: Role;
+  gender: "MALE" | "FEMALE";
+  birthDate: string; // date
+  familyRole: FamilyRole;
+  profileImageUrl: string;
+  alarmEnabled: boolean;
+};
+
+// 호환성을 위한 QuestionMember 타입 (Member의 부분 집합)
 export type QuestionMember = {
   id: string;
   familyRole: FamilyRole;
@@ -194,21 +209,17 @@ export type QuestionMember = {
   gender: "MALE" | "FEMALE";
 };
 
-export type QuestionInstance = {
-  id: string;
-  content: string;
-  subject: QuestionMember | null;
-};
-
 export type QuestionAssignment = {
   id: string;
-  questionInstance: QuestionInstance;
-  member: QuestionMember;
-  state: QuestionState;
+  member: Member;
   dueAt: string; // date-time
   sentAt: string | null; // date-time
+  readAt: string | null; // date-time
   answeredAt: string | null; // date-time
   expiredAt: string | null; // date-time
+  state: QuestionState;
+  reminderCount: number;
+  lastRemindedAt: string | null; // date-time
 };
 
 // QuestionResponse 타입 정의 (OpenAPI 스펙에 맞춤)
@@ -235,18 +246,15 @@ export async function getTodayQuestions() {
 }
 
 // 오늘의 질문 인스턴스 ID 조회 (답변 상세 페이지용)
-// 새로운 API 스펙에서는 todayQuestionInstanceId가 제공되지 않으므로
-// QuestionAssignment.questionInstance.id를 사용해야 함
+// 새로운 API 스펙에서는 questionDetails.questionInstanceId를 사용
 // 이 함수는 더 이상 사용되지 않음 (호환성을 위해 유지)
 export async function getTodayQuestionInstanceId(): Promise<string | null> {
   console.log("[오늘의 질문 인스턴스 ID 조회 요청]");
   const response = await apiFetch<QuestionResponse>("/api/questions", {
     method: "GET",
   });
-  // 새로운 API 스펙에서는 todayQuestionInstanceId가 없으므로
-  // 첫 번째 QuestionAssignment의 questionInstance.id를 반환
-  const firstAssignment = response.todayQuestionAssignments?.[0];
-  const instanceId = firstAssignment?.questionInstance?.id || null;
+  // 새로운 API 스펙에서는 questionDetails.questionInstanceId를 사용
+  const instanceId = response.questionDetails?.questionInstanceId || null;
   console.log("[오늘의 질문 인스턴스 ID 조회 응답]", instanceId);
   return instanceId;
 }
@@ -276,6 +284,9 @@ export type Answer = {
   id?: string;
   questionAssignment?: QuestionAssignment;
   member?: QuestionMember;
+  // 질문 정보 (호환성을 위해 추가)
+  questionContent?: string;
+  questionInstanceId?: string;
 };
 
 // 답변 생성
@@ -495,6 +506,8 @@ export async function getRecentAnswers(months: number = 1, limit: number = 10) {
                 profileImageUrl: null,
                 gender: ans.gender,
               },
+              questionContent: question.questionContent,
+              questionInstanceId: question.questionInstanceId,
             }));
             
             allAnswers.push(...convertedAnswers);
@@ -519,4 +532,56 @@ export async function getRecentAnswers(months: number = 1, limit: number = 10) {
   const result = allAnswers.slice(0, limit);
   console.log("[최근 답변 조회 응답]", result);
   return result;
+}
+
+// Comment types
+export type CommentRequest = {
+  questionInstanceId: string;
+  commentId?: string; // 수정 시 필요
+  parentCommentId?: string; // 대댓글 작성 시 필요
+  content: string; // 필수
+};
+
+export type Comment = {
+  id: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+  parent?: Comment;
+};
+
+export type CommentResponse = {
+  comment: Comment;
+};
+
+// 댓글 생성
+export async function createComment(payload: CommentRequest) {
+  console.log("[댓글 생성 요청]", payload);
+  const response = await apiFetch<CommentResponse>("/api/comments", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+  console.log("[댓글 생성 응답]", response);
+  return response;
+}
+
+// 댓글 수정
+export async function updateComment(payload: CommentRequest) {
+  console.log("[댓글 수정 요청]", payload);
+  const response = await apiFetch<CommentResponse>("/api/comments", {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+  console.log("[댓글 수정 응답]", response);
+  return response;
+}
+
+// 댓글 삭제
+export async function deleteComment(commentId: string) {
+  console.log("[댓글 삭제 요청]", { commentId });
+  const response = await apiFetch<void>(`/api/comments/${commentId}`, {
+    method: "DELETE",
+  });
+  console.log("[댓글 삭제 응답]", response);
+  return response;
 }

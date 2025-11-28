@@ -73,12 +73,16 @@ export default function HistoryScreen() {
   };
 
   const handleQuestionPress = (questionAssignmentId: string, question: string, questionInstanceId?: string) => {
+    if (!questionInstanceId) {
+      console.warn("[기록 페이지] questionInstanceId가 없어서 상세보기로 이동할 수 없습니다.");
+      return;
+    }
     router.push({
       pathname: "/reply-detail",
       params: {
         questionAssignmentId,
         question,
-        questionInstanceId: questionInstanceId || "",
+        questionInstanceId,
       },
     });
   };

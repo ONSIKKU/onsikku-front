@@ -67,8 +67,11 @@ export default function TodayQuestion({
     }
   };
 
+  // 질문이 없는지 확인
+  const hasNoQuestion = !question || question.trim() === "" || question === "질문이 없습니다";
+  
   // 현재 사용자에게 할당된 질문이고, 질문 내용이 있고, 아직 답변하지 않았으면 활성화
-  const isActive = isUserAssignment && !!question && !!questionAssignmentId && !isAnswered && question !== "오늘 하루 어떠셨나요?\n위로받고 싶은 일이 있었나요?";
+  const isActive = !hasNoQuestion && isUserAssignment && !!question && !!questionAssignmentId && !isAnswered && question !== "오늘 하루 어떠셨나요?\n위로받고 싶은 일이 있었나요?";
 
   return (
     <View className="bg-white w-full p-6 rounded-3xl shadow-sm">
@@ -77,11 +80,19 @@ export default function TodayQuestion({
         <Text className="font-bold text-xl text-gray-800">오늘의 질문</Text>
       </View>
 
-      <View className="bg-orange-50 p-5 rounded-2xl mb-5">
-        <Text className="font-sans text-base text-gray-700 leading-6">{question}</Text>
+      <View className={`p-5 rounded-2xl mb-5 ${hasNoQuestion ? "bg-gray-100" : "bg-orange-50"}`}>
+        <Text className={`font-sans text-base leading-6 ${hasNoQuestion ? "text-gray-500 italic text-center" : "text-gray-700"}`}>
+          {hasNoQuestion ? "질문이 없습니다" : question}
+        </Text>
       </View>
 
-      {isAnswered ? (
+      {hasNoQuestion ? (
+        <View className="bg-gray-100 p-5 rounded-2xl">
+          <Text className="text-center text-sm text-gray-500">
+            새로운 질문을 기다려주세요
+          </Text>
+        </View>
+      ) : isAnswered ? (
         <>
           <View className="bg-gray-100 p-5 rounded-2xl mb-4">
             <Text className="text-center text-base text-gray-700 font-medium">

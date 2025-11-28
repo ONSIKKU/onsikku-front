@@ -94,7 +94,7 @@ export default function QuestionList({
           <QuestionCard
             item={item}
             onPress={
-              item.questionAssignmentId && onQuestionPress
+              item.questionAssignmentId && item.questionInstanceId && onQuestionPress
                 ? () => onQuestionPress(item.questionAssignmentId!, item.question, item.questionInstanceId)
                 : undefined
             }

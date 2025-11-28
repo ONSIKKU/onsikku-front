@@ -12,9 +12,10 @@ import {
 } from "@/utils/api";
 import { getItem } from "@/utils/AsyncStorage";
 import { familyRoleToKo } from "@/utils/labels";
+import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, Dimensions, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, Dimensions, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const { width } = Dimensions.get("window");
@@ -47,9 +48,10 @@ export default function Page() {
         });
         console.log("[홈 화면] API 응답 전체:", response);
         
-        const data = response.todayQuestionAssignments || [];
-        setQuestions(data || []);
-        console.log("[홈 화면] todayQuestionAssignments:", data);
+        // questionDetails에서 questionAssignments 가져오기
+        const questionAssignments = response.questionDetails?.questionAssignments || [];
+        setQuestions(questionAssignments);
+        console.log("[홈 화면] questionAssignments:", questionAssignments);
         
         // 질문 내용과 인스턴스 ID는 questionDetails에서 가져오기
         if (response.questionDetails) {
@@ -143,9 +145,9 @@ export default function Page() {
 
   const recentAnswersData = recentAnswers.map((answer) => {
     const familyRole = answer.member?.familyRole || answer.familyRole || "PARENT";
-    const questionContent = answer.questionAssignment?.questionInstance?.content || "";
+    const questionContent = answer.questionContent || "";
     const questionAssignmentId = answer.questionAssignment?.id || "";
-    const questionInstanceId = answer.questionAssignment?.questionInstance?.id || "";
+    const questionInstanceId = answer.questionInstanceId || "";
     
     return {
       roleName: familyRoleToKo(familyRole),
@@ -165,7 +167,10 @@ export default function Page() {
   // 현재 사용자에게 할당된 질문이 없으면 첫 번째 질문 사용 (호환성)
   const currentQuestion = currentUserQuestion || questions[0];
   // questionContent는 state에서 가져오기 (questionDetails에서 가져온 값)
-  const displayQuestionContent = questionContent || "질문이 존재하지 않습니다.";
+  // 질문 내용이 없거나 빈 문자열일 때 "질문이 없습니다" 표시
+  const displayQuestionContent = (questionContent && questionContent.trim() !== "") 
+    ? questionContent 
+    : "질문이 없습니다";
   
   // 답변 대기 중인 사람 수 (SENT 상태이고 아직 답변 안 한 경우)
   const pendingCount = questions.filter(
@@ -179,8 +184,8 @@ export default function Page() {
   const hasUserAssignment = !!currentUserQuestion;
   
   // 현재 사용자가 오늘의 질문에 답변했는지 확인
-  // currentQuestion 기준으로 확인 (할당된 질문이 없을 경우를 대비)
-  const hasAnsweredToday = currentQuestion?.answeredAt !== null || currentUserQuestion?.answeredAt !== null;
+  // state가 "ANSWERED"일 때만 답변 완료로 표시
+  const hasAnsweredToday = currentUserQuestion?.state === "ANSWERED" || currentQuestion?.state === "ANSWERED";
 
   // questionInstanceId: state에서 가져오기 (questionDetails.questionInstanceId)
   // 새로운 API 스펙에서는 questionDetails.questionInstanceId를 사용
@@ -191,7 +196,8 @@ export default function Page() {
   console.log("[홈 화면] 현재 질문 ID:", currentQuestion?.id);
   console.log("[홈 화면] questionInstanceId:", displayQuestionInstanceId);
   console.log("[홈 화면] questionContent:", displayQuestionContent);
-  console.log("[홈 화면] currentQuestion 전체:", JSON.stringify(currentQuestion, null, 2));
+  console.log("[홈 화면] currentQuestion state:", currentQuestion?.state);
+  console.log("[홈 화면] currentUserQuestion state:", currentUserQuestion?.state);
   console.log("[홈 화면] 답변 완료 여부:", hasAnsweredToday);
   console.log("[홈 화면] answeredAt:", currentQuestion?.answeredAt);
 
@@ -229,6 +235,29 @@ export default function Page() {
           isUserAssignment={hasUserAssignment}
           isAnswered={hasAnsweredToday}
         />
+        
+        {/* 댓글 작성 테스트 버튼 */}
+        {displayQuestionInstanceId && (
+          <TouchableOpacity
+            className="bg-blue-400 p-4 rounded-2xl shadow-sm"
+            onPress={() => {
+              router.push({
+                pathname: "/reply-detail",
+                params: {
+                  questionInstanceId: displayQuestionInstanceId,
+                  question: displayQuestionContent,
+                },
+              });
+            }}
+          >
+            <View className="flex-row items-center justify-center gap-2">
+              <Ionicons name="chatbubble-outline" size={20} color="#1F2937" />
+              <Text className="text-base font-bold text-gray-800">
+                댓글 작성 테스트
+              </Text>
+            </View>
+          </TouchableOpacity>
+        )}
         <View className="bg-white w-full p-5 rounded-3xl shadow-sm">
           <View className="flex flex-row justify-between items-center mb-4">
             <Text className="font-bold text-lg text-gray-800">지난 답변 둘러보기</Text>
