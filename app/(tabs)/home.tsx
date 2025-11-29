@@ -11,7 +11,7 @@ import {
     setAccessToken
 } from "@/utils/api";
 import { getItem } from "@/utils/AsyncStorage";
-import { familyRoleToKo } from "@/utils/labels";
+import { getRoleIconAndText } from "@/utils/labels";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
@@ -149,17 +149,21 @@ export default function Page() {
 
   const recentAnswersData = recentAnswers.map((answer) => {
     const familyRole = answer.member?.familyRole || answer.familyRole || "PARENT";
+    const gender = answer.member?.gender || answer.gender;
     const questionContent = answer.questionContent || "";
     const questionAssignmentId = answer.questionAssignment?.id || "";
     const questionInstanceId = answer.questionInstanceId || "";
     
+    const { text: roleText, icon: roleIcon } = getRoleIconAndText(familyRole, gender);
+
     return {
-      roleName: familyRoleToKo(familyRole),
+      roleName: roleText,
       date: formatDate(answer.createdAt),
       content: getContentText(answer.content),
       questionAssignmentId,
       questionInstanceId,
       question: questionContent,
+      roleIcon,
     };
   });
 
@@ -295,7 +299,7 @@ export default function Page() {
                     style={{ width: ITEM_WIDTH, paddingHorizontal: 8 }}
                     key={index}
                   >
-                    <RecentAnswers {...item} />
+                    <RecentAnswers {...item} roleIcon={item.roleIcon} />
                   </View>
                 ))}
               </ScrollView>

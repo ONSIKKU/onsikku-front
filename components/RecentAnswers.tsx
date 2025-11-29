@@ -5,19 +5,21 @@ interface RecentAnswersProps {
   roleName: string;
   date: string;
   content: string;
+  roleIcon: string;
 }
 
 export default function RecentAnswers({
   roleName,
   date,
   content,
+  roleIcon,
 }: RecentAnswersProps) {
   return (
     <View className="bg-white p-5 rounded-2xl shadow-sm border border-orange-100">
       <View className="flex flex-row items-center justify-between mb-3">
         <View className="flex-row items-center gap-2">
           <View className="w-8 h-8 rounded-full bg-orange-100 items-center justify-center">
-            <Text className="text-xs font-bold text-onsikku-dark-orange">{roleName}</Text>
+            <Text className="text-base">{roleIcon}</Text>
           </View>
           <Text className="font-medium text-gray-800">{roleName}</Text>
         </View>

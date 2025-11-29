@@ -2,7 +2,7 @@ import React from "react";
 import { ActivityIndicator, FlatList, Text, View } from "react-native";
 import QuestionCard, { Question } from "./QuestionCard";
 import { QuestionDetails } from "@/utils/api";
-import { familyRoleToKo } from "@/utils/labels";
+import { getRoleIconAndText } from "@/utils/labels";
 
 interface QuestionListProps {
   questions: QuestionDetails[];
@@ -18,18 +18,6 @@ const formatDate = (dateString: string) => {
   return `${month}/${day}`;
 };
 
-const getRoleEmoji = (role: string) => {
-  switch (role) {
-    case "PARENT":
-      return "👨";
-    case "CHILD":
-      return "👦";
-    case "GRANDPARENT":
-      return "👴";
-    default:
-      return "👤";
-  }
-};
 
 export default function QuestionList({
   questions,
@@ -37,16 +25,19 @@ export default function QuestionList({
   error,
   onQuestionPress,
 }: QuestionListProps) {
-  const convertedQuestions: Question[] = questions.map((q) => ({
-    id: q.questionAssignmentId || "",
-    date: formatDate(q.dueAt || q.sentAt || ""),
-    author: familyRoleToKo(q.familyRole || "PARENT"),
-    authorAvatar: getRoleEmoji(q.familyRole || "PARENT"),
-    question: q.questionContent,
-    status: q.state === "ANSWERED" ? "answered" : "pending",
-    questionAssignmentId: q.questionAssignmentId,
-    questionInstanceId: q.questionInstanceId,
-  }));
+  const convertedQuestions: Question[] = questions.map((q) => {
+    const { icon, text } = getRoleIconAndText(q.familyRole, q.gender);
+    return {
+      id: q.questionAssignmentId || "",
+      date: formatDate(q.dueAt || q.sentAt || ""),
+      author: text,
+      authorAvatar: icon,
+      question: q.questionContent,
+      status: q.state === "ANSWERED" ? "answered" : "pending",
+      questionAssignmentId: q.questionAssignmentId,
+      questionInstanceId: q.questionInstanceId,
+    };
+  });
 
   if (loading) {
     return (

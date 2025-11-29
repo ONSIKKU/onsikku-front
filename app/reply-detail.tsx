@@ -1,6 +1,6 @@
 import { Answer, Comment, createComment, deleteAnswer, deleteComment, getMyPage, getQuestionInstanceDetails, setAccessToken, updateAnswer, updateComment } from "@/utils/api";
 import { getItem } from "@/utils/AsyncStorage";
-import { familyRoleToKo } from "@/utils/labels";
+import { getRoleIconAndText } from "@/utils/labels";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -62,7 +62,8 @@ const FeedCard = ({
   onDelete: () => void;
 }) => {
   const familyRole = answer.member?.familyRole || answer.familyRole || "PARENT";
-  const roleName = familyRoleToKo(familyRole);
+  const gender = answer.member?.gender || answer.gender;
+  const { text: roleName } = getRoleIconAndText(familyRole, gender);
   const timeAgo = answer.createdAt ? formatTimeAgo(answer.createdAt) : "";
   const profileImageUrl = answer.member?.profileImageUrl || null;
 
@@ -91,7 +92,7 @@ const FeedCard = ({
             />
           ) : (
             <View className="w-10 h-10 rounded-full bg-orange-100 items-center justify-center">
-              <Ionicons name="person" size={20} color="#FB923C" />
+              <Text className="text-xl">{getRoleIconAndText(familyRole, gender).icon}</Text>
             </View>
           )}
           <View>
@@ -155,7 +156,8 @@ const CommentCard = ({
   onReply: () => void;
 }) => {
   const familyRole = comment.member?.familyRole || "PARENT";
-  const roleName = familyRoleToKo(familyRole);
+  const gender = comment.member?.gender;
+  const { text: roleName } = getRoleIconAndText(familyRole, gender);
   const timeAgo = comment.createdAt ? formatTimeAgo(comment.createdAt) : "";
   const profileImageUrl = comment.member?.profileImageUrl || null;
 
@@ -169,7 +171,7 @@ const CommentCard = ({
           />
         ) : (
           <View className="w-8 h-8 rounded-full bg-orange-100 items-center justify-center">
-            <Ionicons name="person" size={16} color="#FB923C" />
+            <Text className="text-base">{getRoleIconAndText(familyRole, gender).icon}</Text>
           </View>
         )}
         <View className="flex-1">
@@ -598,7 +600,7 @@ export default function ReplyDetailScreen() {
                 {replyingToComment && (
                   <View className="bg-orange-50 p-2 rounded-lg mb-3">
                     <Text className="text-xs text-gray-600">
-                      {familyRoleToKo(replyingToComment.member?.familyRole || "PARENT")}님에게 답글
+                      {getRoleIconAndText(replyingToComment.member?.familyRole, replyingToComment.member?.gender).text}님에게 답글
                     </Text>
                   </View>
                 )}
