@@ -588,6 +588,7 @@ export type Comment = {
   createdAt: string;
   updatedAt: string;
   parent?: Comment;
+  member?: QuestionMember;
 };
 
 export type CommentResponse = {

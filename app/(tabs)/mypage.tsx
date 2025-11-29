@@ -1,12 +1,26 @@
 import LogoutButton from "@/components/mypage/LogoutButton";
 import ProfileSection from "@/components/mypage/ProfileSection";
-import { deleteMember, getMyPage, logout, MypageResponse, patchMyPage, setAccessToken } from "@/utils/api";
+import {
+  deleteMember,
+  getMyPage,
+  logout,
+  MypageResponse,
+  patchMyPage,
+  setAccessToken,
+} from "@/utils/api";
 import { getItem, removeItem } from "@/utils/AsyncStorage";
 import { genderToKo, getRoleIconAndText } from "@/utils/labels";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import { Alert, Pressable, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  Pressable,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Page() {
@@ -105,31 +119,27 @@ export default function Page() {
   };
 
   const onDeleteAccount = () => {
-    Alert.alert(
-      "회원 탈퇴",
-      "회원 탈퇴를 진행하시겠어요? 답변은 soft delete, 기타 데이터는 삭제됩니다.",
-      [
-        { text: "취소", style: "cancel" },
-        {
-          text: deleting ? "진행중" : "탈퇴",
-          style: "destructive",
-          onPress: async () => {
-            if (deleting) return;
-            try {
-              setDeleting(true);
-              await deleteMember();
-              await removeItem("accessToken");
-              await removeItem("registrationToken");
-              router.replace("/");
-            } catch (e: any) {
-              Alert.alert("오류", e?.message || "회원 탈퇴에 실패했습니다");
-            } finally {
-              setDeleting(false);
-            }
-          },
+    Alert.alert("회원 탈퇴", "정말 탈퇴하시겠습니까?", [
+      { text: "취소", style: "cancel" },
+      {
+        text: deleting ? "진행중" : "탈퇴",
+        style: "destructive",
+        onPress: async () => {
+          if (deleting) return;
+          try {
+            setDeleting(true);
+            await deleteMember();
+            await removeItem("accessToken");
+            await removeItem("registrationToken");
+            router.replace("/");
+          } catch (e: any) {
+            Alert.alert("오류", e?.message || "회원 탈퇴에 실패했습니다");
+          } finally {
+            setDeleting(false);
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   if (loading) {
@@ -174,8 +184,6 @@ export default function Page() {
     gender: data?.gender,
   };
 
-
-
   return (
     <SafeAreaView className="flex-1 bg-onsikku-main-orange">
       <ScrollView
@@ -195,7 +203,9 @@ export default function Page() {
                   className="flex-row items-center px-3 py-1.5 bg-orange-50 rounded-lg"
                 >
                   <Ionicons name="create-outline" size={16} color="#FB923C" />
-                  <Text className="text-sm font-medium text-orange-600 ml-1">수정</Text>
+                  <Text className="text-sm font-medium text-orange-600 ml-1">
+                    수정
+                  </Text>
                 </TouchableOpacity>
               </View>
               <View className="gap-3">
@@ -204,33 +214,45 @@ export default function Page() {
                     <Ionicons name="people-outline" size={20} color="#FB923C" />
                     <Text className="text-sm text-gray-600 ml-2">가족명</Text>
                   </View>
-                  <Text className="text-sm font-medium text-gray-800">{data?.familyName}</Text>
+                  <Text className="text-sm font-medium text-gray-800">
+                    {data?.familyName}
+                  </Text>
                 </View>
                 <View className="flex-row items-center justify-between py-2 border-b border-gray-100">
                   <View className="flex-row items-center">
                     <Ionicons name="people-outline" size={20} color="#FB923C" />
-                    <Text className="text-sm text-gray-600 ml-2">가족 내 역할</Text>
+                    <Text className="text-sm text-gray-600 ml-2">
+                      가족 내 역할
+                    </Text>
                   </View>
-                  <Text className="text-sm font-medium text-gray-800">{getRoleIconAndText(data?.familyRole, data?.gender).text}</Text>
+                  <Text className="text-sm font-medium text-gray-800">
+                    {getRoleIconAndText(data?.familyRole, data?.gender).text}
+                  </Text>
                 </View>
                 <View className="flex-row items-center justify-between py-2 border-b border-gray-100">
                   <View className="flex-row items-center">
-                    <Ionicons name="calendar-outline" size={20} color="#FB923C" />
+                    <Ionicons
+                      name="calendar-outline"
+                      size={20}
+                      color="#FB923C"
+                    />
                     <Text className="text-sm text-gray-600 ml-2">생년월일</Text>
                   </View>
-                  <Text className="text-sm font-medium text-gray-800">{data?.birthDate ?? "-"}</Text>
+                  <Text className="text-sm font-medium text-gray-800">
+                    {data?.birthDate ?? "-"}
+                  </Text>
                 </View>
                 <View className="flex-row items-center justify-between py-2">
                   <View className="flex-row items-center">
                     <Ionicons name="person-outline" size={20} color="#FB923C" />
                     <Text className="text-sm text-gray-600 ml-2">성별</Text>
                   </View>
-                  <Text className="text-sm font-medium text-gray-800">{genderToKo(data?.gender)}</Text>
+                  <Text className="text-sm font-medium text-gray-800">
+                    {genderToKo(data?.gender)}
+                  </Text>
                 </View>
               </View>
             </View>
-
-
 
             {/* 설정 카드 */}
             <View className="bg-white w-full p-5 rounded-3xl shadow-sm">
@@ -238,7 +260,11 @@ export default function Page() {
               <View className="gap-3">
                 <View className="flex-row items-center justify-between py-2">
                   <View className="flex-row items-center flex-1">
-                    <Ionicons name="notifications-outline" size={20} color="#FB923C" />
+                    <Ionicons
+                      name="notifications-outline"
+                      size={20}
+                      color="#FB923C"
+                    />
                     <Text className="text-sm text-gray-800 ml-2">알림</Text>
                   </View>
                   <Pressable
@@ -248,8 +274,16 @@ export default function Page() {
                       data?.alarmEnabled ? "bg-orange-100" : "bg-gray-100"
                     }`}
                   >
-                    <Text className={`text-xs font-medium ${data?.alarmEnabled ? "text-orange-600" : "text-gray-600"}`}>
-                      {updating ? "처리 중..." : data?.alarmEnabled ? "켜짐" : "꺼짐"}
+                    <Text
+                      className={`text-xs font-medium ${
+                        data?.alarmEnabled ? "text-orange-600" : "text-gray-600"
+                      }`}
+                    >
+                      {updating
+                        ? "처리 중..."
+                        : data?.alarmEnabled
+                        ? "켜짐"
+                        : "꺼짐"}
                     </Text>
                   </Pressable>
                 </View>
@@ -257,8 +291,12 @@ export default function Page() {
                   <View className="flex-row items-center flex-1">
                     <Ionicons name="key-outline" size={20} color="#FB923C" />
                     <View className="ml-2">
-                      <Text className="text-sm text-gray-800">가족 초대코드</Text>
-                      <Text className="text-xs text-gray-500 mt-0.5 font-mono">{data?.familyInvitationCode || "-"}</Text>
+                      <Text className="text-sm text-gray-800">
+                        가족 초대코드
+                      </Text>
+                      <Text className="text-xs text-gray-500 mt-0.5 font-mono">
+                        {data?.familyInvitationCode || "-"}
+                      </Text>
                     </View>
                   </View>
                   <Pressable
@@ -271,8 +309,6 @@ export default function Page() {
                 </View>
               </View>
             </View>
-
-
 
             <LogoutButton onPress={onLogout} />
 

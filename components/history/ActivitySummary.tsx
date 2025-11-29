@@ -56,10 +56,11 @@ export default function ActivitySummary({ questions, year, month }: ActivitySumm
         // 병렬로 답변 조회 (성능 최적화)
         const answerPromises = answeredQuestions.map(async (q) => {
           try {
-            const answers = await getAnswers(q.questionAssignmentId);
+            if (!q.questionInstanceId) return 0;
+            const answers = await getAnswers(q.questionInstanceId);
             return answers.length;
           } catch (e) {
-            console.error(`[답변 수 조회 실패] ${q.questionAssignmentId}`, e);
+            console.error(`[답변 수 조회 실패] ${q.questionInstanceId}`, e);
             return 0;
           }
         });

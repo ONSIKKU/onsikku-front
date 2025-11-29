@@ -299,7 +299,21 @@ export default function Page() {
                     style={{ width: ITEM_WIDTH, paddingHorizontal: 8 }}
                     key={index}
                   >
-                    <RecentAnswers {...item} roleIcon={item.roleIcon} />
+                    <RecentAnswers
+                      {...item}
+                      roleIcon={item.roleIcon}
+                      onPress={() => {
+                        if (item.questionInstanceId) {
+                          router.push({
+                            pathname: "/reply-detail",
+                            params: {
+                              questionInstanceId: item.questionInstanceId,
+                              question: item.question,
+                            },
+                          });
+                        }
+                      }}
+                    />
                   </View>
                 ))}
               </ScrollView>

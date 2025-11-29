@@ -1,11 +1,11 @@
-import { Heart } from "lucide-react-native";
-import { Text, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 
 interface RecentAnswersProps {
   roleName: string;
   date: string;
   content: string;
   roleIcon: string;
+  onPress?: () => void;
 }
 
 export default function RecentAnswers({
@@ -13,9 +13,14 @@ export default function RecentAnswers({
   date,
   content,
   roleIcon,
+  onPress,
 }: RecentAnswersProps) {
   return (
-    <View className="bg-white p-5 rounded-2xl shadow-sm border border-orange-100">
+    <TouchableOpacity 
+      className="bg-white p-5 rounded-2xl shadow-sm border border-orange-100"
+      onPress={onPress}
+      activeOpacity={0.7}
+    >
       <View className="flex flex-row items-center justify-between mb-3">
         <View className="flex-row items-center gap-2">
           <View className="w-8 h-8 rounded-full bg-orange-100 items-center justify-center">
@@ -25,13 +30,9 @@ export default function RecentAnswers({
         </View>
         <Text className="text-xs text-gray-500">{date}</Text>
       </View>
-      <Text className="font-sans text-sm text-gray-700 leading-5 mb-3" numberOfLines={2}>
+      <Text className="font-sans text-sm text-gray-700 leading-5" numberOfLines={3}>
         {content}
       </Text>
-      <View className="flex flex-row gap-2 items-center">
-        <Heart size={16} fill={"#EB523F"} color={"#EB523F"} />
-        <Text className="text-xs text-gray-500">👍</Text>
-      </View>
-    </View>
+    </TouchableOpacity>
   );
 }
