@@ -2,20 +2,27 @@ import RecentAnswers from "@/components/RecentAnswers";
 import TodayQuestion from "@/components/TodayQuestion";
 import TodayRespondent from "@/components/TodayRespondent";
 import {
-    Answer,
-    apiFetch,
-    getMyPage,
-    getRecentAnswers,
-    QuestionAssignment,
-    QuestionResponse,
-    setAccessToken
+  Answer,
+  apiFetch,
+  getMyPage,
+  getRecentAnswers,
+  QuestionAssignment,
+  QuestionResponse,
+  setAccessToken,
 } from "@/utils/api";
 import { getItem } from "@/utils/AsyncStorage";
 import { getRoleIconAndText } from "@/utils/labels";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, Dimensions, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  Dimensions,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const { width } = Dimensions.get("window");
@@ -29,12 +36,16 @@ export default function Page() {
   const [questions, setQuestions] = useState<QuestionAssignment[]>([]);
   const [error, setError] = useState<string>("");
   const [questionContent, setQuestionContent] = useState<string>("");
-  const [questionInstanceId, setQuestionInstanceId] = useState<string | null>(null);
+  const [questionInstanceId, setQuestionInstanceId] = useState<string | null>(
+    null
+  );
   const [recentAnswers, setRecentAnswers] = useState<Answer[]>([]);
   const [loadingAnswers, setLoadingAnswers] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [currentUserRole, setCurrentUserRole] = useState<string | null>(null);
-  const [currentUserGender, setCurrentUserGender] = useState<string | null>(null);
+  const [currentUserGender, setCurrentUserGender] = useState<string | null>(
+    null
+  );
 
   const fetchTodayQuestions = useCallback(async () => {
     try {
@@ -49,20 +60,25 @@ export default function Page() {
           method: "GET",
         });
         console.log("[홈 화면] API 응답 전체:", response);
-        
+
         // questionDetails에서 questionAssignments 가져오기
-        const questionAssignments = response.questionDetails?.questionAssignments || [];
+        const questionAssignments =
+          response.questionDetails?.questionAssignments || [];
         setQuestions(questionAssignments);
         console.log("[홈 화면] questionAssignments:", questionAssignments);
-        
+
         // 질문 내용과 인스턴스 ID는 questionDetails에서 가져오기
         if (response.questionDetails) {
           const content = response.questionDetails.questionContent || "";
-          const instanceId = response.questionDetails.questionInstanceId || null;
+          const instanceId =
+            response.questionDetails.questionInstanceId || null;
           setQuestionContent(content);
           setQuestionInstanceId(instanceId);
           console.log("[홈 화면] 질문 내용 (questionDetails):", content);
-          console.log("[홈 화면] questionInstanceId (questionDetails):", instanceId);
+          console.log(
+            "[홈 화면] questionInstanceId (questionDetails):",
+            instanceId
+          );
         }
       } else {
         setError("로그인이 필요합니다");
@@ -148,13 +164,17 @@ export default function Page() {
   };
 
   const recentAnswersData = recentAnswers.map((answer) => {
-    const familyRole = answer.member?.familyRole || answer.familyRole || "PARENT";
+    const familyRole =
+      answer.member?.familyRole || answer.familyRole || "PARENT";
     const gender = answer.member?.gender || answer.gender;
     const questionContent = answer.questionContent || "";
     const questionAssignmentId = answer.questionAssignment?.id || "";
     const questionInstanceId = answer.questionInstanceId || "";
-    
-    const { text: roleText, icon: roleIcon } = getRoleIconAndText(familyRole, gender);
+
+    const { text: roleText, icon: roleIcon } = getRoleIconAndText(
+      familyRole,
+      gender
+    );
 
     return {
       roleName: roleText,
@@ -171,15 +191,16 @@ export default function Page() {
   const currentUserQuestion = currentUserId
     ? questions.find((q) => q.member?.id === currentUserId)
     : null;
-  
+
   // 현재 사용자에게 할당된 질문이 없으면 첫 번째 질문 사용 (호환성)
   const currentQuestion = currentUserQuestion || questions[0];
   // questionContent는 state에서 가져오기 (questionDetails에서 가져온 값)
   // 질문 내용이 없거나 빈 문자열일 때 "질문이 없습니다" 표시
-  const displayQuestionContent = (questionContent && questionContent.trim() !== "") 
-    ? questionContent 
-    : "질문이 없습니다";
-  
+  const displayQuestionContent =
+    questionContent && questionContent.trim() !== ""
+      ? questionContent
+      : "질문이 없습니다";
+
   // 답변 대기 중인 사람 수 (SENT 상태이고 아직 답변 안 한 경우)
   const pendingCount = questions.filter(
     (q) => q.state === "SENT" && !q.answeredAt
@@ -187,13 +208,15 @@ export default function Page() {
 
   // 질문 대상 (subject) - 현재 사용자 정보 사용
   const questionSubject = currentUserQuestion?.member || null;
-  
+
   // 현재 사용자에게 할당된 질문이 있는지 확인
   const hasUserAssignment = !!currentUserQuestion;
-  
+
   // 현재 사용자가 오늘의 질문에 답변했는지 확인
   // state가 "ANSWERED"일 때만 답변 완료로 표시
-  const hasAnsweredToday = currentUserQuestion?.state === "ANSWERED" || currentQuestion?.state === "ANSWERED";
+  const hasAnsweredToday =
+    currentUserQuestion?.state === "ANSWERED" ||
+    currentQuestion?.state === "ANSWERED";
 
   // questionInstanceId: state에서 가져오기 (questionDetails.questionInstanceId)
   // 새로운 API 스펙에서는 questionDetails.questionInstanceId를 사용
@@ -205,7 +228,10 @@ export default function Page() {
   console.log("[홈 화면] questionInstanceId:", displayQuestionInstanceId);
   console.log("[홈 화면] questionContent:", displayQuestionContent);
   console.log("[홈 화면] currentQuestion state:", currentQuestion?.state);
-  console.log("[홈 화면] currentUserQuestion state:", currentUserQuestion?.state);
+  console.log(
+    "[홈 화면] currentUserQuestion state:",
+    currentUserQuestion?.state
+  );
   console.log("[홈 화면] 답변 완료 여부:", hasAnsweredToday);
   console.log("[홈 화면] answeredAt:", currentQuestion?.answeredAt);
 
@@ -232,19 +258,19 @@ export default function Page() {
         contentContainerStyle={{ padding: 16, paddingBottom: 32, gap: 20 }}
         showsVerticalScrollIndicator={false}
       >
-        <TodayRespondent 
+        <TodayRespondent
           subject={questionSubject}
           gender={currentUserGender}
           pendingCount={pendingCount}
         />
-        <TodayQuestion 
+        <TodayQuestion
           question={displayQuestionContent}
           questionAssignmentId={currentQuestion?.id}
           questionInstanceId={displayQuestionInstanceId || undefined}
           isUserAssignment={hasUserAssignment}
           isAnswered={hasAnsweredToday}
         />
-        
+
         {/* 댓글 작성 테스트 버튼 */}
         {displayQuestionInstanceId && (
           <TouchableOpacity
@@ -269,20 +295,23 @@ export default function Page() {
         )}
         <View className="bg-white w-full p-5 rounded-3xl shadow-sm">
           <View className="flex flex-row justify-between items-center mb-4">
-            <Text className="font-bold text-lg text-gray-800">지난 답변 둘러보기</Text>
-            <Text className="font-medium text-sm text-onsikku-dark-orange">
-              더보기
+            <Text className="font-bold text-lg text-gray-800">
+              지난 답변 둘러보기
             </Text>
           </View>
 
           {loadingAnswers ? (
             <View className="w-full items-center justify-center py-8">
               <ActivityIndicator size="small" color="#FB923C" />
-              <Text className="text-gray-500 mt-2 text-sm">답변을 불러오는 중...</Text>
+              <Text className="text-gray-500 mt-2 text-sm">
+                답변을 불러오는 중...
+              </Text>
             </View>
           ) : recentAnswersData.length === 0 ? (
             <View className="w-full items-center justify-center py-8">
-              <Text className="text-gray-500 text-sm">아직 답변이 없습니다</Text>
+              <Text className="text-gray-500 text-sm">
+                아직 답변이 없습니다
+              </Text>
             </View>
           ) : (
             <>
