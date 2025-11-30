@@ -9,6 +9,7 @@ interface TodayQuestionProps {
   questionInstanceId?: string; // 질문 인스턴스 ID (답변 상세 페이지로 이동 시 필요)
   isUserAssignment?: boolean; // 현재 사용자에게 할당된 질문인지
   isAnswered?: boolean; // 답변 완료 여부
+  isEmpty?: boolean;
 }
 
 export default function TodayQuestion({ 
@@ -16,7 +17,8 @@ export default function TodayQuestion({
   questionAssignmentId, 
   questionInstanceId,
   isUserAssignment = false, 
-  isAnswered = false 
+  isAnswered = false,
+  isEmpty = false,
 }: TodayQuestionProps) {
   const handlePress = () => {
     if (questionAssignmentId && isUserAssignment && !isAnswered) {
@@ -68,10 +70,30 @@ export default function TodayQuestion({
   };
 
   // 질문이 없는지 확인
-  const hasNoQuestion = !question || question.trim() === "" || question === "질문이 없습니다";
+  const hasNoQuestion = isEmpty || !question || question.trim() === "" || question === "질문이 없습니다" || question === "새로운 질문을 기다려 주세요";
   
   // 현재 사용자에게 할당된 질문이고, 질문 내용이 있고, 아직 답변하지 않았으면 활성화
   const isActive = !hasNoQuestion && isUserAssignment && !!question && !!questionAssignmentId && !isAnswered && question !== "오늘 하루 어떠셨나요?\n위로받고 싶은 일이 있었나요?";
+
+  if (hasNoQuestion) {
+    return (
+      <View className="bg-white w-full p-8 rounded-3xl shadow-sm items-center justify-center min-h-[280px] gap-4">
+        <View className="bg-orange-50 p-6 rounded-full">
+          <MessageCircle color="#FB923C" size={40} strokeWidth={1.5} />
+        </View>
+        <View className="items-center gap-2">
+          <Text className="font-bold text-xl text-gray-800 text-center">
+            새로운 질문을 기다려 주세요
+          </Text>
+          <View className="bg-gray-50 px-4 py-2 rounded-full mt-1">
+            <Text className="text-gray-500 text-center text-xs font-medium">
+              매일 밤 10시에 질문이 도착해요 🌙
+            </Text>
+          </View>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View className="bg-white w-full p-6 rounded-3xl shadow-sm">

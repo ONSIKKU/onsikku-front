@@ -18,6 +18,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
+  RefreshControl,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -33,6 +34,7 @@ export default function Page() {
   const router = useRouter();
   const [activeIndex, setActiveIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [questions, setQuestions] = useState<QuestionAssignment[]>([]);
   const [error, setError] = useState<string>("");
   const [questionContent, setQuestionContent] = useState<string>("");
@@ -55,17 +57,14 @@ export default function Page() {
       console.log("[액세스 토큰]", token || "토큰 없음");
       if (token) {
         setAccessToken(token);
-        // 새로운 API 스펙에 맞게 오늘의 질문 조회
         const response = await apiFetch<QuestionResponse>("/api/questions", {
           method: "GET",
         });
-        console.log("[홈 화면] API 응답 전체:", response);
 
         // questionDetails에서 questionAssignments 가져오기
         const questionAssignments =
           response.questionDetails?.questionAssignments || [];
         setQuestions(questionAssignments);
-        console.log("[홈 화면] questionAssignments:", questionAssignments);
 
         // 질문 내용과 인스턴스 ID는 questionDetails에서 가져오기
         if (response.questionDetails) {
@@ -74,11 +73,6 @@ export default function Page() {
             response.questionDetails.questionInstanceId || null;
           setQuestionContent(content);
           setQuestionInstanceId(instanceId);
-          console.log("[홈 화면] 질문 내용 (questionDetails):", content);
-          console.log(
-            "[홈 화면] questionInstanceId (questionDetails):",
-            instanceId
-          );
         }
       } else {
         setError("로그인이 필요합니다");
@@ -139,6 +133,21 @@ export default function Page() {
     }, [fetchTodayQuestions, fetchRecentAnswers])
   );
 
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([
+        fetchCurrentUser(),
+        fetchTodayQuestions(),
+        fetchRecentAnswers(),
+      ]);
+    } catch (e) {
+      console.error("새로고침 실패", e);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [fetchCurrentUser, fetchTodayQuestions, fetchRecentAnswers]);
+
   const handleScroll = (event: any) => {
     const scrollPosition = event.nativeEvent.contentOffset.x;
     const index = Math.round(scrollPosition / ITEM_WIDTH);
@@ -194,12 +203,14 @@ export default function Page() {
 
   // 현재 사용자에게 할당된 질문이 없으면 첫 번째 질문 사용 (호환성)
   const currentQuestion = currentUserQuestion || questions[0];
-  // questionContent는 state에서 가져오기 (questionDetails에서 가져온 값)
+
+  const isQuestionEmpty = !questionContent || questionContent.trim() === "";
+
   // 질문 내용이 없거나 빈 문자열일 때 "질문이 없습니다" 표시
   const displayQuestionContent =
     questionContent && questionContent.trim() !== ""
       ? questionContent
-      : "질문이 없습니다";
+      : "새로운 질문을 기다려 주세요";
 
   // 답변 대기 중인 사람 수 (SENT 상태이고 아직 답변 안 한 경우)
   const pendingCount = questions.filter(
@@ -221,19 +232,6 @@ export default function Page() {
   // questionInstanceId: state에서 가져오기 (questionDetails.questionInstanceId)
   // 새로운 API 스펙에서는 questionDetails.questionInstanceId를 사용
   const displayQuestionInstanceId = questionInstanceId;
-
-  // 디버깅: 질문 정보 확인
-  console.log("[홈 화면] 질문 개수:", questions.length);
-  console.log("[홈 화면] 현재 질문 ID:", currentQuestion?.id);
-  console.log("[홈 화면] questionInstanceId:", displayQuestionInstanceId);
-  console.log("[홈 화면] questionContent:", displayQuestionContent);
-  console.log("[홈 화면] currentQuestion state:", currentQuestion?.state);
-  console.log(
-    "[홈 화면] currentUserQuestion state:",
-    currentUserQuestion?.state
-  );
-  console.log("[홈 화면] 답변 완료 여부:", hasAnsweredToday);
-  console.log("[홈 화면] answeredAt:", currentQuestion?.answeredAt);
 
   if (loading) {
     return (
@@ -257,42 +255,32 @@ export default function Page() {
       <ScrollView
         contentContainerStyle={{ padding: 16, paddingBottom: 32, gap: 20 }}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#FB923C"]} // 안드로이드용 색상
+            tintColor="#FB923C" // iOS용 색상
+          />
+        }
       >
-        <TodayRespondent
-          subject={questionSubject}
-          gender={currentUserGender}
-          pendingCount={pendingCount}
-        />
+        {!isQuestionEmpty && (
+          <TodayRespondent
+            subject={questionSubject}
+            gender={currentUserGender}
+            pendingCount={pendingCount}
+          />
+        )}
         <TodayQuestion
           question={displayQuestionContent}
           questionAssignmentId={currentQuestion?.id}
           questionInstanceId={displayQuestionInstanceId || undefined}
           isUserAssignment={hasUserAssignment}
           isAnswered={hasAnsweredToday}
+          isEmpty={isQuestionEmpty}
         />
 
-        {/* 댓글 작성 테스트 버튼 */}
-        {displayQuestionInstanceId && (
-          <TouchableOpacity
-            className="bg-blue-400 p-4 rounded-2xl shadow-sm"
-            onPress={() => {
-              router.push({
-                pathname: "/reply-detail",
-                params: {
-                  questionInstanceId: displayQuestionInstanceId,
-                  question: displayQuestionContent,
-                },
-              });
-            }}
-          >
-            <View className="flex-row items-center justify-center gap-2">
-              <Ionicons name="chatbubble-outline" size={20} color="#1F2937" />
-              <Text className="text-base font-bold text-gray-800">
-                댓글 작성 테스트
-              </Text>
-            </View>
-          </TouchableOpacity>
-        )}
+
         <View className="bg-white w-full p-5 rounded-3xl shadow-sm">
           <View className="flex flex-row justify-between items-center mb-4">
             <Text className="font-bold text-lg text-gray-800">

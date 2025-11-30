@@ -11,6 +11,7 @@ import {
 import { getItem, removeItem } from "@/utils/AsyncStorage";
 import { genderToKo, getRoleIconAndText } from "@/utils/labels";
 import { Ionicons } from "@expo/vector-icons";
+import * as Clipboard from "expo-clipboard";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -87,6 +88,15 @@ export default function Page() {
       Alert.alert("오류", e?.message || "초대코드 재발급에 실패했습니다");
     } finally {
       setUpdating(false);
+    }
+  };
+
+  const copyInvitationCode = async () => {
+    if (data?.familyInvitationCode) {
+      await Clipboard.setStringAsync(data.familyInvitationCode);
+      Alert.alert("복사 완료", "초대코드가 클립보드에 복사되었습니다.");
+    } else {
+      Alert.alert("알림", "초대코드가 없습니다.");
     }
   };
 
@@ -299,13 +309,21 @@ export default function Page() {
                       </Text>
                     </View>
                   </View>
-                  <Pressable
-                    onPress={regenerateInvitation}
-                    disabled={updating}
-                    className="px-3 py-2 rounded-lg bg-orange-50"
-                  >
-                    <Ionicons name="refresh" size={16} color="#FB923C" />
-                  </Pressable>
+                  <View className="flex-row gap-2">
+                    <Pressable
+                      onPress={copyInvitationCode}
+                      className="px-3 py-2 rounded-lg bg-orange-50"
+                    >
+                      <Ionicons name="copy-outline" size={16} color="#FB923C" />
+                    </Pressable>
+                    <Pressable
+                      onPress={regenerateInvitation}
+                      disabled={updating}
+                      className="px-3 py-2 rounded-lg bg-orange-50"
+                    >
+                      <Ionicons name="refresh" size={16} color="#FB923C" />
+                    </Pressable>
+                  </View>
                 </View>
               </View>
             </View>
