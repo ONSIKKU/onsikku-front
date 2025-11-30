@@ -18,10 +18,15 @@ export default function Index() {
           // 토큰이 없으면 랜딩 화면 표시
           setLoading(false);
         }
-      } catch (e) {
-        console.error("[인증 체크 에러]", e);
-        setLoading(false);
+      } else {
+        // 토큰이 없으면 랜딩 페이지 유지 (아무것도 하지 않음)
       }
+    } catch (e) {
+      // ignore error
+    } finally {
+      setLoading(false);
+    }
+  };
     };
 
     checkAuth();

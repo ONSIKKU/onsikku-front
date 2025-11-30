@@ -32,12 +32,6 @@ export async function apiFetch<T>(path: string, init?: RequestInit & { _retry?: 
   const url = baseUrl + path;
   const headers = getHeaders(init?.headers as Record<string, string> | undefined);
   
-  console.log("[API 요청]", {
-    url,
-    method: init?.method || "GET",
-    hasToken: !!headers["Authorization"],
-  });
-  
   const res = await fetch(url, {
     ...init,
     headers,
@@ -45,7 +39,6 @@ export async function apiFetch<T>(path: string, init?: RequestInit & { _retry?: 
 
   // Handle 401 (Unauthorized) - Token Refresh Logic
   if (res.status === 401 && !init?._retry) {
-    console.log("[401 Unauthorized] 토큰 만료, 재발급 시도...");
     try {
       const storedRefreshToken = await getItem("refreshToken");
       if (!storedRefreshToken) {
@@ -55,8 +48,6 @@ export async function apiFetch<T>(path: string, init?: RequestInit & { _retry?: 
       // Call refreshToken logic
       // Note: We use the exported function below, ensuring it doesn't use apiFetch to avoid recursion
       const newTokens = await refreshToken(storedRefreshToken);
-
-      console.log("[토큰 재발급 성공]", "Access Token updated");
 
       // Update memory and storage
       setAccessToken(newTokens.accessToken);
@@ -71,7 +62,6 @@ export async function apiFetch<T>(path: string, init?: RequestInit & { _retry?: 
       return apiFetch<T>(path, { ...init, _retry: true });
 
     } catch (refreshError) {
-      console.error("[토큰 재발급 실패]", refreshError);
       // Clean up tokens
       setAccessToken(null);
       await removeItem("accessToken");
@@ -85,11 +75,6 @@ export async function apiFetch<T>(path: string, init?: RequestInit & { _retry?: 
   const json = text ? JSON.parse(text) : null;
 
   if (!res.ok) {
-    console.error("[API 에러]", {
-      status: res.status,
-      statusText: res.statusText,
-      response: json,
-    });
     const message = (json && (json.message || json.error)) || `HTTP ${res.status}`;
     throw new Error(message);
   }
@@ -161,7 +146,6 @@ export type SignupRequest = {
 
 // 회원가입 (JWT 불필요)
 export async function signup(payload: SignupRequest) {
-  console.log("[회원가입 요청]", payload);
   const url = baseUrl + "/api/auth/signup";
   const res = await fetch(url, {
     method: "POST",
@@ -176,22 +160,18 @@ export async function signup(payload: SignupRequest) {
 
   if (!res.ok) {
     const message = (json && (json.message || json.error)) || `HTTP ${res.status}`;
-    console.error("[회원가입 에러]", message);
     throw new Error(message);
   }
 
   const result = (json && (json.result ?? json)) as AuthResponse;
-  console.log("[회원가입 응답]", result);
   return result;
 }
 
 // 로그아웃
 export async function logout() {
-  console.log("[로그아웃 요청]");
   const response = await apiFetch<string>("/api/members/logout", {
     method: "POST",
   });
-  console.log("[로그아웃 응답]", response);
   return response;
 }
 
@@ -201,7 +181,6 @@ export type TokenRefreshRequest = {
 };
 
 export async function refreshToken(refreshToken: string) {
-  console.log("[토큰 재발급 요청]");
   const url = baseUrl + "/api/auth/refresh";
   const res = await fetch(url, {
     method: "POST",
@@ -216,12 +195,10 @@ export async function refreshToken(refreshToken: string) {
 
   if (!res.ok) {
     const message = (json && (json.message || json.error)) || `HTTP ${res.status}`;
-    console.error("[토큰 재발급 에러]", message);
     throw new Error(message);
   }
 
   const result = (json && (json.result ?? json)) as AuthResponse;
-  console.log("[토큰 재발급 응답]", result);
   return result;
 }
 
@@ -275,11 +252,9 @@ export type QuestionResponse = {
 
 // 오늘의 질문 조회
 export async function getTodayQuestions() {
-  console.log("[오늘의 질문 조회 요청]");
   const response = await apiFetch<QuestionResponse>("/api/questions", {
     method: "GET",
   });
-  console.log("[오늘의 질문 조회 응답]", response);
   // 새로운 API 스펙에서는 todayQuestionInstanceId가 제공되지 않음
   // 호환성을 위해 QuestionAssignment[] 반환
   return response.todayQuestionAssignments || [];
@@ -289,13 +264,11 @@ export async function getTodayQuestions() {
 // 새로운 API 스펙에서는 questionDetails.questionInstanceId를 사용
 // 이 함수는 더 이상 사용되지 않음 (호환성을 위해 유지)
 export async function getTodayQuestionInstanceId(): Promise<string | null> {
-  console.log("[오늘의 질문 인스턴스 ID 조회 요청]");
   const response = await apiFetch<QuestionResponse>("/api/questions", {
     method: "GET",
   });
   // 새로운 API 스펙에서는 questionDetails.questionInstanceId를 사용
   const instanceId = response.questionDetails?.questionInstanceId || null;
-  console.log("[오늘의 질문 인스턴스 ID 조회 응답]", instanceId);
   return instanceId;
 }
 
@@ -331,8 +304,6 @@ export type Answer = {
 
 // 답변 생성
 export async function createAnswer(payload: AnswerRequest) {
-  console.log("[답변 생성 요청]", payload);
-  console.log("[답변 생성] 현재 토큰:", inMemoryToken ? "설정됨" : "없음");
   
   // content가 문자열인 경우 TEXT 타입에 맞게 JsonNode 형식으로 변환
   let content = payload.content;
@@ -361,7 +332,6 @@ export async function createAnswer(payload: AnswerRequest) {
     method: "POST",
     body: JSON.stringify(requestPayload),
   });
-  console.log("[답변 생성 응답]", response);
   
   // 호환성을 위해 Answer 타입으로 변환
   return {
@@ -372,20 +342,17 @@ export async function createAnswer(payload: AnswerRequest) {
 
 // 질문 인스턴스 상세 조회 (답변 포함)
 export async function getQuestionInstanceDetails(questionInstanceId: string) {
-  console.log("[질문 인스턴스 상세 조회 요청]", { questionInstanceId });
   const response = await apiFetch<QuestionResponse>(
     `/api/questions/${questionInstanceId}`,
     {
       method: "GET",
     }
   );
-  console.log("[질문 인스턴스 상세 조회 응답]", response);
   return response;
 }
 
 // 특정 질문의 답변 조회 (questionInstanceId를 통해)
 export async function getAnswers(questionInstanceId: string) {
-  console.log("[답변 조회 요청]", { questionInstanceId });
   const questionData = await getQuestionInstanceDetails(questionInstanceId);
   
   // QuestionResponse의 questionDetails.answers에서 답변 추출
@@ -397,13 +364,11 @@ export async function getAnswers(questionInstanceId: string) {
     id: ans.answerId,
   }));
   
-  console.log("[답변 조회 응답]", convertedAnswers);
   return convertedAnswers;
 }
 
 // 답변 수정
 export async function updateAnswer(payload: AnswerRequest) {
-  console.log("[답변 수정 요청]", payload);
   const requestPayload = {
     answerId: payload.answerId,
     questionAssignmentId: payload.questionAssignmentId,
@@ -426,7 +391,6 @@ export async function updateAnswer(payload: AnswerRequest) {
     method: "PATCH",
     body: JSON.stringify(requestPayload),
   });
-  console.log("[답변 수정 응답]", response);
   
   // 호환성을 위해 Answer 타입으로 변환
   return {
@@ -437,7 +401,6 @@ export async function updateAnswer(payload: AnswerRequest) {
 
 // 답변 삭제
 export async function deleteAnswer(payload: AnswerRequest) {
-  console.log("[답변 삭제 요청]", payload);
   const requestPayload = {
     answerId: payload.answerId,
     questionAssignmentId: payload.questionAssignmentId,
@@ -447,7 +410,6 @@ export async function deleteAnswer(payload: AnswerRequest) {
     method: "DELETE",
     body: JSON.stringify(requestPayload),
   });
-  console.log("[답변 삭제 응답]", response);
   return response;
 }
 
@@ -473,7 +435,6 @@ export type QuestionDetails = {
 
 // 월별 질문 조회
 export async function getQuestionsByMonth(year: number, month: number) {
-  console.log("[월별 질문 조회 요청]", { year, month });
   const params = new URLSearchParams({
     year: year.toString(),
     month: month.toString(),
@@ -484,7 +445,6 @@ export async function getQuestionsByMonth(year: number, month: number) {
       method: "GET",
     }
   );
-  console.log("[월별 질문 조회 응답]", response);
   
   // 호환성을 위해 questionDetailsList를 questionDetails로 변환
   const questionDetailsList = response.questionDetailsList || [];
@@ -510,7 +470,6 @@ export async function getQuestionsByMonth(year: number, month: number) {
 
 // 최근 답변 조회 (최근 N개월의 질문에서 답변된 것들만)
 export async function getRecentAnswers(months: number = 1, limit: number = 10) {
-  console.log("[최근 답변 조회 요청]", { months, limit });
   
   const now = new Date();
   const allAnswers: Answer[] = [];
@@ -553,11 +512,11 @@ export async function getRecentAnswers(months: number = 1, limit: number = 10) {
             allAnswers.push(...convertedAnswers);
           }
         } catch (e) {
-          console.error(`[답변 조회 실패] ${question.questionInstanceId}`, e);
+          // ignore error
         }
       }
     } catch (e) {
-      console.error(`[월별 질문 조회 실패] ${year}-${month}`, e);
+      // ignore error
     }
   }
   
@@ -570,7 +529,6 @@ export async function getRecentAnswers(months: number = 1, limit: number = 10) {
   
   // 최대 limit개만 반환
   const result = allAnswers.slice(0, limit);
-  console.log("[최근 답변 조회 응답]", result);
   return result;
 }
 
@@ -597,32 +555,26 @@ export type CommentResponse = {
 
 // 댓글 생성
 export async function createComment(payload: CommentRequest) {
-  console.log("[댓글 생성 요청]", payload);
   const response = await apiFetch<CommentResponse>("/api/comments", {
     method: "POST",
     body: JSON.stringify(payload),
   });
-  console.log("[댓글 생성 응답]", response);
   return response;
 }
 
 // 댓글 수정
 export async function updateComment(payload: CommentRequest) {
-  console.log("[댓글 수정 요청]", payload);
   const response = await apiFetch<CommentResponse>("/api/comments", {
     method: "PATCH",
     body: JSON.stringify(payload),
   });
-  console.log("[댓글 수정 응답]", response);
   return response;
 }
 
 // 댓글 삭제
 export async function deleteComment(commentId: string) {
-  console.log("[댓글 삭제 요청]", { commentId });
   const response = await apiFetch<void>(`/api/comments/${commentId}`, {
     method: "DELETE",
   });
-  console.log("[댓글 삭제 응답]", response);
   return response;
 }

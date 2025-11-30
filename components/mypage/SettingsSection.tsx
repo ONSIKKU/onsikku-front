@@ -27,11 +27,14 @@ export default function SettingsSection() {
       <Text className="text-lg font-bold text-gray-800 mb-2">설정</Text>
       <View>
         {settings.map((item, index) => (
-          <SettingsItem
-            key={item.title}
-            {...item}
-            onPress={() => console.log(`Navigate to ${item.title}`)}
-          />
+        <SettingsItem
+          key={index}
+          icon={item.icon}
+          title={item.title}
+          onPress={() => {
+            // Navigate to item.title
+          }}
+        />
         ))}
       </View>
     </View>

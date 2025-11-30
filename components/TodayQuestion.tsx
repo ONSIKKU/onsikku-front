@@ -30,16 +30,11 @@ export default function TodayQuestion({
         },
       });
     } else {
-      console.log("[TodayQuestion] questionAssignmentId가 없거나 사용자에게 할당되지 않은 질문입니다");
+      // ignore
     }
   };
 
   const handleViewAnswer = () => {
-    console.log("[TodayQuestion] 내 답변 바로가기 클릭", { 
-      questionInstanceId, 
-      question,
-      questionAssignmentId 
-    });
     if (questionInstanceId) {
       router.push({
         pathname: "/reply-detail",
@@ -49,14 +44,8 @@ export default function TodayQuestion({
         },
       });
     } else {
-      console.warn("[TodayQuestion] questionInstanceId가 없습니다.", {
-        questionInstanceId,
-        questionAssignmentId,
-        question,
-      });
       // questionInstanceId가 없어도 questionAssignmentId가 있으면 시도
       if (questionAssignmentId) {
-        console.log("[TodayQuestion] questionAssignmentId로 시도:", questionAssignmentId);
         // 일단 questionAssignmentId를 questionInstanceId로 사용 (임시)
         router.push({
           pathname: "/reply-detail",

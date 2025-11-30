@@ -43,7 +43,6 @@ export default function SignUpClusterScreen() {
     // 완료 api 보내기
     const registrationToken = await getItem("registrationToken");
     if (!registrationToken) {
-      console.log("회원가입 토큰이 존재하지 않습니다.");
       Alert.alert("오류", "회원가입 토큰이 없습니다. 다시 로그인해주세요.");
       return;
     }
@@ -79,7 +78,6 @@ export default function SignUpClusterScreen() {
       // 회원가입 성공 후 메인 화면으로 이동
       router.replace("/(tabs)/home");
     } catch (err: any) {
-      console.error("[회원가입 에러]", err);
       Alert.alert("회원가입 실패", err?.message || "회원가입에 실패했습니다.");
     } finally {
       setSubmitting(false);
