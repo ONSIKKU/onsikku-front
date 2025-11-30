@@ -1,4 +1,4 @@
-import { getItem, setItem, removeItem } from "./AsyncStorage";
+import { getItem, removeItem, setItem } from "./AsyncStorage";
 
 export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
@@ -408,7 +408,7 @@ export async function updateAnswer(payload: AnswerRequest) {
     answerId: payload.answerId,
     questionAssignmentId: payload.questionAssignmentId,
     answerType: payload.answerType,
-    content: payload.content,
+    content: {"text": payload.content},
   };
   
   const response = await apiFetch<{
