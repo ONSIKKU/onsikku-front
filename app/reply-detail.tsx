@@ -32,7 +32,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 // Instagram 스타일 시간 포맷
 const formatTimeAgo = (dateString: string) => {
-  const date = new Date(dateString);
+  const date = new Date(dateString.endsWith("Z") ? dateString : dateString + "Z");
   const now = new Date();
   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
@@ -143,12 +143,14 @@ const FeedCard = ({
 const CommentCard = ({
   comment,
   isMyComment,
+  isReply = false,
   onEdit,
   onDelete,
   onReply,
 }: {
   comment: Comment;
   isMyComment: boolean;
+  isReply?: boolean;
   onEdit: () => void;
   onDelete: () => void;
   onReply: () => void;
@@ -160,17 +162,32 @@ const CommentCard = ({
   const profileImageUrl = comment.member?.profileImageUrl || null;
 
   return (
-    <View className="flex-row px-4 py-4 border-b border-gray-50 last:border-b-0 bg-white">
+    <View
+      className={`flex-row py-4 border-b border-gray-50 last:border-b-0 ${
+        isReply ? "pl-12 pr-4 bg-gray-50/50" : "px-4 bg-white"
+      }`}
+    >
+      {/* 대댓글일 경우 연결선 아이콘 표시 (선택 사항) */}
+      {isReply && (
+        <View className="absolute left-5 top-4 mr-1">
+          <Ionicons name="return-down-forward-outline" size={20} color="#D1D5DB" />
+        </View>
+      )}
+
       {/* 프로필 */}
       <View className="mr-3">
         {profileImageUrl ? (
           <Image
             source={{ uri: profileImageUrl }}
-            className="w-8 h-8 rounded-full"
+            className={`${isReply ? "w-7 h-7" : "w-9 h-9"} rounded-full`}
           />
         ) : (
-          <View className="w-8 h-8 rounded-full bg-gray-100 items-center justify-center">
-            <Text className="text-sm">
+          <View
+            className={`${
+              isReply ? "w-7 h-7" : "w-9 h-9"
+            } rounded-full bg-gray-100 items-center justify-center`}
+          >
+            <Text className={isReply ? "text-xs" : "text-sm"}>
               {getRoleIconAndText(familyRole, gender).icon}
             </Text>
           </View>
@@ -182,31 +199,40 @@ const CommentCard = ({
         {/* 이름 + 시간 + 액션 */}
         <View className="flex-row items-center justify-between mb-1">
           <View className="flex-row items-center gap-2">
-            <Text className="text-sm font-semibold text-gray-900">
+            <Text
+              className={`${
+                isReply ? "text-xs" : "text-sm"
+              } font-semibold text-gray-900`}
+            >
               {roleName}
             </Text>
             <Text className="text-xs text-gray-400">{timeAgo}</Text>
           </View>
-          
-          {isMyComment && (
-            <View className="flex-row items-center gap-3">
-              <TouchableOpacity onPress={onEdit}>
-                <Ionicons name="create-outline" size={16} color="#9CA3AF" />
-              </TouchableOpacity>
-              <TouchableOpacity onPress={onDelete}>
-                <Ionicons name="trash-outline" size={16} color="#EF4444" />
-              </TouchableOpacity>
-            </View>
-          )}
+
+          <View className="flex-row items-center gap-3">
+            {isMyComment && (
+              <>
+                <TouchableOpacity onPress={onEdit} hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }}>
+                  <Ionicons name="create-outline" size={16} color="#9CA3AF" />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={onDelete} hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }}>
+                  <Ionicons name="trash-outline" size={16} color="#EF4444" />
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
         </View>
 
         <Text className="text-sm text-gray-800 leading-5 mb-2">
           {comment.content}
         </Text>
 
-        <TouchableOpacity onPress={onReply}>
-          <Text className="text-xs font-medium text-gray-500">답글 달기</Text>
-        </TouchableOpacity>
+        {/* 대댓글에는 답글 달기 버튼 숨기기 (1뎁스만 허용할 경우) */}
+        {!isReply && (
+          <TouchableOpacity onPress={onReply} hitSlop={{ top: 5, bottom: 5, left: 5, right: 10 }}>
+            <Text className="text-xs font-medium text-gray-500">답글 달기</Text>
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );
@@ -507,6 +533,51 @@ export default function ReplyDetailScreen() {
     setReplyingToComment(comment);
   };
 
+  // 댓글을 계층형으로 정렬 및 렌더링
+  const renderComments = () => {
+    // 1. 부모 댓글(parent가 없는 것)만 필터링
+    const rootComments = comments.filter((c) => !c.parent);
+
+    return rootComments.map((rootComment) => {
+      const isMyRootComment = currentUserId === rootComment.member?.id;
+      
+      // 2. 해당 부모의 대댓글(parent.id가 일치하는 것) 필터링
+      const childComments = comments.filter(
+        (c) => c.parent?.id === rootComment.id
+      );
+
+      return (
+        <View key={rootComment.id}>
+          {/* 부모 댓글 */}
+          <CommentCard
+            comment={rootComment}
+            isMyComment={isMyRootComment}
+            isReply={false}
+            onEdit={() => handleEditComment(rootComment)}
+            onDelete={() => handleDeleteComment(rootComment)}
+            onReply={() => handleReplyComment(rootComment)}
+          />
+          
+          {/* 자식 댓글들 (대댓글) */}
+          {childComments.map((childComment) => {
+             const isMyChildComment = currentUserId === childComment.member?.id;
+             return (
+               <CommentCard
+                 key={childComment.id}
+                 comment={childComment}
+                 isMyComment={isMyChildComment}
+                 isReply={true}
+                 onEdit={() => handleEditComment(childComment)}
+                 onDelete={() => handleDeleteComment(childComment)}
+                 onReply={() => handleReplyComment(childComment)}
+               />
+             );
+          })}
+        </View>
+      );
+    });
+  };
+
   return (
     <SafeAreaView edges={["bottom"]} className="flex-1 bg-orange-50">
       <KeyboardAvoidingView 
@@ -581,19 +652,7 @@ export default function ReplyDetailScreen() {
                      <Text className="text-gray-400 text-sm">첫 번째 댓글을 남겨보세요!</Text>
                    </View>
                  ) : (
-                   comments.map((comment) => {
-                     const isMyComment = currentUserId === comment.member?.id;
-                     return (
-                       <CommentCard
-                         key={comment.id}
-                         comment={comment}
-                         isMyComment={isMyComment}
-                         onEdit={() => handleEditComment(comment)}
-                         onDelete={() => handleDeleteComment(comment)}
-                         onReply={() => handleReplyComment(comment)}
-                       />
-                     );
-                   })
+                   renderComments()
                  )}
                </View>
             </View>

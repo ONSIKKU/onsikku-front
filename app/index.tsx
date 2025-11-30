@@ -18,15 +18,13 @@ export default function Index() {
           // 토큰이 없으면 랜딩 화면 표시
           setLoading(false);
         }
-      } else {
-        // 토큰이 없으면 랜딩 페이지 유지 (아무것도 하지 않음)
+      } catch (e) {
+        console.error("Authentication check failed", e); // 에러 로깅 추가
+        setLoading(false); // 에러 발생 시에도 랜딩 화면 표시
+      } finally {
+        // 여기서는 setLoading(false)를 호출하지 않습니다.
+        // 토큰이 있을 경우 router.replace로 이동하고, 없을 경우 또는 에러 시 catch/else 블록에서 처리됩니다.
       }
-    } catch (e) {
-      // ignore error
-    } finally {
-      setLoading(false);
-    }
-  };
     };
 
     checkAuth();
