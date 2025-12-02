@@ -105,31 +105,14 @@ export default function TodayQuestion({
         </View>
       ) : isAnswered ? (
         <>
-          <View className="bg-gray-100 p-5 rounded-2xl mb-4">
-            <Text className="text-center text-base text-gray-700 font-medium">
-              오늘 답변을 완료했어요! 🎉
-            </Text>
-          </View>
-          <View className="flex-row items-center justify-center gap-2 mb-2">
-            <Text className="text-center text-sm text-gray-500">
-              오후 10시에 새로운 질문이 도착해요
-            </Text>
-          </View>
-          <TouchableOpacity
+          <GeneralButton
+            text="내 답변 보기"
+            isActive={true}
             onPress={handleViewAnswer}
-            activeOpacity={0.7}
-            className="flex-row items-center justify-center gap-1 mt-2"
-          >
-            <Text className="text-sm text-onsikku-dark-orange font-medium">
-              내 답변 보기
-            </Text>
-            <ChevronRight size={16} color="#F97315" />
-          </TouchableOpacity>
-          {!questionInstanceId && (
-            <Text className="text-center text-xs text-red-500 mt-2">
-              질문 정보가 없습니다. (디버깅)
-            </Text>
-          )}
+          />
+          <Text className="text-center text-sm text-gray-500 mt-3">
+            오늘 답변을 완료했어요! 🎉
+          </Text>
         </>
       ) : (
         <GeneralButton 

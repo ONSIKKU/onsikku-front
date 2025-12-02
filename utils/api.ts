@@ -286,6 +286,7 @@ export type AnswerRequest = {
   questionAssignmentId: string;
   answerType?: AnswerType; // 생성 시 필수, 수정/삭제 시 선택
   content?: any; // JsonNode (string or object), 생성/수정 시 필요
+  reactionType?: "LIKE" | "ANGRY" | "SAD" | "FUNNY";
 };
 
 export type Answer = {
@@ -536,6 +537,34 @@ export async function getRecentAnswers(months: number = 1, limit: number = 10) {
   // 최대 limit개만 반환
   const result = allAnswers.slice(0, limit);
   return result;
+}
+
+// 답변 반응 추가
+export async function addReaction(payload: {
+  answerId: string;
+  reactionType: "LIKE" | "ANGRY" | "SAD" | "FUNNY";
+}) {
+  const response = await apiFetch<{
+    answerId: string;
+    memberId: string;
+    familyRole: FamilyRole;
+    gender: "MALE" | "FEMALE";
+    createdAt: string;
+    content: any;
+    likeReactionCount: number;
+    angryReactionCount: number;
+    sadReactionCount: number;
+    funnyReactionCount: number;
+  }>("/api/questions/answers/reaction", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+
+  // 호환성을 위해 Answer 타입으로 변환
+  return {
+    ...response,
+    id: response.answerId,
+  } as Answer;
 }
 
 // Comment types

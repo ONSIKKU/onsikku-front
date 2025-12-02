@@ -15,9 +15,7 @@ export default function TodayRespondent({
   assignments,
   currentUserId,
 }: TodayRespondentProps) {
-  const pendingCount = assignments.filter(
-    (a) => a.state !== "ANSWERED"
-  ).length;
+  const pendingCount = assignments.filter((a) => a.state !== "ANSWERED").length;
 
   return (
     <View className="bg-white w-full p-6 rounded-3xl shadow-sm">
@@ -36,12 +34,12 @@ export default function TodayRespondent({
             member.familyRole,
             member.gender
           );
-          
+
           return (
             <View key={member.id} className="items-center w-[22%] mb-2">
               <RoleCard
                 icon={icon}
-                roleName={`${text}${isMe ? "\n(나)" : ""}`}
+                roleName={`${text}${isMe ? " (나)" : ""}`}
                 isSelected={isAnswered}
                 isPending={isAssigned && !isAnswered}
               />
@@ -54,14 +52,13 @@ export default function TodayRespondent({
         <View className="flex flex-row gap-2 justify-center items-center bg-orange-50 py-3 px-4 rounded-xl">
           <Clock4 size={18} color={"#FB923C"} />
           <Text className="text-onsikku-dark-orange font-medium text-sm">
-            {pendingCount}명이 답변 대기중이에요
+            답변을 기다리고 있어요
           </Text>
         </View>
       ) : (
         <View className="flex flex-row gap-2 justify-center items-center bg-orange-50 py-3 px-4 rounded-xl">
-          <Star size={18} color={"#FB923C"} />
           <Text className="text-onsikku-dark-orange font-medium text-sm">
-            모두 답변을 완료했어요!
+            답변이 완료됐어요!
           </Text>
         </View>
       )}

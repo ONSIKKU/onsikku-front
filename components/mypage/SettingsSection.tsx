@@ -31,6 +31,7 @@ export default function SettingsSection() {
           key={index}
           icon={item.icon}
           title={item.title}
+          subtitle={item.subtitle}
           onPress={() => {
             // Navigate to item.title
           }}

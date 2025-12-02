@@ -1,4 +1,5 @@
 import {
+  addReaction,
   Answer,
   Comment,
   createComment,
@@ -14,14 +15,16 @@ import { getItem } from "@/utils/AsyncStorage";
 import { getRoleIconAndText } from "@/utils/labels";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Animated,
   Image,
   KeyboardAvoidingView,
   Modal,
   Platform,
+  Pressable,
   ScrollView,
   Text,
   TextInput,
@@ -63,6 +66,30 @@ const formatTimeAgo = (dateString: string) => {
 interface ReplyDetailScreenProps {}
 
 // ----------------------------------------------------------------------
+// Reaction Button Component
+// ----------------------------------------------------------------------
+const ReactionButton = ({
+  icon,
+  count,
+  onPress,
+}: {
+  icon: string;
+  count: number;
+  onPress: () => void;
+}) => {
+  return (
+    <Pressable
+      onPress={onPress}
+      className="flex-row items-center gap-1 px-2 py-1"
+      style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+    >
+      <Text style={{ fontSize: 20 }}>{icon}</Text>
+      <Text className="text-xs text-gray-500 font-medium">{count}</Text>
+    </Pressable>
+  );
+};
+
+// ----------------------------------------------------------------------
 // Feed Card (Answer)
 // ----------------------------------------------------------------------
 const FeedCard = ({
@@ -70,11 +97,13 @@ const FeedCard = ({
   isMyAnswer,
   onEdit,
   onDelete,
+  onReaction,
 }: {
   answer: Answer;
   isMyAnswer: boolean;
   onEdit: () => void;
   onDelete: () => void;
+  onReaction: (type: "LIKE" | "ANGRY" | "SAD" | "FUNNY") => void;
 }) => {
   const familyRole = answer.member?.familyRole || answer.familyRole || "PARENT";
   const gender = answer.member?.gender || answer.gender;
@@ -120,9 +149,6 @@ const FeedCard = ({
             <TouchableOpacity onPress={onEdit} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
               <Ionicons name="create-outline" size={20} color="#9CA3AF" />
             </TouchableOpacity>
-            <TouchableOpacity onPress={onDelete} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-              <Ionicons name="trash-outline" size={20} color="#EF4444" />
-            </TouchableOpacity>
           </View>
         )}
       </View>
@@ -132,6 +158,30 @@ const FeedCard = ({
         <Text className="text-base text-gray-800 leading-7 font-sans">
           {contentText}
         </Text>
+      </View>
+
+      {/* 반응 버튼 영역 */}
+      <View className="flex-row justify-around px-4 pt-2 mt-2 border-t border-gray-50">
+        <ReactionButton 
+          icon="👍" 
+          count={answer.likeReactionCount} 
+          onPress={() => onReaction("LIKE")} 
+        />
+        <ReactionButton 
+          icon="😆" 
+          count={answer.funnyReactionCount} 
+          onPress={() => onReaction("FUNNY")} 
+        />
+        <ReactionButton 
+          icon="😭" 
+          count={answer.sadReactionCount} 
+          onPress={() => onReaction("SAD")} 
+        />
+        <ReactionButton 
+          icon="😡" 
+          count={answer.angryReactionCount} 
+          onPress={() => onReaction("ANGRY")} 
+        />
       </View>
     </View>
   );
@@ -292,7 +342,8 @@ export default function ReplyDetailScreen() {
 
         try {
           const myPage = await getMyPage();
-          setCurrentUserId(myPage.memberId || null);
+          // MypageResponse 구조 변경 대응
+          setCurrentUserId(myPage.member?.id || null);
         } catch (e) {
           console.error("[사용자 정보 조회 에러]", e);
         }
@@ -430,6 +481,33 @@ export default function ReplyDetailScreen() {
         },
       },
     ]);
+  };
+
+  const handleReaction = async (answer: Answer, reactionType: "LIKE" | "ANGRY" | "SAD" | "FUNNY") => {
+    try {
+      const token = await getItem("accessToken");
+      if (token) {
+        setAccessToken(token);
+      }
+
+      await addReaction({
+        answerId: answer.answerId,
+        reactionType,
+      });
+
+      // 화면 갱신 (재조회)
+      // 낙관적 업데이트보다는 정확성을 위해 재조회 사용 (반응 카운트는 서버에서 계산됨)
+      const questionData = await getQuestionInstanceDetails(questionInstanceId!);
+      const answerList = questionData.questionDetails?.answers || [];
+      const convertedAnswers: Answer[] = answerList.map((ans: any) => ({
+        ...ans,
+        id: ans.answerId,
+      }));
+      setAnswers(convertedAnswers);
+    } catch (e: any) {
+      console.error("[반응 추가 에러]", e);
+      Alert.alert("오류", e?.message || "반응을 남기지 못했습니다.");
+    }
   };
 
   const handleCreateComment = async () => {
@@ -629,6 +707,7 @@ export default function ReplyDetailScreen() {
                         isMyAnswer={isMyAnswer}
                         onEdit={() => handleEditAnswer(answer)}
                         onDelete={() => handleDeleteAnswer(answer)}
+                        onReaction={(type) => handleReaction(answer, type)}
                       />
                     );
                   })

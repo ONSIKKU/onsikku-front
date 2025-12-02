@@ -61,7 +61,7 @@ export default function SignUpClusterScreen() {
         gender,
         birthDate,
         profileImageUrl: uri || null,
-        familyName: familyMode === "CREATE" ? familyName : undefined,
+        familyName: familyMode === "CREATE" ? familyName : "",
         familyInvitationCode:
           familyMode === "JOIN" ? familyInvitationCode : undefined,
         familyMode,

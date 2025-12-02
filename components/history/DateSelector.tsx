@@ -7,6 +7,7 @@ interface DateSelectorProps {
   selectedMonth: number;
   onPrevMonth: () => void;
   onNextMonth: () => void;
+  onDatePress?: () => void;
 }
 
 export default function DateSelector({
@@ -14,6 +15,7 @@ export default function DateSelector({
   selectedMonth,
   onPrevMonth,
   onNextMonth,
+  onDatePress,
 }: DateSelectorProps) {
   return (
     <View className="bg-white w-full p-6 rounded-2xl shadow-sm">
@@ -25,12 +27,16 @@ export default function DateSelector({
         >
           <Ionicons name="chevron-back-outline" size={24} color="#F97315" />
         </Pressable>
-        <View className="flex-row items-center">
+        <Pressable
+          onPress={onDatePress}
+          className="flex-row items-center p-2"
+          style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
+        >
           <Ionicons name="time-outline" size={20} color="#F97315" />
           <Text className="text-base font-bold text-gray-800 ml-2">
             {selectedYear}년 {selectedMonth}월
           </Text>
-        </View>
+        </Pressable>
         <Pressable
           onPress={onNextMonth}
           className="p-2"
