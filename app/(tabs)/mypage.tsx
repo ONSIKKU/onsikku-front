@@ -207,7 +207,7 @@ export default function Page() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-onsikku-main-orange">
+    <SafeAreaView className="flex-1 bg-onsikku-main-orange" edges={["top"]}>
       <ScrollView
         contentContainerStyle={{ paddingBottom: 30, paddingTop: 20 }}
         showsVerticalScrollIndicator={false}
@@ -233,7 +233,7 @@ export default function Page() {
               <View className="gap-3">
                 <View className="flex-row items-center justify-between py-2 border-b border-gray-100">
                   <View className="flex-row items-center">
-                    <Ionicons name="people-outline" size={20} color="#FB923C" />
+                    <Ionicons name="home-outline" size={20} color="#FB923C" />
                     <Text className="text-sm text-gray-600 ml-2">가족명</Text>
                   </View>
                   <Text className="text-sm font-medium text-gray-800">
@@ -271,7 +271,11 @@ export default function Page() {
                 </View>
                 <View className="flex-row items-center justify-between py-2">
                   <View className="flex-row items-center">
-                    <Ionicons name="person-outline" size={20} color="#FB923C" />
+                    <Ionicons
+                      name="male-female-outline"
+                      size={20}
+                      color="#FB923C"
+                    />
                     <Text className="text-sm text-gray-600 ml-2">성별</Text>
                   </View>
                   <Text className="text-sm font-medium text-gray-800">
@@ -297,7 +301,11 @@ export default function Page() {
                     }`}
                   >
                     <View className="flex-row items-center">
-                      <Ionicons name="person-circle-outline" size={24} color="#FB923C" />
+                      <Ionicons
+                        name="person-circle-outline"
+                        size={24}
+                        color="#FB923C"
+                      />
                       <Text className="text-sm text-gray-600 ml-2">
                         {
                           getRoleIconAndText(member.familyRole, member.gender)
@@ -313,10 +321,10 @@ export default function Page() {
                     <Text className="text-sm font-medium text-gray-800">
                       {/* 이름이 따로 없으므로 역할로 대체하거나 추후 추가 */}
                       {member.familyRole === "GRANDPARENT"
-                         ? "조부모님" 
-                         : member.familyRole === "PARENT"
-                         ? "부모님"
-                         : "자녀"}
+                        ? "조부모님"
+                        : member.familyRole === "PARENT"
+                        ? "부모님"
+                        : "자녀"}
                     </Text>
                   </View>
                 ))}

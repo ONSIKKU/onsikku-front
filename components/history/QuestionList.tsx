@@ -42,10 +42,10 @@ export default function QuestionList({
   if (loading) {
     return (
       <View className="w-full">
-        <Text className="text-lg font-bold text-gray-800 mb-4">지난 질문들</Text>
+        <Text className="font-sans font-bold text-xl text-gray-900 mb-4">지난 질문들</Text>
         <View className="bg-white p-6 rounded-2xl shadow-sm items-center justify-center">
           <ActivityIndicator size="large" color="#F97315" />
-          <Text className="text-gray-500 mt-4">질문을 불러오는 중...</Text>
+          <Text className="font-sans text-gray-500 mt-4">질문을 불러오는 중...</Text>
         </View>
       </View>
     );
@@ -54,9 +54,9 @@ export default function QuestionList({
   if (error) {
     return (
       <View className="w-full">
-        <Text className="text-lg font-bold text-gray-800 mb-4">지난 질문들</Text>
+        <Text className="font-sans font-bold text-xl text-gray-900 mb-4">지난 질문들</Text>
         <View className="bg-white p-6 rounded-2xl shadow-sm">
-          <Text className="text-red-500 text-center">{error}</Text>
+          <Text className="font-sans text-red-500 text-center">{error}</Text>
         </View>
       </View>
     );
@@ -65,9 +65,9 @@ export default function QuestionList({
   if (convertedQuestions.length === 0) {
     return (
       <View className="w-full">
-        <Text className="text-lg font-bold text-gray-800 mb-4">지난 질문들</Text>
+        <Text className="font-sans font-bold text-xl text-gray-900 mb-4">지난 질문들</Text>
         <View className="bg-white p-6 rounded-2xl shadow-sm">
-          <Text className="text-gray-500 text-center">
+          <Text className="font-sans text-gray-500 text-center">
             이 기간에 질문이 없습니다.
           </Text>
         </View>
@@ -77,7 +77,7 @@ export default function QuestionList({
 
   return (
     <View className="w-full">
-      <Text className="text-lg font-bold text-gray-800 mb-4">지난 질문들</Text>
+      <Text className="font-sans font-bold text-xl text-gray-900 mb-4">지난 질문들</Text>
       <FlatList
         data={convertedQuestions}
         keyExtractor={(item) => item.id}

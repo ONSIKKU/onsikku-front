@@ -22,7 +22,7 @@ export interface Question {
 const Reaction = ({ icon, count }: { icon: any; count: number }) => (
   <View className="flex-row items-center mr-3">
     <Text style={{ fontSize: 16 }}>{icon}</Text>
-    <Text className="text-sm text-gray-500 ml-1">{count}</Text>
+    <Text className="font-sans text-sm text-gray-500 ml-1">{count}</Text>
   </View>
 );
 
@@ -39,27 +39,29 @@ export default function QuestionCard({
     <TouchableOpacity
       onPress={onPress}
       disabled={isPending || !onPress}
-      className={`w-full p-5 rounded-2xl shadow-sm ${
-        isPending ? "bg-gray-100" : "bg-white"
+      className={`w-full p-5 rounded-2xl shadow-sm border border-gray-100 ${
+        isPending ? "bg-gray-50" : "bg-white"
       }`}
     >
       <View className="flex-row justify-between items-start">
         <View className="flex-row items-center">
-          <Text className="text-sm font-bold text-orange-500 mr-2">
+          <Text className="font-sans text-sm font-bold text-orange-500 mr-2">
             {item.date}
           </Text>
           <Text style={{ fontSize: 18 }}>{item.authorAvatar}</Text>
-          <Text className="text-sm text-gray-700 ml-1">{item.author}</Text>
+          <Text className="font-sans text-sm text-gray-700 ml-1">{item.author}</Text>
         </View>
         {!isPending && (
-          <Ionicons name="chevron-forward-outline" size={20} color="gray" />
+          <Ionicons name="chevron-forward-outline" size={20} color="#D1D5DB" />
         )}
       </View>
 
-      <Text className="text-base text-gray-800 my-3">{item.question}</Text>
+      <Text className="font-sans text-base text-gray-900 my-3 leading-relaxed">
+        {item.question}
+      </Text>
 
       {isPending ? (
-        <Text className="text-sm text-gray-500">답변 대기 중</Text>
+        <Text className="font-sans text-sm text-gray-500">답변 대기 중</Text>
       ) : (
         <View className="flex-row">
           {item.reactions?.heart! > 0 && (

@@ -40,22 +40,7 @@ export default function RootLayout() {
           />
           <Stack.Screen
             name="reply"
-            options={({ navigation }) => ({
-              title: "🧡 답변 작성",
-              headerShown: true,
-              headerStyle: { backgroundColor: "#FFF5E9" },
-              headerTitleAlign: "center",
-              headerShadowVisible: false,
-              headerBackVisible: false,
-              headerLeft: () => (
-                <TouchableOpacity
-                  onPress={() => navigation.goBack()}
-                  style={{ marginLeft: 16 }}
-                >
-                  <Ionicons name="arrow-back" size={24} color="#1F2937" />
-                </TouchableOpacity>
-              ),
-            })}
+            options={{ headerShown: false }}
           />
           <Stack.Screen
             name="reply-detail"
@@ -78,22 +63,7 @@ export default function RootLayout() {
           />
           <Stack.Screen
             name="mypage-edit"
-            options={({ navigation }) => ({
-              title: "내 정보 수정",
-              headerShown: true,
-              headerStyle: { backgroundColor: "#FFF5E9" },
-              headerTitleAlign: "center",
-              headerShadowVisible: false,
-              headerBackVisible: false,
-              headerLeft: () => (
-                <TouchableOpacity
-                  onPress={() => navigation.goBack()}
-                  style={{ marginLeft: 16 }}
-                >
-                  <Ionicons name="arrow-back" size={24} color="#1F2937" />
-                </TouchableOpacity>
-              ),
-            })}
+            options={{ headerShown: false }}
           />
         </Stack>
       </View>

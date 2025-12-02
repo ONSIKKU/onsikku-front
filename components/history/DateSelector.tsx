@@ -33,7 +33,7 @@ export default function DateSelector({
           style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
         >
           <Ionicons name="time-outline" size={20} color="#F97315" />
-          <Text className="text-base font-bold text-gray-800 ml-2">
+          <Text className="font-sans text-lg font-bold text-gray-900 ml-2">
             {selectedYear}년 {selectedMonth}월
           </Text>
         </Pressable>

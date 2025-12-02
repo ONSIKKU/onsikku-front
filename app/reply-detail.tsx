@@ -14,12 +14,11 @@ import {
 import { getItem } from "@/utils/AsyncStorage";
 import { getRoleIconAndText } from "@/utils/labels";
 import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams } from "expo-router";
-import React, { useEffect, useRef, useState } from "react";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
-  Animated,
   Image,
   KeyboardAvoidingView,
   Modal,
@@ -35,7 +34,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 // Instagram 스타일 시간 포맷
 const formatTimeAgo = (dateString: string) => {
-  const date = new Date(dateString.endsWith("Z") ? dateString : dateString + "Z");
+  const date = new Date(
+    dateString.endsWith("Z") ? dateString : dateString + "Z"
+  );
   const now = new Date();
   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
@@ -84,7 +85,9 @@ const ReactionButton = ({
       style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
     >
       <Text style={{ fontSize: 20 }}>{icon}</Text>
-      <Text className="text-xs text-gray-500 font-medium">{count}</Text>
+      <Text className="font-sans text-xs text-gray-500 font-medium">
+        {count}
+      </Text>
     </Pressable>
   );
 };
@@ -136,17 +139,22 @@ const FeedCard = ({
           )}
           <View>
             <View className="flex-row items-center gap-1">
-              <Text className="text-base font-semibold text-gray-900">
+              <Text className="font-sans text-base font-semibold text-gray-900">
                 {roleName}
               </Text>
             </View>
-            <Text className="text-xs text-gray-400 mt-0.5">{timeAgo}</Text>
+            <Text className="font-sans text-xs text-gray-400 mt-0.5">
+              {timeAgo}
+            </Text>
           </View>
         </View>
 
         {isMyAnswer && (
           <View className="flex-row items-center gap-4">
-            <TouchableOpacity onPress={onEdit} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <TouchableOpacity
+              onPress={onEdit}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
               <Ionicons name="create-outline" size={20} color="#9CA3AF" />
             </TouchableOpacity>
           </View>
@@ -155,32 +163,32 @@ const FeedCard = ({
 
       {/* 내용 */}
       <View className="pb-2 px-4">
-        <Text className="text-base text-gray-800 leading-7 font-sans">
+        <Text className="font-sans text-base text-gray-900 leading-relaxed">
           {contentText}
         </Text>
       </View>
 
       {/* 반응 버튼 영역 */}
       <View className="flex-row justify-around px-4 pt-2 mt-2 border-t border-gray-50">
-        <ReactionButton 
-          icon="👍" 
-          count={answer.likeReactionCount} 
-          onPress={() => onReaction("LIKE")} 
+        <ReactionButton
+          icon="👍"
+          count={answer.likeReactionCount}
+          onPress={() => onReaction("LIKE")}
         />
-        <ReactionButton 
-          icon="😆" 
-          count={answer.funnyReactionCount} 
-          onPress={() => onReaction("FUNNY")} 
+        <ReactionButton
+          icon="😆"
+          count={answer.funnyReactionCount}
+          onPress={() => onReaction("FUNNY")}
         />
-        <ReactionButton 
-          icon="😭" 
-          count={answer.sadReactionCount} 
-          onPress={() => onReaction("SAD")} 
+        <ReactionButton
+          icon="😭"
+          count={answer.sadReactionCount}
+          onPress={() => onReaction("SAD")}
         />
-        <ReactionButton 
-          icon="😡" 
-          count={answer.angryReactionCount} 
-          onPress={() => onReaction("ANGRY")} 
+        <ReactionButton
+          icon="😡"
+          count={answer.angryReactionCount}
+          onPress={() => onReaction("ANGRY")}
         />
       </View>
     </View>
@@ -220,7 +228,11 @@ const CommentCard = ({
       {/* 대댓글일 경우 연결선 아이콘 표시 (선택 사항) */}
       {isReply && (
         <View className="absolute left-5 top-4 mr-1">
-          <Ionicons name="return-down-forward-outline" size={20} color="#D1D5DB" />
+          <Ionicons
+            name="return-down-forward-outline"
+            size={20}
+            color="#D1D5DB"
+          />
         </View>
       )}
 
@@ -252,20 +264,26 @@ const CommentCard = ({
             <Text
               className={`${
                 isReply ? "text-xs" : "text-sm"
-              } font-semibold text-gray-900`}
+              } font-sans font-semibold text-gray-900`}
             >
               {roleName}
             </Text>
-            <Text className="text-xs text-gray-400">{timeAgo}</Text>
+            <Text className="font-sans text-xs text-gray-400">{timeAgo}</Text>
           </View>
 
           <View className="flex-row items-center gap-3">
             {isMyComment && (
               <>
-                <TouchableOpacity onPress={onEdit} hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }}>
+                <TouchableOpacity
+                  onPress={onEdit}
+                  hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }}
+                >
                   <Ionicons name="create-outline" size={16} color="#9CA3AF" />
                 </TouchableOpacity>
-                <TouchableOpacity onPress={onDelete} hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }}>
+                <TouchableOpacity
+                  onPress={onDelete}
+                  hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }}
+                >
                   <Ionicons name="trash-outline" size={16} color="#EF4444" />
                 </TouchableOpacity>
               </>
@@ -273,14 +291,19 @@ const CommentCard = ({
           </View>
         </View>
 
-        <Text className="text-sm text-gray-800 leading-5 mb-2">
+        <Text className="font-sans text-sm text-gray-900 leading-relaxed mb-2">
           {comment.content}
         </Text>
 
         {/* 대댓글에는 답글 달기 버튼 숨기기 (1뎁스만 허용할 경우) */}
         {!isReply && (
-          <TouchableOpacity onPress={onReply} hitSlop={{ top: 5, bottom: 5, left: 5, right: 10 }}>
-            <Text className="text-xs font-medium text-gray-500">답글 달기</Text>
+          <TouchableOpacity
+            onPress={onReply}
+            hitSlop={{ top: 5, bottom: 5, left: 5, right: 10 }}
+          >
+            <Text className="font-sans text-xs font-medium text-gray-500">
+              답글 달기
+            </Text>
           </TouchableOpacity>
         )}
       </View>
@@ -292,6 +315,7 @@ const CommentCard = ({
 // Main Screen
 // ----------------------------------------------------------------------
 export default function ReplyDetailScreen() {
+  const router = useRouter();
   const params = useLocalSearchParams<{
     questionAssignmentId?: string;
     question?: string;
@@ -305,20 +329,22 @@ export default function ReplyDetailScreen() {
   const [questionContent, setQuestionContent] = useState<string>("");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [questionAssignments, setQuestionAssignments] = useState<any[]>([]);
-  
+
   // Edit Answer State
   const [editingAnswer, setEditingAnswer] = useState<Answer | null>(null);
   const [editText, setEditText] = useState("");
   const [showEditModal, setShowEditModal] = useState(false);
-  
+
   // Edit Comment State
   const [editingComment, setEditingComment] = useState<Comment | null>(null);
   const [editCommentText, setEditCommentText] = useState("");
   const [showEditCommentModal, setShowEditCommentModal] = useState(false);
-  
+
   // New Comment State
   const [newCommentText, setNewCommentText] = useState("");
-  const [replyingToComment, setReplyingToComment] = useState<Comment | null>(null);
+  const [replyingToComment, setReplyingToComment] = useState<Comment | null>(
+    null
+  );
 
   const questionInstanceId = params.questionInstanceId;
   const question = params.question || "질문 정보가 없습니다.";
@@ -348,12 +374,16 @@ export default function ReplyDetailScreen() {
           console.error("[사용자 정보 조회 에러]", e);
         }
 
-        const questionData = await getQuestionInstanceDetails(questionInstanceId);
-        
-        const content = questionData.questionDetails?.questionContent || question;
+        const questionData = await getQuestionInstanceDetails(
+          questionInstanceId
+        );
+
+        const content =
+          questionData.questionDetails?.questionContent || question;
         setQuestionContent(content);
 
-        const assignments = questionData.questionDetails?.questionAssignments || [];
+        const assignments =
+          questionData.questionDetails?.questionAssignments || [];
         setQuestionAssignments(assignments);
 
         const answerList = questionData.questionDetails?.answers || [];
@@ -401,7 +431,8 @@ export default function ReplyDetailScreen() {
     }
 
     try {
-      const questionAssignmentId = getQuestionAssignmentIdForAnswer(editingAnswer);
+      const questionAssignmentId =
+        getQuestionAssignmentIdForAnswer(editingAnswer);
       if (!questionAssignmentId) {
         Alert.alert("오류", "질문 할당 정보를 찾을 수 없습니다.");
         return;
@@ -419,7 +450,9 @@ export default function ReplyDetailScreen() {
         content: editText.trim(),
       });
 
-      const questionData = await getQuestionInstanceDetails(questionInstanceId!);
+      const questionData = await getQuestionInstanceDetails(
+        questionInstanceId!
+      );
       const answerList = questionData.questionDetails?.answers || [];
       const convertedAnswers: Answer[] = answerList.map((ans: any) => ({
         ...ans,
@@ -447,7 +480,8 @@ export default function ReplyDetailScreen() {
         style: "destructive",
         onPress: async () => {
           try {
-            const questionAssignmentId = getQuestionAssignmentIdForAnswer(answer);
+            const questionAssignmentId =
+              getQuestionAssignmentIdForAnswer(answer);
             if (!questionAssignmentId) {
               Alert.alert("오류", "질문 할당 정보를 찾을 수 없습니다.");
               return;
@@ -463,7 +497,9 @@ export default function ReplyDetailScreen() {
               questionAssignmentId,
             });
 
-            const questionData = await getQuestionInstanceDetails(questionInstanceId!);
+            const questionData = await getQuestionInstanceDetails(
+              questionInstanceId!
+            );
             const answerList = questionData.questionDetails?.answers || [];
             const convertedAnswers: Answer[] = answerList.map((ans: any) => ({
               ...ans,
@@ -483,7 +519,10 @@ export default function ReplyDetailScreen() {
     ]);
   };
 
-  const handleReaction = async (answer: Answer, reactionType: "LIKE" | "ANGRY" | "SAD" | "FUNNY") => {
+  const handleReaction = async (
+    answer: Answer,
+    reactionType: "LIKE" | "ANGRY" | "SAD" | "FUNNY"
+  ) => {
     try {
       const token = await getItem("accessToken");
       if (token) {
@@ -497,7 +536,9 @@ export default function ReplyDetailScreen() {
 
       // 화면 갱신 (재조회)
       // 낙관적 업데이트보다는 정확성을 위해 재조회 사용 (반응 카운트는 서버에서 계산됨)
-      const questionData = await getQuestionInstanceDetails(questionInstanceId!);
+      const questionData = await getQuestionInstanceDetails(
+        questionInstanceId!
+      );
       const answerList = questionData.questionDetails?.answers || [];
       const convertedAnswers: Answer[] = answerList.map((ans: any) => ({
         ...ans,
@@ -593,7 +634,9 @@ export default function ReplyDetailScreen() {
 
             await deleteComment(comment.id);
 
-            const questionData = await getQuestionInstanceDetails(questionInstanceId!);
+            const questionData = await getQuestionInstanceDetails(
+              questionInstanceId!
+            );
             const commentList = questionData.questionDetails?.comments || [];
             setComments(commentList as Comment[]);
 
@@ -618,7 +661,7 @@ export default function ReplyDetailScreen() {
 
     return rootComments.map((rootComment) => {
       const isMyRootComment = currentUserId === rootComment.member?.id;
-      
+
       // 2. 해당 부모의 대댓글(parent.id가 일치하는 것) 필터링
       const childComments = comments.filter(
         (c) => c.parent?.id === rootComment.id
@@ -635,21 +678,21 @@ export default function ReplyDetailScreen() {
             onDelete={() => handleDeleteComment(rootComment)}
             onReply={() => handleReplyComment(rootComment)}
           />
-          
+
           {/* 자식 댓글들 (대댓글) */}
           {childComments.map((childComment) => {
-             const isMyChildComment = currentUserId === childComment.member?.id;
-             return (
-               <CommentCard
-                 key={childComment.id}
-                 comment={childComment}
-                 isMyComment={isMyChildComment}
-                 isReply={true}
-                 onEdit={() => handleEditComment(childComment)}
-                 onDelete={() => handleDeleteComment(childComment)}
-                 onReply={() => handleReplyComment(childComment)}
-               />
-             );
+            const isMyChildComment = currentUserId === childComment.member?.id;
+            return (
+              <CommentCard
+                key={childComment.id}
+                comment={childComment}
+                isMyComment={isMyChildComment}
+                isReply={true}
+                onEdit={() => handleEditComment(childComment)}
+                onDelete={() => handleDeleteComment(childComment)}
+                onReply={() => handleReplyComment(childComment)}
+              />
+            );
           })}
         </View>
       );
@@ -657,25 +700,37 @@ export default function ReplyDetailScreen() {
   };
 
   return (
-    <SafeAreaView edges={["bottom"]} className="flex-1 bg-orange-50">
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === "ios" ? "padding" : undefined} 
-        className="flex-1 px-5"
+    <SafeAreaView edges={["top"]} className="flex-1 bg-orange-50">
+      <Stack.Screen options={{ headerShown: false }} />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        className="flex-1"
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
       >
-        <ScrollView contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
-          {/* 질문 섹션 */}
-          <View className="bg-white pt-5 pb-6 rounded-2xl mb-5 shadow-sm mt-5">
-            <View className="mb-3 flex-row items-center gap-2 px-5">
-              <View className="bg-orange-100 p-1.5 rounded-lg">
-                <Ionicons name="chatbubbles-outline" size={18} color="#F97315" />
-              </View>
-              <Text className="text-xs font-bold text-orange-500 tracking-widest uppercase">오늘의 질문</Text>
-            </View>
-            <View className="px-5">
-              <Text className="text-xl font-bold text-gray-900 leading-8">
-                {questionContent || question}
-              </Text>
-            </View>
+        {/* Header */}
+        <View className="px-4 py-2 flex-row items-center mb-2">
+          <TouchableOpacity
+            onPress={() => router.back()}
+            className="w-10 h-10 items-center justify-center rounded-full bg-white shadow-sm mr-4"
+          >
+            <Ionicons name="arrow-back" size={24} color="#374151" />
+          </TouchableOpacity>
+          <Text className="font-sans text-xl font-bold text-gray-900">
+            답변 상세
+          </Text>
+        </View>
+
+        <ScrollView
+          className="flex-1 px-5"
+          contentContainerStyle={{ paddingBottom: 20 }}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Question Section (Modern Style) */}
+          <View className="items-center mb-6 mt-4 px-2">
+            <Text className="font-sans text-2xl font-bold leading-9 text-center text-gray-900">
+              <Text className="text-orange-500">Q. </Text>
+              {questionContent || question}
+            </Text>
           </View>
 
           {/* 답변 목록 */}
@@ -688,14 +743,19 @@ export default function ReplyDetailScreen() {
               <>
                 {/* 답변 헤더 */}
                 <View className="py-2 mb-2 flex-row justify-between items-center">
-                  <Text className="font-bold text-gray-800 text-lg">
-                    답변 <Text className="text-orange-500">{answers.length}</Text>
+                  <Text className="font-sans font-bold text-gray-800 text-lg">
+                    답변{" "}
+                    <Text className="font-sans text-orange-500">
+                      {answers.length}
+                    </Text>
                   </Text>
                 </View>
 
                 {answers.length === 0 ? (
                   <View className="py-10 items-center">
-                    <Text className="text-gray-400">아직 작성된 답변이 없습니다.</Text>
+                    <Text className="font-sans text-gray-400">
+                      아직 작성된 답변이 없습니다.
+                    </Text>
                   </View>
                 ) : (
                   answers.map((answer) => {
@@ -719,32 +779,45 @@ export default function ReplyDetailScreen() {
           {/* 댓글 목록 */}
           {!loading && (
             <View className="mt-4 mb-5">
-               <View className="py-2 mb-2">
-                  <Text className="font-bold text-gray-800 text-lg">
-                    댓글 <Text className="text-gray-500">{comments.length}</Text>
+              <View className="py-2 mb-2">
+                <Text className="font-sans font-bold text-gray-800 text-lg">
+                  댓글{" "}
+                  <Text className="font-sans text-gray-500">
+                    {comments.length}
                   </Text>
-               </View>
-               
-               <View className="bg-white rounded-2xl shadow-sm overflow-hidden">
-                 {comments.length === 0 ? (
-                   <View className="py-8 items-center bg-white">
-                     <Text className="text-gray-400 text-sm">첫 번째 댓글을 남겨보세요!</Text>
-                   </View>
-                 ) : (
-                   renderComments()
-                 )}
-               </View>
+                </Text>
+              </View>
+
+              <View className="bg-white rounded-2xl shadow-sm overflow-hidden">
+                {comments.length === 0 ? (
+                  <View className="py-8 items-center bg-white">
+                    <Text className="font-sans text-gray-400 text-sm">
+                      첫 번째 댓글을 남겨보세요!
+                    </Text>
+                  </View>
+                ) : (
+                  renderComments()
+                )}
+              </View>
             </View>
           )}
         </ScrollView>
 
-        {/* 댓글 입력창 (Floating Bottom) */}
-        <View className="absolute bottom-0 left-0 right-0 px-5 pb-5 pt-2 bg-transparent">
+        {/* 댓글 입력창 (Static Bottom) */}
+        <View className="px-5 pb-8 pt-2 bg-transparent">
           <View className="bg-white rounded-2xl px-2 py-2 shadow-lg border border-orange-100">
             {replyingToComment && (
               <View className="flex-row items-center justify-between bg-orange-50 px-3 py-2 rounded-lg mb-2">
-                <Text className="text-xs text-gray-600">
-                  <Text className="font-bold">{getRoleIconAndText(replyingToComment.member?.familyRole, replyingToComment.member?.gender).text}</Text>님에게 답글 작성 중...
+                <Text className="font-sans text-xs text-gray-600">
+                  <Text className="font-sans font-bold">
+                    {
+                      getRoleIconAndText(
+                        replyingToComment.member?.familyRole,
+                        replyingToComment.member?.gender
+                      ).text
+                    }
+                  </Text>
+                  님에게 답글 작성 중...
                 </Text>
                 <TouchableOpacity onPress={() => setReplyingToComment(null)}>
                   <Ionicons name="close-circle" size={18} color="#9CA3AF" />
@@ -753,14 +826,17 @@ export default function ReplyDetailScreen() {
             )}
             <View className="flex-row items-end gap-2">
               <TextInput
-                className="flex-1 bg-transparent px-2 py-2 text-base text-gray-900 max-h-24"
+                className="flex-1 bg-transparent px-2 py-2 font-sans text-base text-gray-900 max-h-24"
                 placeholder="댓글을 입력하세요..."
+                placeholderTextColor="#6B7280"
                 multiline
                 value={newCommentText}
                 onChangeText={setNewCommentText}
               />
-              <TouchableOpacity 
-                className={`w-10 h-10 rounded-full items-center justify-center mb-0.5 ${newCommentText.trim() ? 'bg-orange-500' : 'bg-gray-200'}`}
+              <TouchableOpacity
+                className={`w-10 h-10 rounded-full items-center justify-center mb-0.5 ${
+                  newCommentText.trim() ? "bg-orange-500" : "bg-gray-200"
+                }`}
                 disabled={!newCommentText.trim()}
                 onPress={handleCreateComment}
               >
@@ -780,9 +856,11 @@ export default function ReplyDetailScreen() {
       >
         <View className="flex-1 bg-black/40 items-center justify-center p-5">
           <View className="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl">
-            <Text className="text-lg font-bold text-gray-900 mb-4">답변 수정</Text>
+            <Text className="font-sans text-lg font-bold text-gray-900 mb-4">
+              답변 수정
+            </Text>
             <TextInput
-              className="bg-gray-50 rounded-xl p-4 text-base text-gray-900 min-h-[120px]"
+              className="bg-gray-50 rounded-xl p-4 font-sans text-base text-gray-900 min-h-[120px]"
               multiline
               value={editText}
               onChangeText={setEditText}
@@ -794,13 +872,15 @@ export default function ReplyDetailScreen() {
                 className="px-5 py-2.5 rounded-lg bg-gray-100"
                 onPress={() => setShowEditModal(false)}
               >
-                <Text className="text-gray-600 font-medium">취소</Text>
+                <Text className="font-sans text-gray-600 font-medium">
+                  취소
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 className="px-5 py-2.5 rounded-lg bg-orange-500"
                 onPress={handleSaveEdit}
               >
-                <Text className="text-white font-medium">저장</Text>
+                <Text className="font-sans text-white font-medium">저장</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -816,9 +896,11 @@ export default function ReplyDetailScreen() {
       >
         <View className="flex-1 bg-black/40 items-center justify-center p-5">
           <View className="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl">
-            <Text className="text-lg font-bold text-gray-900 mb-4">댓글 수정</Text>
+            <Text className="font-sans text-lg font-bold text-gray-900 mb-4">
+              댓글 수정
+            </Text>
             <TextInput
-              className="bg-gray-50 rounded-xl p-4 text-base text-gray-900 min-h-[100px]"
+              className="bg-gray-50 rounded-xl p-4 font-sans text-base text-gray-900 min-h-[100px]"
               multiline
               value={editCommentText}
               onChangeText={setEditCommentText}
@@ -830,13 +912,15 @@ export default function ReplyDetailScreen() {
                 className="px-5 py-2.5 rounded-lg bg-gray-100"
                 onPress={() => setShowEditCommentModal(false)}
               >
-                <Text className="text-gray-600 font-medium">취소</Text>
+                <Text className="font-sans text-gray-600 font-medium">
+                  취소
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 className="px-5 py-2.5 rounded-lg bg-orange-500"
                 onPress={handleSaveCommentEdit}
               >
-                <Text className="text-white font-medium">저장</Text>
+                <Text className="font-sans text-white font-medium">저장</Text>
               </TouchableOpacity>
             </View>
           </View>

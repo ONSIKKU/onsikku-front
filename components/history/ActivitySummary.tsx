@@ -4,8 +4,8 @@ import { QuestionDetails } from "@/utils/api";
 
 const StatCard = ({ value, label }: { value: number; label: string }) => (
   <View className="bg-orange-50 rounded-lg p-4 flex-1 items-center justify-center">
-    <Text className="text-2xl font-bold text-orange-500">{value}</Text>
-    <Text className="text-xs text-gray-600 mt-1">{label}</Text>
+    <Text className="font-sans text-3xl font-bold text-orange-500">{value}</Text>
+    <Text className="font-sans text-sm text-gray-500 mt-1">{label}</Text>
   </View>
 );
 
@@ -29,7 +29,7 @@ export default function ActivitySummary({ questions, year, month }: ActivitySumm
 
   return (
     <View className="bg-white w-full p-6 rounded-2xl shadow-sm">
-      <Text className="text-lg font-bold text-gray-800 mb-4">{title}</Text>
+      <Text className="font-sans font-bold text-xl text-gray-900 mb-4">{title}</Text>
       <View className="flex-row justify-between gap-3">
         <StatCard value={totalQuestions} label="총 질문" />
         <StatCard value={answeredCount} label="답변 완료" />

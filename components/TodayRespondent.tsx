@@ -19,11 +19,9 @@ export default function TodayRespondent({
 
   return (
     <View className="bg-white w-full p-6 rounded-3xl shadow-sm">
-      <View className="flex flex-row items-center gap-2 mb-4">
-        <Star color="#FB923C" size={24} />
-        <Text className="font-bold text-xl text-gray-800">오늘의 주인공</Text>
-      </View>
-
+      <Text className="font-sans font-bold text-gray-500 mb-4 ml-1">
+        오늘의 주인공
+      </Text>
       <View className="flex-row justify-around items-start mb-4 gap-2 flex-wrap">
         {members.map((member) => {
           const assignment = assignments.find((a) => a.member.id === member.id);
@@ -42,26 +40,13 @@ export default function TodayRespondent({
                 roleName={`${text}${isMe ? " (나)" : ""}`}
                 isSelected={isAnswered}
                 isPending={isAssigned && !isAnswered}
+                isProtagonist={isAssigned}
               />
             </View>
           );
         })}
       </View>
 
-      {pendingCount > 0 ? (
-        <View className="flex flex-row gap-2 justify-center items-center bg-orange-50 py-3 px-4 rounded-xl">
-          <Clock4 size={18} color={"#FB923C"} />
-          <Text className="text-onsikku-dark-orange font-medium text-sm">
-            답변을 기다리고 있어요
-          </Text>
-        </View>
-      ) : (
-        <View className="flex flex-row gap-2 justify-center items-center bg-orange-50 py-3 px-4 rounded-xl">
-          <Text className="text-onsikku-dark-orange font-medium text-sm">
-            답변이 완료됐어요!
-          </Text>
-        </View>
-      )}
     </View>
   );
 }

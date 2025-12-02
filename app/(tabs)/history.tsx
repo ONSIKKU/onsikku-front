@@ -144,7 +144,7 @@ export default function HistoryScreen() {
   const months = Array.from({ length: maxMonth }, (_, i) => i + 1);
 
   return (
-    <SafeAreaView className="flex-1 bg-orange-50">
+    <SafeAreaView className="flex-1 bg-orange-50" edges={["top"]}>
       <ScrollView
         refreshControl={
           <RefreshControl

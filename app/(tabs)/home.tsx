@@ -28,8 +28,8 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const { width } = Dimensions.get("window");
-// SafeAreaView (px-4 -> 16*2=32) + Container View (p-4 -> 16*2=32) = 64
-const ITEM_WIDTH = width - 64;
+// Container paddingHorizontal: 20 -> Total 40
+const ITEM_WIDTH = width - 40;
 
 export default function Page() {
   const router = useRouter();
@@ -243,7 +243,7 @@ export default function Page() {
     return (
       <SafeAreaView className="flex-1 w-full px-4 gap-6 bg-onsikku-main-orange justify-center items-center">
         <ActivityIndicator size="large" color="#FB923C" />
-        <Text className="text-gray-600">질문을 불러오는 중...</Text>
+        <Text className="font-sans text-gray-600">질문을 불러오는 중...</Text>
       </SafeAreaView>
     );
   }
@@ -251,15 +251,15 @@ export default function Page() {
   if (error && questions.length === 0) {
     return (
       <SafeAreaView className="flex-1 w-full px-4 gap-6 bg-onsikku-main-orange justify-center items-center">
-        <Text className="text-red-500 text-center">{error}</Text>
+        <Text className="font-sans text-red-500 text-center">{error}</Text>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 w-full bg-orange-50">
+    <SafeAreaView className="flex-1 w-full bg-orange-50" edges={["top"]}>
       <ScrollView
-        contentContainerStyle={{ padding: 16, paddingBottom: 32, gap: 20 }}
+        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 40, paddingTop: 10 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
@@ -270,91 +270,122 @@ export default function Page() {
           />
         }
       >
-        {!isQuestionEmpty && (
-          <TodayRespondent
-            members={familyMembers}
-            assignments={questions}
-            currentUserId={currentUserId}
+        {/* Header Section */}
+        <View className="mb-6 mt-2">
+          <Text className="font-sans text-gray-500 font-medium text-sm mb-1 ml-1">
+            {new Date().toLocaleDateString("ko-KR", {
+              month: "long",
+              day: "numeric",
+              weekday: "long",
+            })}
+          </Text>
+          <Text className="font-sans text-2xl font-bold text-gray-900 ml-1">
+            반가워요,{" "}
+            {getRoleIconAndText(
+              currentUserRole as any,
+              currentUserGender as any
+            ).text || "가족"}
+            님! 👋
+          </Text>
+        </View>
+
+        <View className="gap-6">
+          {!isQuestionEmpty && (
+            <TodayRespondent
+              members={familyMembers}
+              assignments={questions}
+              currentUserId={currentUserId}
+            />
+          )}
+          <TodayQuestion
+            question={displayQuestionContent}
+            questionAssignmentId={currentQuestion?.id}
+            questionInstanceId={displayQuestionInstanceId || undefined}
+            isUserAssignment={hasUserAssignment}
+            isAnswered={hasAnsweredToday}
+            isEmpty={isQuestionEmpty}
           />
-        )}
-        <TodayQuestion
-          question={displayQuestionContent}
-          questionAssignmentId={currentQuestion?.id}
-          questionInstanceId={displayQuestionInstanceId || undefined}
-          isUserAssignment={hasUserAssignment}
-          isAnswered={hasAnsweredToday}
-          isEmpty={isQuestionEmpty}
-        />
 
+          {/* Recent Answers Section - Unboxed */}
+          <View>
+            <View className="flex flex-row justify-between items-center mb-3 px-1">
+              <Text className="font-sans font-bold text-xl text-gray-800">
+                지난 추억들
+              </Text>
+            </View>
 
-        <View className="bg-white w-full p-5 rounded-3xl shadow-sm">
-          <View className="flex flex-row justify-between items-center mb-4">
-            <Text className="font-bold text-lg text-gray-800">
-              지난 답변 둘러보기
-            </Text>
+            {loadingAnswers ? (
+              <View className="w-full items-center justify-center py-8">
+                <ActivityIndicator size="small" color="#FB923C" />
+                <Text className="font-sans text-gray-500 mt-2 text-sm">
+                  답변을 불러오는 중...
+                </Text>
+              </View>
+            ) : recentAnswersData.length === 0 ? (
+              <View className="w-full items-center justify-center py-8">
+                <Text className="font-sans text-gray-500 text-sm">
+                  아직 답변이 없습니다
+                </Text>
+              </View>
+            ) : (
+              <>
+                <ScrollView
+                  horizontal
+                  pagingEnabled
+                  showsHorizontalScrollIndicator={false}
+                  onScroll={handleScroll}
+                  scrollEventThrottle={16}
+                  style={{ width: ITEM_WIDTH }}
+                >
+                  {recentAnswersData.map((item, index) => (
+                    <View
+                      style={{ width: ITEM_WIDTH }}
+                      key={index}
+                    >
+                      <RecentAnswers
+                        {...item}
+                        roleIcon={item.roleIcon}
+                        onPress={() => {
+                          if (item.questionInstanceId) {
+                            router.push({
+                              pathname: "/reply-detail",
+                              params: {
+                                questionInstanceId: item.questionInstanceId,
+                                question: item.question,
+                              },
+                            });
+                          }
+                        }}
+                      />
+                    </View>
+                  ))}
+                </ScrollView>
+
+                <View className="flex-row justify-center items-center gap-2 mt-4">
+                  {recentAnswersData.map((_, index) => (
+                    <View
+                      key={index}
+                      className={`h-2 w-2 rounded-full ${
+                        activeIndex === index
+                          ? "bg-onsikku-dark-orange"
+                          : "bg-orange-200"
+                      }`}
+                    />
+                  ))}
+                </View>
+              </>
+            )}
           </View>
 
-          {loadingAnswers ? (
-            <View className="w-full items-center justify-center py-8">
-              <ActivityIndicator size="small" color="#FB923C" />
-              <Text className="text-gray-500 mt-2 text-sm">
-                답변을 불러오는 중...
-              </Text>
-            </View>
-          ) : recentAnswersData.length === 0 ? (
-            <View className="w-full items-center justify-center py-8">
-              <Text className="text-gray-500 text-sm">
-                아직 답변이 없습니다
-              </Text>
-            </View>
-          ) : (
-            <>
-              <ScrollView
-                horizontal
-                pagingEnabled
-                showsHorizontalScrollIndicator={false}
-                onScroll={handleScroll}
-                scrollEventThrottle={16}
-                style={{ width: ITEM_WIDTH }}
-              >
-                {recentAnswersData.map((item, index) => (
-                  <View
-                    style={{ width: ITEM_WIDTH, paddingHorizontal: 8 }}
-                    key={index}
-                  >
-                    <RecentAnswers
-                      {...item}
-                      roleIcon={item.roleIcon}
-                      onPress={() => {
-                        if (item.questionInstanceId) {
-                          router.push({
-                            pathname: "/reply-detail",
-                            params: {
-                              questionInstanceId: item.questionInstanceId,
-                              question: item.question,
-                            },
-                          });
-                        }
-                      }}
-                    />
-                  </View>
-                ))}
-              </ScrollView>
-
-              <View className="flex-row justify-center items-center gap-2 mt-3">
-                {recentAnswersData.map((_, index) => (
-                  <View
-                    key={index}
-                    className={`h-2 w-2 rounded-full ${
-                      activeIndex === index
-                        ? "bg-onsikku-dark-orange"
-                        : "bg-orange-200"
-                    }`}
-                  />
-                ))}
-              </View>
-            </>
-          )}
+          {/* Temp Redirect Button */}
+          <TouchableOpacity
+            onPress={() => router.push("/not-assigned")}
+            className="bg-gray-200 p-3 rounded-lg items-center mt-10"
+          >
+            <Text className="text-gray-600 font-sans">
+              미리보기: 할당 안된 상태
+            </Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaView>
