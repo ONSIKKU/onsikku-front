@@ -47,24 +47,33 @@ export default function SignUpClusterScreen() {
       return;
     }
 
-    if (!role || !gender || !birthDate || !familyName) {
+    if (!role || !gender || !birthDate || (familyMode === "CREATE" && !familyName)) {
       Alert.alert("확인", "필수 정보가 입력되지 않았습니다.");
       return;
     }
 
     try {
       setSubmitting(true);
-      const result = await signup({
+      const signupPayload = {
         registrationToken,
         grandParentType: grandParentType || null,
         familyRole: role,
         gender,
         birthDate,
         profileImageUrl: uri || null,
-        familyName,
-        familyInvitationCode: familyMode === "JOIN" ? familyInvitationCode : undefined,
+        familyName: familyMode === "CREATE" ? familyName : undefined,
+        familyInvitationCode:
+          familyMode === "JOIN" ? familyInvitationCode : undefined,
         familyMode,
-      });
+      };
+      console.log("[회원가입 요청 데이터]", signupPayload);
+      const result = await signup(signupPayload);
+      console.log("[회원가입 API 응답]", result);
+
+      // 에러 처리: accessToken이 없으면 실패로 간주
+      if (!result.accessToken) {
+        throw new Error((result as any).message || "회원가입에 실패했습니다.");
+      }
 
       // 토큰 저장
       if (result.accessToken) {

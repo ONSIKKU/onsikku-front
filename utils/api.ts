@@ -39,15 +39,18 @@ export async function apiFetch<T>(path: string, init?: RequestInit & { _retry?: 
 
   // Handle 401 (Unauthorized) - Token Refresh Logic
   if (res.status === 401 && !init?._retry) {
+    console.log("[API] 401 Unauthorized 감지. 토큰 갱신을 시도합니다.");
     try {
       const storedRefreshToken = await getItem("refreshToken");
       if (!storedRefreshToken) {
         throw new Error("No refresh token available");
       }
 
+      console.log("[API] 리프레시 토큰으로 새 토큰을 요청합니다.");
       // Call refreshToken logic
       // Note: We use the exported function below, ensuring it doesn't use apiFetch to avoid recursion
       const newTokens = await refreshToken(storedRefreshToken);
+      console.log("[API] 새 토큰을 받았습니다.", { newAccessToken: newTokens.accessToken });
 
       // Update memory and storage
       setAccessToken(newTokens.accessToken);
@@ -57,11 +60,13 @@ export async function apiFetch<T>(path: string, init?: RequestInit & { _retry?: 
         await setItem("refreshToken", newTokens.refreshToken);
       }
 
+      console.log("[API] 원래 요청을 재시도합니다.");
       // Retry the original request with the new token
       // The new token will be picked up by getHeaders() since we updated inMemoryToken
       return apiFetch<T>(path, { ...init, _retry: true });
 
     } catch (refreshError) {
+      console.error("[API] 토큰 갱신 실패:", refreshError);
       // Clean up tokens
       setAccessToken(null);
       await removeItem("accessToken");
@@ -86,17 +91,20 @@ export async function apiFetch<T>(path: string, init?: RequestInit & { _retry?: 
 export type FamilyRole = "PARENT" | "CHILD" | "GRANDPARENT";
 export type Role = "MEMBER" | "ADMIN";
 
-export type MypageResponse = {
-  memberId: string;
-  familyId: string;
+export type Family = {
+  createdAt: string; // date-time
+  updatedAt: string; // date-time
+  id: string; // uuid
   familyName: string;
-  familyInvitationCode: string;
-  role: Role;
-  profileImageUrl: string;
-  familyRole: FamilyRole;
-  birthDate: string; // yyyy-MM-dd
-  gender: "MALE" | "FEMALE";
-  alarmEnabled: boolean;
+  invitationCode: string;
+  grandparentType: "PATERNAL" | "MATERNAL";
+  familyInviteEnabled: boolean;
+};
+
+export type MypageResponse = {
+  member: Member;
+  family: Family;
+  familyMembers: Member[];
 };
 
 export type MypagePatch = Partial<{
@@ -105,7 +113,7 @@ export type MypagePatch = Partial<{
   birthDate: string; // yyyy-MM-dd
   gender: "MALE" | "FEMALE";
   isAlarmEnabled: boolean;
-  regenerateFamilyInvitationCode: boolean;
+  isFamilyInviteEnabled: boolean;
 }>;
 
 export function getMyPage() {
@@ -246,8 +254,7 @@ export type QuestionResponse = {
   totalQuestions?: number;
   answeredQuestions?: number;
   totalReactions?: number;
-  todayQuestionAssignments?: QuestionAssignment[]; // 오늘의 질문 조회 시
-  // todayQuestionInstanceId는 더 이상 제공되지 않음 (API 문서 업데이트)
+  familyMembers?: Member[]; // 가족 구성원 목록
 };
 
 // 오늘의 질문 조회
@@ -255,9 +262,8 @@ export async function getTodayQuestions() {
   const response = await apiFetch<QuestionResponse>("/api/questions", {
     method: "GET",
   });
-  // 새로운 API 스펙에서는 todayQuestionInstanceId가 제공되지 않음
-  // 호환성을 위해 QuestionAssignment[] 반환
-  return response.todayQuestionAssignments || [];
+  // 새로운 API 스펙에서는 questionDetails.questionAssignments를 사용
+  return response.questionDetails?.questionAssignments || [];
 }
 
 // 오늘의 질문 인스턴스 ID 조회 (답변 상세 페이지용)

@@ -4,12 +4,14 @@ interface RoleCardProps {
   icon: string;
   roleName: string;
   isSelected: boolean;
+  isPending?: boolean;
 }
 
 export default function RoleCard({
   icon,
   roleName,
   isSelected,
+  isPending,
 }: RoleCardProps) {
   return (
     <View className="flex-1 flex-col justify-start items-center gap-1">
@@ -18,6 +20,8 @@ export default function RoleCard({
         ${
           isSelected
             ? "bg-onsikku-main-orange border border-onsikku-dark-orange"
+            : isPending
+            ? "bg-white border-2 border-onsikku-main-orange"
             : "bg-onsikku-light-gray"
         }
         `}
@@ -26,7 +30,7 @@ export default function RoleCard({
       </View>
       <Text
         className={`font-sans ${
-          isSelected ? "text-onsikku-dark-orange" : "text-gray-200"
+          isSelected || isPending ? "text-onsikku-dark-orange" : "text-gray-200"
         }`}
       >
         {roleName}

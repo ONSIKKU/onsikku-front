@@ -65,10 +65,10 @@ export default function Page() {
   );
 
   const toggleAlarm = async () => {
-    if (!data) return;
+    if (!data?.member) return;
     try {
       setUpdating(true);
-      const next = !data.alarmEnabled;
+      const next = !data.member.alarmEnabled;
       const res = await patchMyPage({ isAlarmEnabled: next });
       setData(res);
     } catch (e: any) {
@@ -79,10 +79,22 @@ export default function Page() {
   };
 
   const regenerateInvitation = async () => {
+    if (!data?.family) return;
     try {
       setUpdating(true);
-      const res = await patchMyPage({ regenerateFamilyInvitationCode: true });
+      const isCurrentlyEnabled = data.family.familyInviteEnabled;
+
+      // If currently enabled, toggle to false first to ensure a 'change' for the API
+      if (isCurrentlyEnabled) {
+        await patchMyPage({ isFamilyInviteEnabled: false });
+        // The API response from this call will update `data` state, which is fine.
+        // We don't need to specifically use `setData` here as the subsequent call will update it again.
+      }
+
+      // Then set to true to trigger regeneration
+      const res = await patchMyPage({ isFamilyInviteEnabled: true });
       setData(res);
+      console.log("[재발급된 초대 코드]", res.family?.invitationCode);
       Alert.alert("재발급 완료", `초대코드가 재발급되었습니다.`);
     } catch (e: any) {
       Alert.alert("오류", e?.message || "초대코드 재발급에 실패했습니다");
@@ -92,8 +104,8 @@ export default function Page() {
   };
 
   const copyInvitationCode = async () => {
-    if (data?.familyInvitationCode) {
-      await Clipboard.setStringAsync(data.familyInvitationCode);
+    if (data?.family?.invitationCode) {
+      await Clipboard.setStringAsync(data.family.invitationCode);
       Alert.alert("복사 완료", "초대코드가 클립보드에 복사되었습니다.");
     } else {
       Alert.alert("알림", "초대코드가 없습니다.");
@@ -189,9 +201,9 @@ export default function Page() {
   }
 
   const profileProps = {
-    avatarUri: data?.profileImageUrl || "",
-    familyRole: data?.familyRole,
-    gender: data?.gender,
+    avatarUri: data?.member?.profileImageUrl || "",
+    familyRole: data?.member?.familyRole,
+    gender: data?.member?.gender,
   };
 
   return (
@@ -225,7 +237,7 @@ export default function Page() {
                     <Text className="text-sm text-gray-600 ml-2">가족명</Text>
                   </View>
                   <Text className="text-sm font-medium text-gray-800">
-                    {data?.familyName}
+                    {data?.family?.familyName}
                   </Text>
                 </View>
                 <View className="flex-row items-center justify-between py-2 border-b border-gray-100">
@@ -236,7 +248,12 @@ export default function Page() {
                     </Text>
                   </View>
                   <Text className="text-sm font-medium text-gray-800">
-                    {getRoleIconAndText(data?.familyRole, data?.gender).text}
+                    {
+                      getRoleIconAndText(
+                        data?.member?.familyRole,
+                        data?.member?.gender
+                      ).text
+                    }
                   </Text>
                 </View>
                 <View className="flex-row items-center justify-between py-2 border-b border-gray-100">
@@ -249,7 +266,7 @@ export default function Page() {
                     <Text className="text-sm text-gray-600 ml-2">생년월일</Text>
                   </View>
                   <Text className="text-sm font-medium text-gray-800">
-                    {data?.birthDate ?? "-"}
+                    {data?.member?.birthDate ?? "-"}
                   </Text>
                 </View>
                 <View className="flex-row items-center justify-between py-2">
@@ -258,9 +275,56 @@ export default function Page() {
                     <Text className="text-sm text-gray-600 ml-2">성별</Text>
                   </View>
                   <Text className="text-sm font-medium text-gray-800">
-                    {genderToKo(data?.gender)}
+                    {genderToKo(data?.member?.gender)}
                   </Text>
                 </View>
+              </View>
+            </View>
+
+            {/* 함께하는 가족 */}
+            <View className="bg-white w-full p-5 rounded-3xl shadow-sm">
+              <Text className="text-lg font-bold text-gray-800 mb-4">
+                함께하는 가족
+              </Text>
+              <View className="gap-3">
+                {data?.familyMembers?.map((member, index) => (
+                  <View
+                    key={member.id}
+                    className={`flex-row items-center justify-between py-2 ${
+                      index !== (data.familyMembers?.length ?? 0) - 1
+                        ? "border-b border-gray-100"
+                        : ""
+                    }`}
+                  >
+                    <View className="flex-row items-center">
+                      <Ionicons name="person-circle-outline" size={24} color="#FB923C" />
+                      <Text className="text-sm text-gray-600 ml-2">
+                        {
+                          getRoleIconAndText(member.familyRole, member.gender)
+                            .text
+                        }
+                      </Text>
+                      {member.id === data?.member?.id && (
+                        <Text className="text-xs font-bold text-orange-500 ml-1">
+                          (나)
+                        </Text>
+                      )}
+                    </View>
+                    <Text className="text-sm font-medium text-gray-800">
+                      {/* 이름이 따로 없으므로 역할로 대체하거나 추후 추가 */}
+                      {member.familyRole === "GRANDPARENT"
+                         ? "조부모님" 
+                         : member.familyRole === "PARENT"
+                         ? "부모님"
+                         : "자녀"}
+                    </Text>
+                  </View>
+                ))}
+                {(!data?.familyMembers || data.familyMembers.length === 0) && (
+                  <Text className="text-gray-400 text-center py-4">
+                    아직 가족 구성원이 없습니다.
+                  </Text>
+                )}
               </View>
             </View>
 
@@ -281,17 +345,21 @@ export default function Page() {
                     onPress={toggleAlarm}
                     disabled={updating}
                     className={`px-4 py-2 rounded-full ${
-                      data?.alarmEnabled ? "bg-orange-100" : "bg-gray-100"
+                      data?.member?.alarmEnabled
+                        ? "bg-orange-100"
+                        : "bg-gray-100"
                     }`}
                   >
                     <Text
                       className={`text-xs font-medium ${
-                        data?.alarmEnabled ? "text-orange-600" : "text-gray-600"
+                        data?.member?.alarmEnabled
+                          ? "text-orange-600"
+                          : "text-gray-600"
                       }`}
                     >
                       {updating
                         ? "처리 중..."
-                        : data?.alarmEnabled
+                        : data?.member?.alarmEnabled
                         ? "켜짐"
                         : "꺼짐"}
                     </Text>
@@ -305,7 +373,7 @@ export default function Page() {
                         가족 초대코드
                       </Text>
                       <Text className="text-xs text-gray-500 mt-0.5 font-mono">
-                        {data?.familyInvitationCode || "-"}
+                        {data?.family?.invitationCode || "-"}
                       </Text>
                     </View>
                   </View>

@@ -1,21 +1,28 @@
-import ImageUploadBox from "@/components/ImageUploadBox";
 import { getItem } from "@/utils/AsyncStorage";
-import { getMyPage, MypageResponse, patchMyPage, setAccessToken } from "@/utils/api";
+import { getMyPage, patchMyPage, setAccessToken } from "@/utils/api";
 import { familyRoleToKo, genderToKo, getRoleIconAndText } from "@/utils/labels";
-import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { Alert, Pressable, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function MyPageEdit() {
   const [loading, setLoading] = useState<boolean>(true);
   const [saving, setSaving] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
-  const [avatarUri, setAvatarUri] = useState<string>("");
   const [gender, setGender] = useState<"MALE" | "FEMALE" | "">("");
   const [birthDate, setBirthDate] = useState<string>("");
-  const [familyRole, setFamilyRole] = useState<"PARENT" | "CHILD" | "GRANDPARENT" | "">("");
+  const [familyRole, setFamilyRole] = useState<
+    "PARENT" | "CHILD" | "GRANDPARENT" | ""
+  >("");
 
   useEffect(() => {
     const run = async () => {
@@ -23,11 +30,10 @@ export default function MyPageEdit() {
         setLoading(true);
         const token = await getItem("accessToken");
         if (token) setAccessToken(token);
-        const res: MypageResponse = await getMyPage();
-        setAvatarUri(res.profileImageUrl || "");
-        setGender(res.gender || "");
-        setBirthDate(res.birthDate || "");
-        setFamilyRole(res.familyRole || "");
+        const res = await getMyPage();
+        setGender(res.member.gender || "");
+        setBirthDate(res.member.birthDate || "");
+        setFamilyRole(res.member.familyRole || "");
       } catch (e: any) {
         setError(e?.message || "정보를 불러오지 못했습니다");
       } finally {
@@ -37,34 +43,9 @@ export default function MyPageEdit() {
     run();
   }, []);
 
-  async function pickFromLibrary() {
-    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!perm.granted) return;
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images"],
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.8,
-      exif: false,
-    });
-    if (!result.canceled) setAvatarUri(result.assets[0].uri);
-  }
-
-  async function takePhoto() {
-    const cam = await ImagePicker.requestCameraPermissionsAsync();
-    if (!cam.granted) return;
-    const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      quality: 0.8,
-    });
-    if (!result.canceled) setAvatarUri(result.assets[0].uri);
-  }
-
   const onSave = async () => {
     try {
       setSaving(true);
-      const isRemoteUrl = /^https?:\/\//.test(avatarUri);
-      // 간단한 날짜 형식 검증 (yyyy-mm-dd)
       const validDate = !birthDate || /^\d{4}-\d{2}-\d{2}$/.test(birthDate);
       if (!validDate) {
         Alert.alert("확인", "생년월일은 yyyy-MM-dd 형식으로 입력해 주세요");
@@ -72,11 +53,10 @@ export default function MyPageEdit() {
         return;
       }
       await patchMyPage({
-        profileImageUrl: isRemoteUrl ? avatarUri : undefined,
         gender: gender || undefined,
         birthDate: birthDate || undefined,
         familyRole: (familyRole as any) || undefined,
-      } as any);
+      });
       Alert.alert("완료", "프로필이 수정되었습니다", [
         { text: "확인", onPress: () => router.back() },
       ]);
@@ -103,19 +83,16 @@ export default function MyPageEdit() {
       >
         <Text className="text-lg font-bold">내 정보 수정</Text>
 
-        <View className="bg-white rounded-full justify-center items-center w-40 h-40 self-center overflow-visible">
-          <View className="rounded-full bg-orange-100 w-full h-full justify-center items-center border-4 border-white shadow-md shadow-gray-200 overflow-visible">
-            <View className="items-center justify-center" style={{ paddingTop: 15 }}>
-              <Text className="text-6xl" style={{ lineHeight: 80 }}>{getRoleIconAndText(familyRole || undefined, gender || undefined).icon}</Text>
-            </View>
-          </View>
+        <View className="w-40 h-40 self-center rounded-full bg-orange-100 border-4 border-white shadow-md shadow-gray-200 justify-center items-center overflow-hidden">
+          <Text className="text-5xl">
+            {
+              getRoleIconAndText(
+                familyRole || undefined,
+                gender || undefined
+              ).icon
+            }
+          </Text>
         </View>
-
-        {/* 이미지 업로드 기능 비활성화 */}
-        {/* <View className="gap-4">
-          <ImageUploadBox type="camera" onPress={takePhoto} />
-          <ImageUploadBox type="album" onPress={pickFromLibrary} />
-        </View> */}
 
         <View className="bg-white p-4 rounded-xl gap-3">
           <Text className="text-sm text-gray-700">성별</Text>
@@ -123,21 +100,18 @@ export default function MyPageEdit() {
             {(["MALE", "FEMALE"] as const).map((g) => {
               const isSelected = gender === g;
               return (
-                <Pressable
-                  key={g}
-                  onPress={() => setGender(g)}
-                >
+                <Pressable key={g} onPress={() => setGender(g)}>
                   <View
                     className={`px-3 py-2 rounded-lg ${
-                      isSelected 
-                        ? "bg-button-selected-light-orange" 
+                      isSelected
+                        ? "bg-button-selected-light-orange"
                         : "bg-white border border-gray-200"
                     }`}
                   >
-                    <Text 
+                    <Text
                       className={`${
-                        isSelected 
-                          ? "text-onsikku-dark-orange font-bold" 
+                        isSelected
+                          ? "text-onsikku-dark-orange font-bold"
                           : "text-gray-600"
                       }`}
                     >
@@ -148,20 +122,19 @@ export default function MyPageEdit() {
               );
             })}
           </View>
-          {/^file:|^assets:/.test(avatarUri) ? (
-            <Text className="text-xs text-gray-500 mt-2">선택한 사진은 로컬 경로입니다. 서버 업로드 기능 연결 후 URL로 저장됩니다.</Text>
-          ) : null}
         </View>
 
         <View className="bg-white p-4 rounded-xl gap-3">
-          <Text className="text-sm text-gray-700">생년월일 (yyyy-MM-dd)</Text>
-          <TextInput
-            className="border border-gray-200 rounded-lg px-3 py-2"
-            value={birthDate}
-            onChangeText={setBirthDate}
-            placeholder="2000-01-01"
-            keyboardType="numbers-and-punctuation"
-          />
+          <View className="gap-3">
+            <Text className="text-sm text-gray-700">생년월일 (yyyy-MM-dd)</Text>
+            <TextInput
+              className="border border-gray-200 rounded-lg px-3 py-2"
+              value={birthDate}
+              onChangeText={setBirthDate}
+              placeholder="2000-01-01"
+              keyboardType="numbers-and-punctuation"
+            />
+          </View>
         </View>
 
         <View className="bg-white p-4 rounded-xl gap-3">
@@ -170,21 +143,18 @@ export default function MyPageEdit() {
             {(["PARENT", "CHILD", "GRANDPARENT"] as const).map((r) => {
               const isSelected = familyRole === r;
               return (
-                <Pressable
-                  key={r}
-                  onPress={() => setFamilyRole(r)}
-                >
+                <Pressable key={r} onPress={() => setFamilyRole(r)}>
                   <View
                     className={`px-3 py-2 rounded-lg ${
-                      isSelected 
-                        ? "bg-button-selected-light-orange" 
+                      isSelected
+                        ? "bg-button-selected-light-orange"
                         : "bg-white border border-gray-200"
                     }`}
                   >
-                    <Text 
+                    <Text
                       className={`${
-                        isSelected 
-                          ? "text-onsikku-dark-orange font-bold" 
+                        isSelected
+                          ? "text-onsikku-dark-orange font-bold"
                           : "text-gray-600"
                       }`}
                     >
@@ -210,4 +180,3 @@ export default function MyPageEdit() {
     </SafeAreaView>
   );
 }
-

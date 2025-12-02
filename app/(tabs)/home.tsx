@@ -6,6 +6,7 @@ import {
   apiFetch,
   getMyPage,
   getRecentAnswers,
+  Member,
   QuestionAssignment,
   QuestionResponse,
   setAccessToken,
@@ -36,6 +37,7 @@ export default function Page() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [questions, setQuestions] = useState<QuestionAssignment[]>([]);
+  const [familyMembers, setFamilyMembers] = useState<Member[]>([]);
   const [error, setError] = useState<string>("");
   const [questionContent, setQuestionContent] = useState<string>("");
   const [questionInstanceId, setQuestionInstanceId] = useState<string | null>(
@@ -65,6 +67,7 @@ export default function Page() {
         const questionAssignments =
           response.questionDetails?.questionAssignments || [];
         setQuestions(questionAssignments);
+        setFamilyMembers(response.familyMembers || []);
 
         // 질문 내용과 인스턴스 ID는 questionDetails에서 가져오기
         if (response.questionDetails) {
@@ -111,9 +114,12 @@ export default function Page() {
       if (token) {
         setAccessToken(token);
         const myPageData = await getMyPage();
-        setCurrentUserId(myPageData.memberId || null);
-        setCurrentUserRole(myPageData.familyRole || null);
-        setCurrentUserGender(myPageData.gender || null);
+        // MypageResponse 구조 변경에 따른 수정 (member 객체 내부 접근)
+        if (myPageData.member) {
+          setCurrentUserId(myPageData.member.id);
+          setCurrentUserRole(myPageData.member.familyRole);
+          setCurrentUserGender(myPageData.member.gender);
+        }
       }
     } catch (e: any) {
       console.error("[현재 사용자 조회 에러]", e);
@@ -266,9 +272,9 @@ export default function Page() {
       >
         {!isQuestionEmpty && (
           <TodayRespondent
-            subject={questionSubject}
-            gender={currentUserGender}
-            pendingCount={pendingCount}
+            members={familyMembers}
+            assignments={questions}
+            currentUserId={currentUserId}
           />
         )}
         <TodayQuestion

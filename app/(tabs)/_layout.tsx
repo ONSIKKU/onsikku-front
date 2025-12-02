@@ -25,6 +25,7 @@ export default function TabLayout() {
         name="notification"
         options={{
           title: "알림",
+          href: null,
           tabBarBadge: 2,
           tabBarIcon: ({ color, focused }) => (
             <Ionicons

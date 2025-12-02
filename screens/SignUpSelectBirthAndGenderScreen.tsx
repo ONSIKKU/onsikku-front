@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
     }),
   },
   picker: {
-    height: Platform.OS === "ios" ? 180 : 50,
+    height: Platform.OS === "ios" ? 180 : 60,
     backgroundColor: "#FFFFFF",
   },
   pickerItem: {
