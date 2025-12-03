@@ -64,6 +64,18 @@ export default function Page() {
     }, [fetchMyPage])
   );
 
+  const calculateAge = (birthDateString: string | undefined): number | null => {
+    if (!birthDateString) return null;
+    const birthDate = new Date(birthDateString);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
   const toggleAlarm = async () => {
     if (!data?.member) return;
     try {
@@ -310,7 +322,8 @@ export default function Page() {
                         {
                           getRoleIconAndText(member.familyRole, member.gender)
                             .text
-                        }
+                        }{" "}
+                        ({calculateAge(member.birthDate)}세)
                       </Text>
                       {member.id === data?.member?.id && (
                         <Text className="text-xs font-bold text-orange-500 ml-1">
