@@ -3,11 +3,11 @@ import "dotenv/config";
 import { ExpoConfig } from "expo/config";
 
 const config: ExpoConfig = {
-  name: "family-front",
-  slug: "family-front",
+  name: "온식구",
+  slug: "onsikku",
   version: "1.0.0",
   orientation: "portrait",
-  icon: "./assets/images/icon.png",
+  icon: "./assets/images/onsikku-main-logo.png",
   scheme: "onsikku", // 우리 앱 커스텀 스킴
   userInterfaceStyle: "automatic",
   newArchEnabled: true,
@@ -39,7 +39,7 @@ const config: ExpoConfig = {
   android: {
     package: "com.jebiyeon.familyfront",
     adaptiveIcon: {
-      foregroundImage: "./assets/images/adaptive-icon.png",
+      foregroundImage: "./assets/images/onsikku-main-logo.png",
       backgroundColor: "#ffffff",
     },
     edgeToEdgeEnabled: true,
@@ -73,7 +73,7 @@ const config: ExpoConfig = {
   web: {
     bundler: "metro",
     output: "static",
-    favicon: "./assets/images/favicon.png",
+    favicon: "./assets/images/onsikku-main-logo.png",
   },
 
   plugins: [
