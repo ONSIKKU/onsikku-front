@@ -377,15 +377,7 @@ export default function Page() {
             )}
           </View>
 
-          {/* Temp Redirect Button */}
-          <TouchableOpacity
-            onPress={() => router.push("/not-assigned")}
-            className="bg-gray-200 p-3 rounded-lg items-center mt-10"
-          >
-            <Text className="text-gray-600 font-sans">
-              미리보기: 할당 안된 상태
-            </Text>
-          </TouchableOpacity>
+
         </View>
       </ScrollView>
     </SafeAreaView>
