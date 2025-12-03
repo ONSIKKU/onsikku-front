@@ -4,7 +4,7 @@ import { ExpoConfig } from "expo/config";
 
 const config: ExpoConfig = {
   name: "온식구",
-  slug: "onsikku",
+  slug: "family-front",
   version: "1.0.0",
   orientation: "portrait",
   icon: "./assets/images/onsikku-main-logo.png",
