@@ -13,7 +13,6 @@ import {
 } from "@/utils/api";
 import { getItem } from "@/utils/AsyncStorage";
 import { getRoleIconAndText } from "@/utils/labels";
-import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -22,7 +21,6 @@ import {
   RefreshControl,
   ScrollView,
   Text,
-  TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -56,7 +54,6 @@ export default function Page() {
       setLoading(true);
       setError("");
       const token = await getItem("accessToken");
-      console.log("[액세스 토큰]", token || "토큰 없음");
       if (token) {
         setAccessToken(token);
         const response = await apiFetch<QuestionResponse>("/api/questions", {
@@ -259,7 +256,11 @@ export default function Page() {
   return (
     <SafeAreaView className="flex-1 w-full bg-orange-50" edges={["top"]}>
       <ScrollView
-        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 40, paddingTop: 10 }}
+        contentContainerStyle={{
+          paddingHorizontal: 20,
+          paddingBottom: 40,
+          paddingTop: 10,
+        }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
@@ -338,10 +339,7 @@ export default function Page() {
                   style={{ width: ITEM_WIDTH }}
                 >
                   {recentAnswersData.map((item, index) => (
-                    <View
-                      style={{ width: ITEM_WIDTH }}
-                      key={index}
-                    >
+                    <View style={{ width: ITEM_WIDTH }} key={index}>
                       <RecentAnswers
                         {...item}
                         roleIcon={item.roleIcon}
@@ -376,8 +374,6 @@ export default function Page() {
               </>
             )}
           </View>
-
-
         </View>
       </ScrollView>
     </SafeAreaView>

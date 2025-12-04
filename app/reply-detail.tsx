@@ -112,7 +112,6 @@ const FeedCard = ({
   const gender = answer.member?.gender || answer.gender;
   const { text: roleName } = getRoleIconAndText(familyRole, gender);
   const timeAgo = answer.createdAt ? formatTimeAgo(answer.createdAt) : "";
-  const profileImageUrl = answer.member?.profileImageUrl || null;
 
   // content가 문자열인 경우와 객체인 경우 처리
   const contentText =
@@ -125,18 +124,11 @@ const FeedCard = ({
       {/* 헤더 */}
       <View className="flex-row items-start justify-between px-4 py-3">
         <View className="flex-row items-center gap-3 flex-1">
-          {profileImageUrl ? (
-            <Image
-              source={{ uri: profileImageUrl }}
-              className="w-10 h-10 rounded-full"
-            />
-          ) : (
-            <View className="w-10 h-10 rounded-full bg-orange-100 items-center justify-center">
-              <Text className="text-xl">
-                {getRoleIconAndText(familyRole, gender).icon}
-              </Text>
-            </View>
-          )}
+          <View className="w-10 h-10 rounded-full bg-orange-100 items-center justify-center">
+            <Text className="text-xl">
+              {getRoleIconAndText(familyRole, gender).icon}
+            </Text>
+          </View>
           <View>
             <View className="flex-row items-center gap-1">
               <Text className="font-sans text-base font-semibold text-gray-900">
@@ -213,11 +205,11 @@ const CommentCard = ({
   onDelete: () => void;
   onReply: () => void;
 }) => {
-  const familyRole = comment.member?.familyRole || "PARENT";
-  const gender = comment.member?.gender;
+  const familyRole =
+    comment.member?.familyRole || comment.familyRole || "PARENT";
+  const gender = comment.member?.gender || comment.gender;
   const { text: roleName } = getRoleIconAndText(familyRole, gender);
   const timeAgo = comment.createdAt ? formatTimeAgo(comment.createdAt) : "";
-  const profileImageUrl = comment.member?.profileImageUrl || null;
 
   return (
     <View
@@ -238,22 +230,15 @@ const CommentCard = ({
 
       {/* 프로필 */}
       <View className="mr-3">
-        {profileImageUrl ? (
-          <Image
-            source={{ uri: profileImageUrl }}
-            className={`${isReply ? "w-7 h-7" : "w-9 h-9"} rounded-full`}
-          />
-        ) : (
-          <View
-            className={`${
-              isReply ? "w-7 h-7" : "w-9 h-9"
-            } rounded-full bg-gray-100 items-center justify-center`}
-          >
-            <Text className={isReply ? "text-xs" : "text-sm"}>
-              {getRoleIconAndText(familyRole, gender).icon}
-            </Text>
-          </View>
-        )}
+        <View
+          className={`${
+            isReply ? "w-7 h-7" : "w-9 h-9"
+          } rounded-full bg-gray-100 items-center justify-center`}
+        >
+          <Text className={isReply ? "text-xs" : "text-sm"}>
+            {getRoleIconAndText(familyRole, gender).icon}
+          </Text>
+        </View>
       </View>
 
       {/* 내용 영역 */}

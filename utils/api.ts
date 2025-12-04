@@ -28,10 +28,15 @@ const getHeaders = (extra?: Record<string, string>) => {
   return headers;
 };
 
-export async function apiFetch<T>(path: string, init?: RequestInit & { _retry?: boolean }): Promise<T> {
+export async function apiFetch<T>(
+  path: string,
+  init?: RequestInit & { _retry?: boolean }
+): Promise<T> {
   const url = baseUrl + path;
-  const headers = getHeaders(init?.headers as Record<string, string> | undefined);
-  
+  const headers = getHeaders(
+    init?.headers as Record<string, string> | undefined
+  );
+
   const res = await fetch(url, {
     ...init,
     headers,
@@ -39,32 +44,27 @@ export async function apiFetch<T>(path: string, init?: RequestInit & { _retry?: 
 
   // Handle 401 (Unauthorized) - Token Refresh Logic
   if (res.status === 401 && !init?._retry) {
-    console.log("[API] 401 Unauthorized 감지. 토큰 갱신을 시도합니다.");
     try {
       const storedRefreshToken = await getItem("refreshToken");
       if (!storedRefreshToken) {
         throw new Error("No refresh token available");
       }
 
-      console.log("[API] 리프레시 토큰으로 새 토큰을 요청합니다.");
       // Call refreshToken logic
       // Note: We use the exported function below, ensuring it doesn't use apiFetch to avoid recursion
       const newTokens = await refreshToken(storedRefreshToken);
-      console.log("[API] 새 토큰을 받았습니다.", { newAccessToken: newTokens.accessToken });
 
       // Update memory and storage
       setAccessToken(newTokens.accessToken);
       await setItem("accessToken", newTokens.accessToken);
-      
+
       if (newTokens.refreshToken) {
         await setItem("refreshToken", newTokens.refreshToken);
       }
 
-      console.log("[API] 원래 요청을 재시도합니다.");
       // Retry the original request with the new token
       // The new token will be picked up by getHeaders() since we updated inMemoryToken
       return apiFetch<T>(path, { ...init, _retry: true });
-
     } catch (refreshError) {
       console.error("[API] 토큰 갱신 실패:", refreshError);
       // Clean up tokens
@@ -80,7 +80,8 @@ export async function apiFetch<T>(path: string, init?: RequestInit & { _retry?: 
   const json = text ? JSON.parse(text) : null;
 
   if (!res.ok) {
-    const message = (json && (json.message || json.error)) || `HTTP ${res.status}`;
+    const message =
+      (json && (json.message || json.error)) || `HTTP ${res.status}`;
     throw new Error(message);
   }
 
@@ -167,7 +168,8 @@ export async function signup(payload: SignupRequest) {
   const json = text ? JSON.parse(text) : null;
 
   if (!res.ok) {
-    const message = (json && (json.message || json.error)) || `HTTP ${res.status}`;
+    const message =
+      (json && (json.message || json.error)) || `HTTP ${res.status}`;
     throw new Error(message);
   }
 
@@ -202,7 +204,8 @@ export async function refreshToken(refreshToken: string) {
   const json = text ? JSON.parse(text) : null;
 
   if (!res.ok) {
-    const message = (json && (json.message || json.error)) || `HTTP ${res.status}`;
+    const message =
+      (json && (json.message || json.error)) || `HTTP ${res.status}`;
     throw new Error(message);
   }
 
@@ -211,7 +214,13 @@ export async function refreshToken(refreshToken: string) {
 }
 
 // Question types
-export type QuestionState = "PENDING" | "SENT" | "READ" | "ANSWERED" | "EXPIRED" | "FAILED";
+export type QuestionState =
+  | "PENDING"
+  | "SENT"
+  | "READ"
+  | "ANSWERED"
+  | "EXPIRED"
+  | "FAILED";
 
 // Member 타입 (API 문서의 Member 스키마와 일치)
 export type Member = {
@@ -279,7 +288,13 @@ export async function getTodayQuestionInstanceId(): Promise<string | null> {
 }
 
 // Answer types
-export type AnswerType = "TEXT" | "IMAGE" | "AUDIO" | "VIDEO" | "FILE" | "MIXED";
+export type AnswerType =
+  | "TEXT"
+  | "IMAGE"
+  | "AUDIO"
+  | "VIDEO"
+  | "FILE"
+  | "MIXED";
 
 export type AnswerRequest = {
   answerId?: string; // 수정/삭제 시 필요
@@ -311,19 +326,18 @@ export type Answer = {
 
 // 답변 생성
 export async function createAnswer(payload: AnswerRequest) {
-  
   // content가 문자열인 경우 TEXT 타입에 맞게 JsonNode 형식으로 변환
   let content = payload.content;
   if (payload.answerType === "TEXT" && typeof payload.content === "string") {
     content = { text: payload.content };
   }
-  
+
   const requestPayload = {
     questionAssignmentId: payload.questionAssignmentId,
     answerType: payload.answerType || "TEXT",
     content: content,
   };
-  
+
   const response = await apiFetch<{
     answerId: string;
     memberId: string;
@@ -339,7 +353,7 @@ export async function createAnswer(payload: AnswerRequest) {
     method: "POST",
     body: JSON.stringify(requestPayload),
   });
-  
+
   // 호환성을 위해 Answer 타입으로 변환
   return {
     ...response,
@@ -361,16 +375,16 @@ export async function getQuestionInstanceDetails(questionInstanceId: string) {
 // 특정 질문의 답변 조회 (questionInstanceId를 통해)
 export async function getAnswers(questionInstanceId: string) {
   const questionData = await getQuestionInstanceDetails(questionInstanceId);
-  
+
   // QuestionResponse의 questionDetails.answers에서 답변 추출
   const answers = questionData.questionDetails?.answers || [];
-  
+
   // 호환성을 위해 Answer[] 타입으로 변환
   const convertedAnswers: Answer[] = answers.map((ans: any) => ({
     ...ans,
     id: ans.answerId,
   }));
-  
+
   return convertedAnswers;
 }
 
@@ -380,9 +394,9 @@ export async function updateAnswer(payload: AnswerRequest) {
     answerId: payload.answerId,
     questionAssignmentId: payload.questionAssignmentId,
     answerType: payload.answerType,
-    content: {"text": payload.content},
+    content: { text: payload.content },
   };
-  
+
   const response = await apiFetch<{
     answerId: string;
     memberId: string;
@@ -398,7 +412,7 @@ export async function updateAnswer(payload: AnswerRequest) {
     method: "PATCH",
     body: JSON.stringify(requestPayload),
   });
-  
+
   // 호환성을 위해 Answer 타입으로 변환
   return {
     ...response,
@@ -412,7 +426,7 @@ export async function deleteAnswer(payload: AnswerRequest) {
     answerId: payload.answerId,
     questionAssignmentId: payload.questionAssignmentId,
   };
-  
+
   const response = await apiFetch<string>("/api/questions/answers", {
     method: "DELETE",
     body: JSON.stringify(requestPayload),
@@ -452,7 +466,7 @@ export async function getQuestionsByMonth(year: number, month: number) {
       method: "GET",
     }
   );
-  
+
   // 호환성을 위해 questionDetailsList를 questionDetails로 변환
   const questionDetailsList = response.questionDetailsList || [];
   const convertedDetails: QuestionDetails[] = questionDetailsList.map((qd) => ({
@@ -460,7 +474,8 @@ export async function getQuestionsByMonth(year: number, month: number) {
     questionAssignmentId: qd.questionAssignments?.[0]?.id || "",
     memberId: qd.questionAssignments?.[0]?.member?.id || "",
     familyRole: qd.questionAssignments?.[0]?.member?.familyRole || "PARENT",
-    profileImageUrl: qd.questionAssignments?.[0]?.member?.profileImageUrl || null,
+    profileImageUrl:
+      qd.questionAssignments?.[0]?.member?.profileImageUrl || null,
     gender: qd.questionAssignments?.[0]?.member?.gender || "MALE",
     state: qd.questionAssignments?.[0]?.state || "PENDING",
     dueAt: qd.questionAssignments?.[0]?.dueAt || "",
@@ -468,7 +483,7 @@ export async function getQuestionsByMonth(year: number, month: number) {
     answeredAt: qd.questionAssignments?.[0]?.answeredAt || null,
     expiredAt: qd.questionAssignments?.[0]?.expiredAt || null,
   }));
-  
+
   return {
     ...response,
     questionDetails: convertedDetails,
@@ -477,30 +492,31 @@ export async function getQuestionsByMonth(year: number, month: number) {
 
 // 최근 답변 조회 (최근 N개월의 질문에서 답변된 것들만)
 export async function getRecentAnswers(months: number = 1, limit: number = 10) {
-  
   const now = new Date();
   const allAnswers: Answer[] = [];
-  
+
   // 최근 N개월의 질문들을 조회
   for (let i = 0; i < months; i++) {
     const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
     const year = date.getFullYear();
     const month = date.getMonth() + 1;
-    
+
     try {
       const questionData = await getQuestionsByMonth(year, month);
       const questionDetails = (questionData as any).questionDetails || [];
       const answeredQuestions = questionDetails.filter(
         (q: QuestionDetails) => q.state === "ANSWERED" || q.answeredAt
       );
-      
+
       // 각 질문 인스턴스에 대한 답변 조회
       for (const question of answeredQuestions) {
         try {
           if (question.questionInstanceId) {
-            const questionDetailsData = await getQuestionInstanceDetails(question.questionInstanceId);
+            const questionDetailsData = await getQuestionInstanceDetails(
+              question.questionInstanceId
+            );
             const answers = questionDetailsData.questionDetails?.answers || [];
-            
+
             // 호환성을 위해 Answer[] 타입으로 변환
             const convertedAnswers: Answer[] = answers.map((ans: any) => ({
               ...ans,
@@ -515,7 +531,7 @@ export async function getRecentAnswers(months: number = 1, limit: number = 10) {
               questionContent: question.questionContent,
               questionInstanceId: question.questionInstanceId,
             }));
-            
+
             allAnswers.push(...convertedAnswers);
           }
         } catch (e) {
@@ -526,14 +542,14 @@ export async function getRecentAnswers(months: number = 1, limit: number = 10) {
       // ignore error
     }
   }
-  
+
   // 시간순 정렬 (최신순)
   allAnswers.sort((a, b) => {
     const dateA = new Date(a.createdAt).getTime();
     const dateB = new Date(b.createdAt).getTime();
     return dateB - dateA;
   });
-  
+
   // 최대 limit개만 반환
   const result = allAnswers.slice(0, limit);
   return result;
@@ -582,6 +598,8 @@ export type Comment = {
   updatedAt: string;
   parent?: Comment;
   member?: QuestionMember;
+  familyRole?: FamilyRole;
+  gender?: "MALE" | "FEMALE";
 };
 
 export type CommentResponse = {

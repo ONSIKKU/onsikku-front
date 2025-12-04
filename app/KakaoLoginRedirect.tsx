@@ -15,7 +15,6 @@ export default function KakaoLoginRedirect() {
         if (!code || typeof code !== "string") {
           throw new Error("인가 코드가 없습니다.");
         }
-        // console.log("code :", code);
         // 1) 백엔드로 code 전달
         const res = await fetch(`${API_BASE}/api/auth/kakao`, {
           method: "POST",
@@ -38,7 +37,6 @@ export default function KakaoLoginRedirect() {
         if (accessToken) {
           setItem("accessToken", accessToken); // AsyncStorage에 저장
         }
-        // console.log(result);
 
         // if (accessToken) {
         //   await SecureStore.setItemAsync("accessToken", accessToken);
@@ -56,7 +54,6 @@ export default function KakaoLoginRedirect() {
           });
         }
       } catch (e: any) {
-        console.log(e);
         Alert.alert("로그인 오류", e?.message ?? "다시 시도해주세요.");
         router.replace("/"); // 처음 화면으로 복귀
       } finally {

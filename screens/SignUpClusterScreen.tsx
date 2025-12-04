@@ -66,9 +66,8 @@ export default function SignUpClusterScreen() {
           familyMode === "JOIN" ? familyInvitationCode : undefined,
         familyMode,
       };
-      console.log("[회원가입 요청 데이터]", signupPayload);
+      
       const result = await signup(signupPayload);
-      console.log("[회원가입 API 응답]", result);
 
       // 에러 처리: accessToken이 없으면 실패로 간주
       if (!result.accessToken) {

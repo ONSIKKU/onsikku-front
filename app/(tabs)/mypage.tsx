@@ -106,7 +106,6 @@ export default function Page() {
       // Then set to true to trigger regeneration
       const res = await patchMyPage({ isFamilyInviteEnabled: true });
       setData(res);
-      console.log("[재발급된 초대 코드]", res.family?.invitationCode);
       Alert.alert("재발급 완료", `초대코드가 재발급되었습니다.`);
     } catch (e: any) {
       Alert.alert("오류", e?.message || "초대코드 재발급에 실패했습니다");
