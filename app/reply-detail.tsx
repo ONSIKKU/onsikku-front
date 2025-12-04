@@ -24,6 +24,7 @@ import {
   Modal,
   Platform,
   Pressable,
+  RefreshControl,
   ScrollView,
   Text,
   TextInput,
@@ -310,6 +311,7 @@ export default function ReplyDetailScreen() {
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [questionContent, setQuestionContent] = useState<string>("");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -335,61 +337,64 @@ export default function ReplyDetailScreen() {
   const question = params.question || "질문 정보가 없습니다.";
 
   // --- Data Fetching ---
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!questionInstanceId) {
-        setError("질문 정보가 없습니다.");
-        setLoading(false);
-        return;
+  const fetchData = async (isRefreshing = false) => {
+    if (!questionInstanceId) {
+      setError("질문 정보가 없습니다.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      if (!isRefreshing) setLoading(true);
+      setError(null);
+      const token = await getItem("accessToken");
+      if (token) {
+        setAccessToken(token);
       }
 
       try {
-        setLoading(true);
-        setError(null);
-        const token = await getItem("accessToken");
-        if (token) {
-          setAccessToken(token);
-        }
-
-        try {
-          const myPage = await getMyPage();
-          // MypageResponse 구조 변경 대응
-          setCurrentUserId(myPage.member?.id || null);
-        } catch (e) {
-          console.error("[사용자 정보 조회 에러]", e);
-        }
-
-        const questionData = await getQuestionInstanceDetails(
-          questionInstanceId
-        );
-
-        const content =
-          questionData.questionDetails?.questionContent || question;
-        setQuestionContent(content);
-
-        const assignments =
-          questionData.questionDetails?.questionAssignments || [];
-        setQuestionAssignments(assignments);
-
-        const answerList = questionData.questionDetails?.answers || [];
-        const convertedAnswers: Answer[] = answerList.map((ans: any) => ({
-          ...ans,
-          id: ans.answerId,
-        }));
-        setAnswers(convertedAnswers);
-
-        const commentList = questionData.questionDetails?.comments || [];
-        setComments(commentList as Comment[]);
-      } catch (e: any) {
-        console.error("[답변 조회 에러]", e);
-        setError(e?.message || "답변을 불러오는데 실패했습니다.");
-      } finally {
-        setLoading(false);
+        const myPage = await getMyPage();
+        // MypageResponse 구조 변경 대응
+        setCurrentUserId(myPage.member?.id || null);
+      } catch (e) {
+        console.error("[사용자 정보 조회 에러]", e);
       }
-    };
 
+      const questionData = await getQuestionInstanceDetails(questionInstanceId);
+
+      const content = questionData.questionDetails?.questionContent || question;
+      setQuestionContent(content);
+
+      const assignments =
+        questionData.questionDetails?.questionAssignments || [];
+      setQuestionAssignments(assignments);
+
+      const answerList = questionData.questionDetails?.answers || [];
+      const convertedAnswers: Answer[] = answerList.map((ans: any) => ({
+        ...ans,
+        id: ans.answerId,
+      }));
+      setAnswers(convertedAnswers);
+
+      const commentList = questionData.questionDetails?.comments || [];
+      setComments(commentList as Comment[]);
+    } catch (e: any) {
+      console.error("[답변 조회 에러]", e);
+      setError(e?.message || "답변을 불러오는데 실패했습니다.");
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
     fetchData();
   }, [questionInstanceId]);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchData(true);
+  };
 
   const getQuestionAssignmentIdForAnswer = (answer: Answer): string | null => {
     const assignment = questionAssignments.find(
@@ -709,6 +714,14 @@ export default function ReplyDetailScreen() {
           className="flex-1 px-5"
           contentContainerStyle={{ paddingBottom: 20 }}
           showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={["#FB923C"]}
+              tintColor="#FB923C"
+            />
+          }
         >
           {/* Question Section (Modern Style) */}
           <View className="items-center mb-6 mt-4 px-2">
