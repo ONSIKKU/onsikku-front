@@ -9,6 +9,7 @@ import { router } from "expo-router";
 import { useMemo, useState } from "react";
 import { Platform, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function SignUpSelectBirthAndGenderScreen() {
   // 선택값
@@ -139,7 +140,8 @@ export default function SignUpSelectBirthAndGenderScreen() {
           </View>
         </View>
         <GeneralButton
-          text={"다음 단계로 ->"}
+          text={"다음 단계로"}
+          rightIcon={<Ionicons name="arrow-forward" size={24} color="white" />}
           isActive={draftBirth !== null && gender !== null}
           onPress={handleNext}
         />

@@ -28,7 +28,7 @@ export default function QuestionList({
   const convertedQuestions: Question[] = questions.map((q) => {
     const { icon, text } = getRoleIconAndText(q.familyRole, q.gender);
     return {
-      id: q.questionAssignmentId || "",
+      id: q.questionInstanceId,
       date: formatDate(q.dueAt || q.sentAt || ""),
       author: text,
       authorAvatar: icon,

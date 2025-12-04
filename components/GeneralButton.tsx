@@ -9,10 +9,12 @@ export default function GeneralButton({
   text,
   isActive,
   onPress,
+  rightIcon,
 }: {
   text: string;
   isActive: boolean;
   onPress?: TouchableOpacityProps["onPress"];
+  rightIcon?: React.ReactNode;
 }) {
   return (
     <TouchableOpacity
@@ -22,11 +24,12 @@ export default function GeneralButton({
       onPress={onPress}
     >
       <View
-        className={`justify-center items-center py-4 rounded-xl ${
+        className={`flex-row justify-center items-center py-4 rounded-xl gap-2 ${
           isActive ? "bg-onsikku-dark-orange" : "bg-light-orange"
         }`}
       >
         <Text className="font-bold text-xl text-white">{text}</Text>
+        {rightIcon}
       </View>
     </TouchableOpacity>
   );

@@ -8,6 +8,8 @@ interface DateSelectorProps {
   onPrevMonth: () => void;
   onNextMonth: () => void;
   onDatePress?: () => void;
+  disablePrev?: boolean;
+  disableNext?: boolean;
 }
 
 export default function DateSelector({
@@ -16,16 +18,23 @@ export default function DateSelector({
   onPrevMonth,
   onNextMonth,
   onDatePress,
+  disablePrev = false,
+  disableNext = false,
 }: DateSelectorProps) {
   return (
     <View className="bg-white w-full p-6 rounded-2xl shadow-sm">
       <View className="flex-row items-center justify-between">
         <Pressable
           onPress={onPrevMonth}
+          disabled={disablePrev}
           className="p-2"
           style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
         >
-          <Ionicons name="chevron-back-outline" size={24} color="#F97315" />
+          <Ionicons
+            name="chevron-back-outline"
+            size={24}
+            color={disablePrev ? "#D1D5DB" : "#F97315"}
+          />
         </Pressable>
         <Pressable
           onPress={onDatePress}
@@ -39,10 +48,15 @@ export default function DateSelector({
         </Pressable>
         <Pressable
           onPress={onNextMonth}
+          disabled={disableNext}
           className="p-2"
           style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
         >
-          <Ionicons name="chevron-forward-outline" size={24} color="#F97315" />
+          <Ionicons
+            name="chevron-forward-outline"
+            size={24}
+            color={disableNext ? "#D1D5DB" : "#F97315"}
+          />
         </Pressable>
       </View>
     </View>

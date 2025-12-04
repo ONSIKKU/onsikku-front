@@ -6,8 +6,9 @@ import { useSignupStore } from "@/features/signup/signupStore";
 import { getRoleIconAndText } from "@/utils/labels";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
-import { View, Text } from "react-native";
+import { View, Text, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function SignUpImageSelectScreen() {
   const uri = useSignupStore((i) => i.uri);
@@ -50,27 +51,38 @@ export default function SignUpImageSelectScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 justify-start items-center px-8  gap-10">
-      <BackButton />
-      <SignUpHeader
-        title={`나를 나타낼 \n사진을 선택해주세요`}
-        description={`가족들이 쉽게 알아볼 수 있는 \n프로필 사진을 선택해주세요`}
-      />
-      <View className="bg-white rounded-full justify-center items-center w-48 h-48">
-        <View className="rounded-full bg-orange-100 w-full h-full justify-center items-center border-4 border-white shadow-md shadow-gray-200">
-          <Text className="text-7xl">{icon}</Text>
+    <SafeAreaView className="flex-1 bg-onsikku-main-orange">
+      <ScrollView
+        contentContainerStyle={{
+          paddingHorizontal: 32,
+          paddingVertical: 40,
+          alignItems: "center",
+          gap: 40,
+        }}
+        showsVerticalScrollIndicator={false}
+      >
+        <BackButton />
+        <SignUpHeader
+          title={`나를 나타낼 \n사진을 선택해주세요`}
+          description={`가족들이 쉽게 알아볼 수 있는 \n프로필 사진을 선택해주세요`}
+        />
+        <View className="bg-white rounded-full justify-center items-center w-48 h-48">
+          <View className="rounded-full bg-orange-100 w-full h-full justify-center items-center border-4 border-white shadow-md shadow-gray-200">
+            <Text className="text-7xl">{icon}</Text>
+          </View>
         </View>
-      </View>
-      <View className="gap-4">
-        <ImageUploadBox type="camera" onPress={takePhoto} />
-        <ImageUploadBox type="album" onPress={pickFromLibrary} />
-      </View>
+        <View className="gap-4">
+          <ImageUploadBox type="camera" onPress={takePhoto} />
+          <ImageUploadBox type="album" onPress={pickFromLibrary} />
+        </View>
 
-      <GeneralButton
-        text={uri !== null ? "다음 단계로 ->" : "기본 프로필로 진행"}
-        isActive={true}
-        onPress={handleNext}
-      />
+        <GeneralButton
+          text={uri !== null ? "다음 단계로" : "기본 프로필로 진행"}
+          rightIcon={<Ionicons name="arrow-forward" size={24} color="white" />}
+          isActive={true}
+          onPress={handleNext}
+        />
+      </ScrollView>
     </SafeAreaView>
   );
 }

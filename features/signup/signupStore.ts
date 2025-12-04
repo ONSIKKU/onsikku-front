@@ -45,5 +45,15 @@ export const useSignupStore = create<SignupState>((set) => ({
   setFamilyMode: (m) => set({ familyMode: m }),
 
   //reset
-  reset: () => set({ role: null }),
+  reset: () =>
+    set({
+      role: null,
+      grandParentType: null,
+      uri: null,
+      gender: null,
+      birthDate: "",
+      familyName: "",
+      familyInvitationCode: "",
+      familyMode: "JOIN",
+    }),
 }));

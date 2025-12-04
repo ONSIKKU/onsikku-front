@@ -143,6 +143,11 @@ export default function HistoryScreen() {
   const maxMonth = tempYear === currentYear ? currentMonth : 12;
   const months = Array.from({ length: maxMonth }, (_, i) => i + 1);
 
+  const isPrevDisabled = selectedYear === 2024 && selectedMonth === 1;
+  const isNextDisabled =
+    selectedYear > currentYear ||
+    (selectedYear === currentYear && selectedMonth >= currentMonth);
+
   return (
     <SafeAreaView className="flex-1 bg-orange-50" edges={["top"]}>
       <ScrollView
@@ -162,6 +167,8 @@ export default function HistoryScreen() {
             onPrevMonth={handlePrevMonth}
             onNextMonth={handleNextMonth}
             onDatePress={openDatePicker}
+            disablePrev={isPrevDisabled}
+            disableNext={isNextDisabled}
           />
           <ActivitySummary
             questions={questions}

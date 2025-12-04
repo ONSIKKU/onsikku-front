@@ -1,4 +1,5 @@
 import { getItem, removeItem, setItem } from "./AsyncStorage";
+import { router } from "expo-router";
 
 export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
@@ -71,6 +72,10 @@ export async function apiFetch<T>(
       setAccessToken(null);
       await removeItem("accessToken");
       await removeItem("refreshToken");
+      
+      // Force navigation to login screen
+      router.replace("/");
+      
       // Propagate the error
       throw new Error("Session expired. Please login again.");
     }

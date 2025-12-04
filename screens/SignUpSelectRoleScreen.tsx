@@ -6,8 +6,9 @@ import { SignupRole, useSignupStore } from "@/features/signup/signupStore";
 import { RoleItem } from "@/features/signup/types";
 import { router } from "expo-router";
 import { useEffect } from "react";
-import { Text, View } from "react-native";
+import { Text, View, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
 
 const roles: RoleItem[] = [
   {
@@ -51,51 +52,61 @@ export default function SignUpSelectRole() {
   }, [role]);
 
   return (
-    <SafeAreaView className="flex-1 bg-onsikku-main-orange px-8 pt-16 justify-start items-center gap-10">
-      <SignUpHeader
-        title={`가족 구성원을\n알려주세요`}
-        description={`가족 안에서 어떤 역할이신지\n선택해주세요`}
-      />
-      <View className="w-full gap-3">
-        {roles.map((item) => (
-          <RoleSelector
-            key={item.role}
-            {...item}
-            selected={item.role === role}
-            onPress={() => handleButtonPress(item.role)}
-          />
-        ))}
-        <View
-          className={`flex-col gap-4 ${
-            role === "GRANDPARENT" ? "" : "invisible"
-          }`}
-        >
-          <Text className="font-bold text-2xl text-center">
-            어느 쪽 조부모님이신가요?
-          </Text>
-          <View className="flex-row gap-4 py-2">
-            <GrandParentSelector
-              parentType="PATERNAL"
-              selected={grandParentType === "PATERNAL"}
-              onPress={() => setGrandParentType("PATERNAL")}
-            />
-            <GrandParentSelector
-              parentType="MATERNAL"
-              selected={grandParentType === "MATERNAL"}
-              onPress={() => setGrandParentType("MATERNAL")}
-            />
-          </View>
-        </View>
-        <GeneralButton
-          text={"다음 단계로 ->"}
-          isActive={
-            role !== "GRANDPARENT"
-              ? role !== null
-              : role !== null && grandParentType !== null
-          }
-          onPress={handleNext}
+    <SafeAreaView className="flex-1 bg-onsikku-main-orange">
+      <ScrollView
+        contentContainerStyle={{
+          paddingHorizontal: 32,
+          paddingTop: 64,
+          paddingBottom: 40,
+          alignItems: "center",
+          gap: 40,
+        }}
+        showsVerticalScrollIndicator={false}
+      >
+        <SignUpHeader
+          title={`가족 구성원을\n알려주세요`}
+          description={`가족 안에서 어떤 역할이신지\n선택해주세요`}
         />
-      </View>
+        <View className="w-full gap-3">
+          {roles.map((item) => (
+            <RoleSelector
+              key={item.role}
+              {...item}
+              selected={item.role === role}
+              onPress={() => handleButtonPress(item.role)}
+            />
+          ))}
+          {role === "GRANDPARENT" && (
+            <View className="flex-col gap-4">
+              <Text className="font-bold text-2xl text-center">
+                어느 쪽 조부모님이신가요?
+              </Text>
+              <View className="flex-row gap-4 py-2">
+                <GrandParentSelector
+                  parentType="PATERNAL"
+                  selected={grandParentType === "PATERNAL"}
+                  onPress={() => setGrandParentType("PATERNAL")}
+                />
+                <GrandParentSelector
+                  parentType="MATERNAL"
+                  selected={grandParentType === "MATERNAL"}
+                  onPress={() => setGrandParentType("MATERNAL")}
+                />
+              </View>
+            </View>
+          )}
+          <GeneralButton
+            text={"다음 단계로"}
+            rightIcon={<Ionicons name="arrow-forward" size={24} color="white" />}
+            isActive={
+              role !== "GRANDPARENT"
+                ? role !== null
+                : role !== null && grandParentType !== null
+            }
+            onPress={handleNext}
+          />
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }

@@ -1,5 +1,6 @@
 import LogoutButton from "@/components/mypage/LogoutButton";
 import ProfileSection from "@/components/mypage/ProfileSection";
+import { useSignupStore } from "@/features/signup/signupStore";
 import {
   deleteMember,
   getMyPage,
@@ -139,6 +140,7 @@ export default function Page() {
             await removeItem("accessToken");
             await removeItem("registrationToken");
             setAccessToken(null);
+            useSignupStore.getState().reset();
             router.replace("/");
           } catch (e: any) {
             console.error("[로그아웃 에러]", e);
@@ -164,6 +166,7 @@ export default function Page() {
             await deleteMember();
             await removeItem("accessToken");
             await removeItem("registrationToken");
+            useSignupStore.getState().reset();
             router.replace("/");
           } catch (e: any) {
             Alert.alert("오류", e?.message || "회원 탈퇴에 실패했습니다");
