@@ -60,21 +60,27 @@ export default function QuestionCard({
         {item.question}
       </Text>
 
-      {isPending ? (
-        <Text className="font-sans text-sm text-gray-500">답변 대기 중</Text>
-      ) : (
-        <View className="flex-row">
-          {item.reactions?.heart! > 0 && (
-            <Reaction icon="❤️" count={item.reactions?.heart!} />
-          )}
-          {item.reactions?.like! > 0 && (
-            <Reaction icon="👍" count={item.reactions?.like!} />
-          )}
-          {item.reactions?.smile! > 0 && (
-            <Reaction icon="😀" count={item.reactions?.smile!} />
-          )}
-        </View>
-      )}
+      <View className="flex-row items-center justify-between mt-2">
+        {isPending ? (
+          <Text className="font-sans text-sm text-gray-500">답변 대기 중</Text>
+        ) : (
+          <Text className="font-sans text-sm font-semibold text-onsikku-dark-orange">답변 완료</Text>
+        )}
+
+        {!isPending && (
+          <View className="flex-row">
+            {item.reactions?.heart! > 0 && (
+              <Reaction icon="❤️" count={item.reactions?.heart!} />
+            )}
+            {item.reactions?.like! > 0 && (
+              <Reaction icon="👍" count={item.reactions?.like!} />
+            )}
+            {item.reactions?.smile! > 0 && (
+              <Reaction icon="😀" count={item.reactions?.smile!} />
+            )}
+          </View>
+        )}
+      </View>
     </TouchableOpacity>
   );
 }
