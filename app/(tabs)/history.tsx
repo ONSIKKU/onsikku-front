@@ -7,6 +7,7 @@ import {
   setAccessToken,
 } from "@/utils/api";
 import { getItem } from "@/utils/AsyncStorage";
+import { Ionicons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
@@ -16,6 +17,7 @@ import {
   RefreshControl,
   ScrollView,
   Text,
+  TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -33,6 +35,8 @@ export default function HistoryScreen() {
   const [tempYear, setTempYear] = useState(selectedYear);
   const [tempMonth, setTempMonth] = useState(selectedMonth);
 
+  const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
+
   const fetchQuestions = useCallback(async () => {
     try {
       setLoading(true);
@@ -43,14 +47,40 @@ export default function HistoryScreen() {
       }
 
       const data = await getQuestionsByMonth(selectedYear, selectedMonth);
-      setQuestions(data.questionDetails || []);
+      const fetchedQuestions = data.questionDetails || [];
+      
+      // Sort questions
+      const sortedQuestions = [...fetchedQuestions].sort((a, b) => {
+        const dateA = new Date(a.sentAt || a.dueAt || "").getTime();
+        const dateB = new Date(b.sentAt || b.dueAt || "").getTime();
+        return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
+      });
+
+      setQuestions(sortedQuestions);
     } catch (e: any) {
       console.error("[월별 질문 조회 에러]", e);
       setError(e?.message || "질문을 불러오는데 실패했습니다.");
     } finally {
       setLoading(false);
     }
-  }, [selectedYear, selectedMonth]);
+  }, [selectedYear, selectedMonth, sortOrder]);
+
+  // Re-sort when sortOrder changes without re-fetching if data exists
+  useEffect(() => {
+    if (questions.length > 0) {
+      const sorted = [...questions].sort((a, b) => {
+        const dateA = new Date(a.sentAt || a.dueAt || "").getTime();
+        const dateB = new Date(b.sentAt || b.dueAt || "").getTime();
+        return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
+      });
+      // Only update if order actually changed to avoid infinite loop
+      // Simple check: compare first element IDs
+      if (sorted[0]?.questionInstanceId !== questions[0]?.questionInstanceId) {
+         setQuestions(sorted);
+      }
+    }
+  }, [sortOrder]);
+
 
   useEffect(() => {
     fetchQuestions();
@@ -175,13 +205,36 @@ export default function HistoryScreen() {
             year={selectedYear}
             month={selectedMonth}
           />
-          {/* The QuestionList component has its own title */}
-          <QuestionList
-            questions={questions}
-            loading={loading}
-            error={error}
-            onQuestionPress={handleQuestionPress}
-          />
+          
+          <View>
+            <View className="flex-row items-center justify-between mb-4">
+              <Text className="font-sans font-bold text-xl text-gray-900">
+                지난 질문들
+              </Text>
+                            <Pressable
+                              onPress={() =>
+                                setSortOrder((prev) => (prev === "newest" ? "oldest" : "newest"))
+                              }
+                              className="flex-row items-center bg-white px-3 py-1.5 rounded-full border border-gray-200"
+                            >
+                              <Ionicons
+                                name={sortOrder === "newest" ? "arrow-down-outline" : "arrow-up-outline"}
+                                size={14}
+                                color="#4B5563"
+                              />
+                              <Text className="font-sans text-xs font-medium text-gray-600 ml-1">
+                                {sortOrder === "newest" ? "최신순" : "오래된순"}
+                              </Text>
+                            </Pressable>            </View>
+
+            {/* The QuestionList component has its own title (removed) */}
+            <QuestionList
+              questions={questions}
+              loading={loading}
+              error={error}
+              onQuestionPress={handleQuestionPress}
+            />
+          </View>
         </View>
       </ScrollView>
 

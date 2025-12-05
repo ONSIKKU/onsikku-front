@@ -29,7 +29,7 @@ export default function QuestionList({
     const { icon, text } = getRoleIconAndText(q.familyRole, q.gender);
     return {
       id: q.questionInstanceId,
-      date: formatDate(q.dueAt || q.sentAt || ""),
+      date: formatDate(q.sentAt || ""),
       author: text,
       authorAvatar: icon,
       question: q.questionContent,
@@ -42,7 +42,6 @@ export default function QuestionList({
   if (loading) {
     return (
       <View className="w-full">
-        <Text className="font-sans font-bold text-xl text-gray-900 mb-4">지난 질문들</Text>
         <View className="bg-white p-6 rounded-2xl shadow-sm items-center justify-center">
           <ActivityIndicator size="large" color="#F97315" />
           <Text className="font-sans text-gray-500 mt-4">질문을 불러오는 중...</Text>
@@ -54,7 +53,6 @@ export default function QuestionList({
   if (error) {
     return (
       <View className="w-full">
-        <Text className="font-sans font-bold text-xl text-gray-900 mb-4">지난 질문들</Text>
         <View className="bg-white p-6 rounded-2xl shadow-sm">
           <Text className="font-sans text-red-500 text-center">{error}</Text>
         </View>
@@ -65,7 +63,6 @@ export default function QuestionList({
   if (convertedQuestions.length === 0) {
     return (
       <View className="w-full">
-        <Text className="font-sans font-bold text-xl text-gray-900 mb-4">지난 질문들</Text>
         <View className="bg-white p-6 rounded-2xl shadow-sm">
           <Text className="font-sans text-gray-500 text-center">
             이 기간에 질문이 없습니다.
@@ -77,7 +74,6 @@ export default function QuestionList({
 
   return (
     <View className="w-full">
-      <Text className="font-sans font-bold text-xl text-gray-900 mb-4">지난 질문들</Text>
       <FlatList
         data={convertedQuestions}
         keyExtractor={(item) => item.id}

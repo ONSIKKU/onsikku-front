@@ -355,39 +355,7 @@ export default function Page() {
             <View className="bg-white w-full p-5 rounded-3xl shadow-sm">
               <Text className="text-lg font-bold text-gray-800 mb-4">설정</Text>
               <View className="gap-3">
-                <View className="flex-row items-center justify-between py-2">
-                  <View className="flex-row items-center flex-1">
-                    <Ionicons
-                      name="notifications-outline"
-                      size={20}
-                      color="#FB923C"
-                    />
-                    <Text className="text-sm text-gray-800 ml-2">알림</Text>
-                  </View>
-                  <Pressable
-                    onPress={toggleAlarm}
-                    disabled={updating}
-                    className={`px-4 py-2 rounded-full ${
-                      data?.member?.alarmEnabled
-                        ? "bg-orange-100"
-                        : "bg-gray-100"
-                    }`}
-                  >
-                    <Text
-                      className={`text-xs font-medium ${
-                        data?.member?.alarmEnabled
-                          ? "text-orange-600"
-                          : "text-gray-600"
-                      }`}
-                    >
-                      {updating
-                        ? "처리 중..."
-                        : data?.member?.alarmEnabled
-                        ? "켜짐"
-                        : "꺼짐"}
-                    </Text>
-                  </Pressable>
-                </View>
+
                 <View className="flex-row items-center justify-between py-2 border-t border-gray-100 pt-3">
                   <View className="flex-row items-center flex-1">
                     <Ionicons name="key-outline" size={20} color="#FB923C" />

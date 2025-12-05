@@ -316,6 +316,17 @@ export default function ReplyDetailScreen() {
   const [questionContent, setQuestionContent] = useState<string>("");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [questionAssignments, setQuestionAssignments] = useState<any[]>([]);
+  const [questionSentAt, setQuestionSentAt] = useState<string | null>(null); // New state for sentAt
+
+  // Date formatter for YYYY.MM.DD
+  const formatDateSimple = (dateString: string) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const day = date.getDate().toString().padStart(2, "0");
+    return `${year}.${month}.${day}`;
+  };
 
   // Edit Answer State
   const [editingAnswer, setEditingAnswer] = useState<Answer | null>(null);
@@ -368,6 +379,13 @@ export default function ReplyDetailScreen() {
       const assignments =
         questionData.questionDetails?.questionAssignments || [];
       setQuestionAssignments(assignments);
+
+      // Extract sentAt from the first assignment
+      if (assignments.length > 0 && assignments[0].sentAt) {
+        setQuestionSentAt(assignments[0].sentAt);
+      } else {
+        setQuestionSentAt(null);
+      }
 
       const answerList = questionData.questionDetails?.answers || [];
       const convertedAnswers: Answer[] = answerList.map((ans: any) => ({
@@ -724,7 +742,14 @@ export default function ReplyDetailScreen() {
           }
         >
           {/* Question Section (Modern Style) */}
-          <View className="items-center mb-6 mt-4 px-2">
+          <View className="relative items-center mb-6 mt-2 px-2 pt-8">
+            {questionSentAt && (
+              <View className="absolute right-0 top-0 bg-orange-100 px-3 py-1 rounded-full">
+                <Text className="font-sans text-xs text-orange-600 font-medium">
+                  {formatDateSimple(questionSentAt)}
+                </Text>
+              </View>
+            )}
             <Text className="font-sans text-2xl font-bold leading-9 text-center text-gray-900">
               <Text className="text-orange-500">Q. </Text>
               {questionContent || question}
