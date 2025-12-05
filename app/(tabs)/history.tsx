@@ -211,21 +211,26 @@ export default function HistoryScreen() {
               <Text className="font-sans font-bold text-xl text-gray-900">
                 지난 질문들
               </Text>
-                            <Pressable
-                              onPress={() =>
-                                setSortOrder((prev) => (prev === "newest" ? "oldest" : "newest"))
-                              }
-                              className="flex-row items-center bg-white px-3 py-1.5 rounded-full border border-gray-200"
-                            >
-                              <Ionicons
-                                name={sortOrder === "newest" ? "arrow-down-outline" : "arrow-up-outline"}
-                                size={14}
-                                color="#4B5563"
-                              />
-                              <Text className="font-sans text-xs font-medium text-gray-600 ml-1">
-                                {sortOrder === "newest" ? "최신순" : "오래된순"}
-                              </Text>
-                            </Pressable>            </View>
+              <Pressable
+                onPress={() =>
+                  setSortOrder((prev) => (prev === "newest" ? "oldest" : "newest"))
+                }
+                className="flex-row items-center bg-white px-3 py-1.5 rounded-full border border-gray-200"
+              >
+                <Ionicons
+                  name={
+                    sortOrder === "newest"
+                      ? "arrow-down-outline"
+                      : "arrow-up-outline"
+                  }
+                  size={14}
+                  color="#4B5563"
+                />
+                <Text className="font-sans text-xs font-medium text-gray-600 ml-1">
+                  {sortOrder === "newest" ? "최신순" : "오래된순"}
+                </Text>
+              </Pressable>
+            </View>
 
             {/* The QuestionList component has its own title (removed) */}
             <QuestionList
